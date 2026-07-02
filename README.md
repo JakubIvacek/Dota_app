@@ -1,108 +1,70 @@
-# Dota Stats App — návrh projektu
+# Dota Stats App
 
-Osobný Dota 2 štatistický nástroj inšpirovaný Dotabuff/OpenDota. Začína ako privátny
-side-project, s možnosťou rozšíriť na multi-user appku, ak to bude dávať zmysel.
+Osobný Dota 2 štatistický nástroj inšpirovaný Dotabuff/OpenDota. Frontend-only —
+**rozhodnutie z 2026-07-03: žiadny vlastný backend**, cachovanie rieši in-memory
+cache + localStorage priamo v appke.
 
 ## Cieľ
 
-Prehľadné zobrazenie vlastných (a neskôr aj cudzích) Dota 2 štatistík — matche,
-winrate podľa hrdinov, detail konkrétneho matchu (itemizácia, gold/XP graf),
-trendy v čase. Postavené nad verejným [OpenDota API](https://docs.opendota.com/),
-takže netreba riešiť vlastný replay parser.
+Prehľadné zobrazenie vlastných aj cudzích Dota 2 štatistík — matche, winrate podľa
+hrdinov, detail konkrétneho matchu (itemizácia, gold/XP graf), trendy v čase.
+Postavené nad verejným [OpenDota API](https://docs.opendota.com/), takže netreba
+riešiť vlastný replay parser.
 
-## Fázy vývoja
+## Spustenie
 
-### Fáza 1 — MVP (privátne, bez backendu)
-- Frontend-only appka, natvrdo nastavené vlastné `account_id`
-- Priame volania na OpenDota API (žiadna autentifikácia potrebná)
-- Obrazovky:
-  - **Dashboard** — celkový winrate, graf winrate v čase, obľúbení hrdinovia
-  - **Matches list** — posledné matche (hrdina, výsledok, KDA, dĺžka)
-  - **Match detail** — rozpis tímov, itemizácia, gold/XP graf (`radiant_gold_adv`)
-  - **Hero stats** — tabuľka winrate/games per hero, triediteľná
-
-### Fáza 2 — Guest mód pre viacerých
-- Landing page s rýchlym vyhľadávaním (vlož Dota ID / Friend Code) → okamžité
-  zobrazenie štatistík bez účtu, read-only
-- Žiadne ukladanie dát, len fetch + zobrazenie
-- Backend pridaný najmä kvôli cachovaniu (OpenDota rate limit ~60 req/min na free tier)
-
-### Fáza 3 — Účty
-- Email + heslo (Spring Security + bcrypt, email verifikácia, password reset)
-- Steam OpenID ako alternatíva/doplnok neskôr, keď appka získa dôveru
-  - Steam OpenID je bezpečný (redirect priamo na `steamcommunity.com`, appka
-    nikdy nevidí heslo), ale veľa ľudí je voči nemu ostražitých kvôli scam stránkam,
-    preto nie je jediná/povinná možnosť
-- Uložené preferencie, obľúbení hráči/matche, možno porovnávanie s kamarátmi
-
-## Tech stack
-
-- **Frontend:** Vue 3 + Vite + TypeScript, Chart.js/ECharts na grafy
-- **Backend:** Spring Boot (od fázy 2, kvôli cachovaniu a auth)
-- **DB:** Postgres (alebo Supabase ako pri task trackeri — rýchlejší štart)
-- **Dáta:** OpenDota API (public), Steam CDN pre hero/item ikony
-
-## Dátový model (návrh, fáza 3)
-
-```
-users
-  id
-  auth_type        -- 'email' | 'steam' | 'guest'
-  email             (nullable)
-  password_hash     (nullable)
-  steam_id          (nullable)
-  dota_account_id   -- prepojenie na Dota profil
-  created_at
-
-cached_matches
-  match_id (PK)
-  account_id
-  raw_data          -- JSON z OpenDota (matches/heroes/items/gold graph)
-  fetched_at
-
-favorites
-  id
-  user_id -> users.id
-  target_type       -- 'player' | 'match'
-  target_id
+```bash
+npm install
+npm run dev
 ```
 
-## Architektúra (fáza 2+)
+Vlastný profil: skopíruj `.env.example` do `.env.local` a nastav `VITE_ACCOUNT_ID`
+(Friend Code z Dota profilu). Bez neho appka funguje v guest móde cez search.
 
-```
-[Browser / Vue app]
-        |
-        v
-[Spring Boot backend]
-   |            |
-   v            v
-[Postgres]   [OpenDota API]
- (cache,      (matches, players,
-  users,       heroes, items)
-  favorites)
-```
+## Roadmap
 
-- Backend funguje ako proxy + cache pred OpenDota, aby appka neprekračovala
-  rate limity a fungovala aj keď je OpenDota pomalé/nedostupné
-- Auth vrstva (Spring Security) rieši email/heslo aj neskôr Steam OpenID
-- Guest requesty idú cez backend rovnako (kvôli cache), len sa nič neukladá
-  k žiadnemu user účtu
+### ✅ Fáza 1 — MVP (hotové 3. 7. 2026)
 
-## Kľúčové OpenDota endpointy
+- Vue 3 + Vite + TypeScript, Chart.js, vue-router
+- Priame volania na OpenDota API, in-memory cache s TTL (rate limit ~60 req/min),
+  hero/item konštanty v localStorage
+- Obrazovky: **Dashboard** (winrate, graf v čase, top hrdinovia), **Matches list**,
+  **Match detail** (scoreboard, itemizácia, gold/XP graf z `radiant_gold_adv`),
+  **Hero stats** (triediteľná tabuľka)
 
-- `GET /players/{account_id}` — profil, MMR estimate
-- `GET /players/{account_id}/matches` — posledné matche
-- `GET /players/{account_id}/heroes` — winrate/games per hero
-- `GET /players/{account_id}/wl` — win/loss split
-- `GET /matches/{match_id}` — detail matchu (items, gold/XP graf cez čas)
+### ✅ Fáza 2 — Guest mód (hotové 3. 7. 2026, bez backendu)
 
-**Poznámka:** aby boli vidieť detailné dáta matchu (items cez čas, gold/xp graf),
-treba mať v Dota klientovi zapnuté `Settings → Advanced Options → Expose Public
-Match Data` — inak sa replay neparsuje a API vráti len základné info.
+- `/player/:accountId` routy s tabmi Overview / Matches / Heroes
+- Search podľa mena (OpenDota `/search`) aj číselného account ID
+- Home page: veľký search, karta „Môj profil“, nedávno pozreté profily (localStorage)
+- Klikateľné mená hráčov v match detaile → ich profily; zvýraznenie riadku sleduje
+  profil, z ktorého bol match otvorený
+- ~~Spring Boot backend na cachovanie~~ — zrušené, frontend cache stačí
 
-### Fáza 4 — 3D hero modely (stretch goal)
+### ~~Fáza 3 — Účty~~ (zrušené)
 
-Namiesto 2D ikon v match detaile zobraziť rotovateľný statický 3D model hrdinu
+Email/heslo, Steam OpenID, uložené preferencie — padlo spolu s backendom.
+Obľúbené veci sa riešia v localStorage (Fáza 4). Keby sa appka niekedy stala
+verejnou multi-user službou, tu je pôvodná úvaha: Steam OpenID je bezpečný
+(redirect na `steamcommunity.com`), ale nie ako jediná možnosť.
+
+### 🔜 Fáza 3 — Hlbšie štatistiky
+
+- Filter matchov podľa hrdinu (a prípadne módu/výsledku)
+- Rolling-window winrate graf (napr. okno 20 matchov) namiesto kumulatívneho —
+  kumulatívny na začiatku divoko skáče pri malej vzorke
+- KDA / GPM / XPM trendy v čase
+- Winrate podľa game módu (All Pick vs Turbo vs Ranked…)
+
+### 🔜 Fáza 4 — Obľúbení hráči
+
+- Hviezdička na profile hráča (toggle)
+- Sekcia „Obľúbení“ na home page nad „Nedávno pozreté“
+- localStorage, rovnaký princíp ako história (`useRecentPlayers` → `useFavorites`)
+
+### 🔜 Fáza 5 — 3D hero modely (stretch goal)
+
+Namiesto 2D ikon v match detaile rotovateľný statický 3D model hrdinu
 (jedna default póza, bez animácií — žiadny skeleton/keyframes, len zamrznutý mesh).
 
 **Extrakcia (jednorazovo, offline, nie za behu appky):**
@@ -115,28 +77,39 @@ Namiesto 2D ikon v match detaile zobraziť rotovateľný statický 3D model hrdi
    1:1 na glTF PBR, môže byť treba ručne doladiť v Blenderi alebo shader kóde
 
 **Ukladanie:**
-- Statické `.glb` súbory, **nie** v DB (binárne, rádovo 1–5MB/hrdina)
-- Buď `/public/models/{hero_id}.glb` v projekte, alebo Supabase Storage (keď ich
-  bude viac, aby sa zbytočne nenafukoval build appky)
+- Statické `.glb` súbory (rádovo 1–5 MB/hrdina), `/public/models/{hero_id}.glb`;
+  keby ich bolo veľa, presunúť mimo build (napr. Supabase Storage)
 
 **Frontend:**
-- Three.js, `GLTFLoader` na načítanie modelu podľa `hero_id`
-- `OrbitControls` na rotovanie myšou
-- Základné osvetlenie (ambient + directional light)
-- Render do `<canvas>` v match detail komponente, ako náhrada/doplnok 2D ikony
+- Three.js, `GLTFLoader` podľa `hero_id`, `OrbitControls`, ambient + directional light
+- Render do `<canvas>` v match detail komponente
 
-**Odporúčaný postup:**
-- Proof of concept najprv na 3–5 najhranejších hrdinoch, overiť celý pipeline
-  (extrakcia → glTF → loader → rotovanie), až potom prípadne škálovať na viac
-- Legálne v šedej zóne pre privátny/malý projekt (bežné vo fanúšikovských
-  projektoch), ale nehostovať cudzie Valve assety verejne/hromadne — radšej
-  poskytnúť skript, nech si extrakciu spustí každý sám nad vlastnou inštaláciou hry
+**Postup:** proof of concept na 3–5 najhranejších hrdinoch, overiť celý pipeline
+(extrakcia → glTF → loader → rotovanie), až potom škálovať. Legálne šedá zóna pre
+privátny projekt — nehostovať Valve assety verejne, radšej poskytnúť extrakčný skript.
 
-**Prekážky:** objem práce pri väčšom počte hrdinov, veľkosť súborov pri načítaní
-viacerých modelov naraz, prípadné ručné doladenie material mappingu.
+## Tech stack
+
+- **Frontend:** Vue 3 + Vite + TypeScript, Chart.js na grafy
+- **Dáta:** OpenDota API (public), Steam CDN pre hero/item ikony
+- **Perzistencia:** localStorage (história, neskôr obľúbení) — žiadna DB, žiadny backend
+
+## Kľúčové OpenDota endpointy
+
+- `GET /players/{account_id}` — profil, rank
+- `GET /players/{account_id}/matches` — posledné matche
+- `GET /players/{account_id}/heroes` — winrate/games per hero
+- `GET /players/{account_id}/wl` — win/loss split
+- `GET /matches/{match_id}` — detail matchu (items, gold/XP graf cez čas)
+- `GET /search?q=` — hľadanie hráčov podľa mena (pozor, vie trvať aj ~7 s)
+
+**Poznámka:** aby boli vidieť detailné dáta matchu (items cez čas, gold/xp graf),
+treba mať v Dota klientovi zapnuté `Settings → Advanced Options → Expose Public
+Match Data` — inak sa replay neparsuje a API vráti len základné info.
 
 ## Otvorené otázky / na doriešenie neskôr
 
-- Real-time match tracking (GSI, websockety) — nice to have, nie MVP
-- Vlastný replay parser — len ak by sa appka niekedy odklonila od OpenDota závislosti
-- Škálovanie cache pri väčšom počte userov
+- Deploy na web (GitHub Pages/Netlify/Vercel) — frontend-only, takže zadarmo;
+  zatiaľ beží len lokálne
+- Real-time match tracking (GSI, websockety) — nice to have
+- Vlastný replay parser — len ak by sa appka niekedy odklonila od OpenDota
