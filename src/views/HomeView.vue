@@ -4,18 +4,25 @@ import { ACCOUNT_ID } from '../config'
 import { getPlayer, rankTierName } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
+import { useFavorites } from '../composables/useFavorites'
 import { timeAgo } from '../utils/format'
 import SearchBox from '../components/SearchBox.vue'
+import PlayerLinkCard from '../components/PlayerLinkCard.vue'
 
 const { data: me } = useAsync(async () =>
   ACCOUNT_ID ? getPlayer(ACCOUNT_ID) : null,
 )
 
 const { recents } = useRecentPlayers()
+const { favorites, isFavorite } = useFavorites()
 
-// Vlastný profil má vlastnú kartu — v histórii ho neduplikuj.
-const otherRecents = computed(() =>
-  recents.value.filter((r) => r.account_id !== ACCOUNT_ID),
+const shownFavorites = computed(() =>
+  favorites.value.filter((f) => f.account_id !== ACCOUNT_ID),
+)
+
+// Vlastný profil má vlastnú kartu a obľúbení vlastnú sekciu — v histórii nedupluj.
+const shownRecents = computed(() =>
+  recents.value.filter((r) => r.account_id !== ACCOUNT_ID && !isFavorite(r.account_id)),
 )
 </script>
 
@@ -37,21 +44,30 @@ const otherRecents = computed(() =>
       <span class="arrow">→</span>
     </RouterLink>
 
-    <section v-if="otherRecents.length" class="recents">
+    <section v-if="shownFavorites.length" class="group">
+      <h2>★ Obľúbení</h2>
+      <div class="grid">
+        <PlayerLinkCard
+          v-for="f in shownFavorites"
+          :key="f.account_id"
+          :account-id="f.account_id"
+          :personaname="f.personaname"
+          :avatarfull="f.avatarfull"
+        />
+      </div>
+    </section>
+
+    <section v-if="shownRecents.length" class="group">
       <h2>Nedávno pozreté</h2>
-      <div class="recent-grid">
-        <RouterLink
-          v-for="r in otherRecents"
+      <div class="grid">
+        <PlayerLinkCard
+          v-for="r in shownRecents"
           :key="r.account_id"
-          :to="`/player/${r.account_id}`"
-          class="card recent"
-        >
-          <img :src="r.avatarfull" alt="" />
-          <div>
-            <div class="recent-name">{{ r.personaname }}</div>
-            <div class="muted small">{{ timeAgo(r.visited_at / 1000) }}</div>
-          </div>
-        </RouterLink>
+          :account-id="r.account_id"
+          :personaname="r.personaname"
+          :avatarfull="r.avatarfull"
+          :sub="timeAgo(r.visited_at / 1000)"
+        />
       </div>
     </section>
   </div>
@@ -110,53 +126,22 @@ const otherRecents = computed(() =>
   font-size: 1.3rem;
 }
 
-.recents {
+.group {
   margin-top: 2rem;
   width: 100%;
   max-width: 720px;
 }
 
-.recents h2 {
+.group h2 {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
 }
 
-.recent-grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.6rem;
-}
-
-.recent {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.6rem 0.8rem;
-  color: var(--ink);
-  text-align: left;
-}
-
-.recent:hover {
-  border-color: var(--accent);
-}
-
-.recent img {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-}
-
-.recent-name {
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 140px;
-}
-
-.small {
-  font-size: 0.8rem;
 }
 </style>

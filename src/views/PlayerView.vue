@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { getPlayer, rankTierName } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
+import { useFavorites } from '../composables/useFavorites'
 
 const route = useRoute()
 const accountId = computed(() => String(route.params.accountId))
@@ -14,6 +15,8 @@ const { record } = useRecentPlayers()
 watchEffect(() => {
   if (player.value) record(player.value)
 })
+
+const { isFavorite, toggle } = useFavorites()
 </script>
 
 <template>
@@ -24,7 +27,18 @@ watchEffect(() => {
     <section class="profile card">
       <img v-if="player.profile" :src="player.profile.avatarfull" alt="" class="avatar" />
       <div>
-        <h1>{{ player.profile?.personaname ?? `Player ${accountId}` }}</h1>
+        <h1>
+          {{ player.profile?.personaname ?? `Player ${accountId}` }}
+          <button
+            v-if="player.profile"
+            class="star"
+            :class="{ active: isFavorite(accountId) }"
+            :title="isFavorite(accountId) ? 'Odobrať z obľúbených' : 'Pridať do obľúbených'"
+            @click="toggle(player)"
+          >
+            {{ isFavorite(accountId) ? '★' : '☆' }}
+          </button>
+        </h1>
         <div class="muted">{{ rankTierName(player.rank_tier) }}</div>
       </div>
       <nav class="tabs">
@@ -78,5 +92,23 @@ watchEffect(() => {
 .tabs a.active {
   background: rgba(57, 135, 229, 0.15);
   color: var(--accent);
+}
+
+.star {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  vertical-align: 2px;
+}
+
+.star:hover {
+  color: var(--gold);
+}
+
+.star.active {
+  color: var(--gold);
 }
 </style>
