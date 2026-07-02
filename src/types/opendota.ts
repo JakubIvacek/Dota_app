@@ -9,6 +9,13 @@ export interface PlayerProfile {
   leaderboard_rank: number | null
 }
 
+export interface SearchResult {
+  account_id: number
+  personaname: string
+  avatarfull: string
+  last_match_time?: string
+}
+
 export interface WinLoss {
   win: number
   lose: number

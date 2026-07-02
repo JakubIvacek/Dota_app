@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ACCOUNT_ID } from '../config'
+import { useRoute } from 'vue-router'
 import {
   getHeroMap,
   getMatches,
-  getPlayer,
   getPlayerHeroes,
   getWinLoss,
-  rankTierName,
   wonMatch,
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
@@ -16,15 +14,17 @@ import StatCard from '../components/StatCard.vue'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 
+const route = useRoute()
+
 const { data, loading, error } = useAsync(async () => {
-  const [player, wl, recentMatches, playerHeroes, heroMap] = await Promise.all([
-    getPlayer(ACCOUNT_ID),
-    getWinLoss(ACCOUNT_ID),
-    getMatches(ACCOUNT_ID, 100),
-    getPlayerHeroes(ACCOUNT_ID),
+  const accountId = String(route.params.accountId)
+  const [wl, recentMatches, playerHeroes, heroMap] = await Promise.all([
+    getWinLoss(accountId),
+    getMatches(accountId, 100),
+    getPlayerHeroes(accountId),
     getHeroMap(),
   ])
-  return { player, wl, recentMatches, playerHeroes, heroMap }
+  return { wl, recentMatches, playerHeroes, heroMap }
 })
 
 /** Kumulatívny winrate cez posledných 100 matchov (chronologicky). */
@@ -61,19 +61,6 @@ const recentWinrate = computed(() => {
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať dáta: {{ error }}</div>
 
   <template v-else-if="data">
-    <section class="profile card">
-      <img
-        v-if="data.player.profile"
-        :src="data.player.profile.avatarfull"
-        alt=""
-        class="avatar"
-      />
-      <div>
-        <h1>{{ data.player.profile?.personaname ?? `Player ${ACCOUNT_ID}` }}</h1>
-        <div class="muted">{{ rankTierName(data.player.rank_tier) }}</div>
-      </div>
-    </section>
-
     <section class="stats">
       <StatCard
         label="Winrate (all time)"
@@ -118,25 +105,14 @@ const recentWinrate = computed(() => {
           </tr>
         </tbody>
       </table>
-      <p class="muted more"><RouterLink to="/heroes">Všetci hrdinovia →</RouterLink></p>
+      <p class="muted more">
+        <RouterLink :to="`/player/${route.params.accountId}/heroes`">Všetci hrdinovia →</RouterLink>
+      </p>
     </section>
   </template>
 </template>
 
 <style scoped>
-.profile {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-}
-
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

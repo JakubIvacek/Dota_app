@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ACCOUNT_ID } from '../config'
+import { useRoute } from 'vue-router'
 import { getHeroMap, getPlayerHeroes } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { timeAgo, winratePct } from '../utils/format'
 import HeroIcon from '../components/HeroIcon.vue'
 
+const route = useRoute()
+
 const { data, loading, error } = useAsync(async () => {
-  const [playerHeroes, heroMap] = await Promise.all([getPlayerHeroes(ACCOUNT_ID), getHeroMap()])
+  const accountId = String(route.params.accountId)
+  const [playerHeroes, heroMap] = await Promise.all([getPlayerHeroes(accountId), getHeroMap()])
   return { playerHeroes, heroMap }
 })
 
@@ -46,8 +49,6 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
 </script>
 
 <template>
-  <h1>Hero stats</h1>
-
   <p v-if="loading" class="muted">Loading…</p>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať hero štatistiky: {{ error }}</div>
 

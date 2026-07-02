@@ -1,30 +1,21 @@
 <script setup lang="ts">
 import { ACCOUNT_ID } from './config'
+import SearchBox from './components/SearchBox.vue'
 </script>
 
 <template>
   <header class="topbar">
     <div class="container topbar-inner">
       <RouterLink to="/" class="brand">Dota Stats</RouterLink>
-      <nav>
-        <RouterLink to="/">Dashboard</RouterLink>
-        <RouterLink to="/matches">Matches</RouterLink>
-        <RouterLink to="/heroes">Heroes</RouterLink>
+      <nav v-if="ACCOUNT_ID">
+        <RouterLink :to="`/player/${ACCOUNT_ID}`">Môj profil</RouterLink>
       </nav>
+      <SearchBox class="topbar-search" />
     </div>
   </header>
 
   <main class="container">
-    <div v-if="!ACCOUNT_ID" class="card setup">
-      <h1>Chýba account ID</h1>
-      <p>
-        Vytvor v koreni projektu súbor <code>.env.local</code> a nastav svoje Dota 2
-        account ID (Friend Code z profilu v hre):
-      </p>
-      <pre>VITE_ACCOUNT_ID=123456789</pre>
-      <p class="muted">Potom reštartuj dev server (<code>npm run dev</code>).</p>
-    </div>
-    <RouterView v-else />
+    <RouterView />
   </main>
 </template>
 
@@ -40,9 +31,9 @@ import { ACCOUNT_ID } from './config'
 .topbar-inner {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  padding-top: 0.7rem;
-  padding-bottom: 0.7rem;
+  gap: 1.5rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
 }
 
 .brand {
@@ -52,28 +43,16 @@ import { ACCOUNT_ID } from './config'
   letter-spacing: 0.01em;
 }
 
-nav {
-  display: flex;
-  gap: 1.2rem;
-}
-
 nav a {
   color: var(--ink-2);
   font-weight: 500;
 }
 
 nav a.router-link-active {
-  color: var(--ink);
-}
-
-nav a.router-link-exact-active {
   color: var(--accent);
 }
 
-.setup pre {
-  background: var(--page);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.7rem 1rem;
+.topbar-search {
+  margin-left: auto;
 }
 </style>

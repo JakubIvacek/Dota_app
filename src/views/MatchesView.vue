@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ACCOUNT_ID } from '../config'
+import { useRoute, useRouter } from 'vue-router'
 import { gameModeName, getHeroMap, getMatches, wonMatch } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDuration, timeAgo } from '../utils/format'
 import HeroIcon from '../components/HeroIcon.vue'
 
+const route = useRoute()
 const router = useRouter()
 
 const { data, loading, error } = useAsync(async () => {
-  const [matches, heroMap] = await Promise.all([getMatches(ACCOUNT_ID, 50), getHeroMap()])
+  const accountId = String(route.params.accountId)
+  const [matches, heroMap] = await Promise.all([getMatches(accountId, 50), getHeroMap()])
   return { matches, heroMap }
 })
 
@@ -21,11 +22,14 @@ const rows = computed(() =>
     won: wonMatch(m),
   })),
 )
+
+function openMatch(matchId: number) {
+  // ?player= — nech match detail vie, koho riadok zvýrazniť.
+  router.push({ path: `/matches/${matchId}`, query: { player: String(route.params.accountId) } })
+}
 </script>
 
 <template>
-  <h1>Posledné matche</h1>
-
   <p v-if="loading" class="muted">Loading…</p>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať matche: {{ error }}</div>
 
@@ -42,12 +46,7 @@ const rows = computed(() =>
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="m in rows"
-          :key="m.match_id"
-          class="clickable"
-          @click="router.push(`/matches/${m.match_id}`)"
-        >
+        <tr v-for="m in rows" :key="m.match_id" class="clickable" @click="openMatch(m.match_id)">
           <td><HeroIcon :hero="m.hero" /></td>
           <td>
             <span class="badge" :class="m.won ? 'win' : 'loss'">{{ m.won ? 'W' : 'L' }}</span>

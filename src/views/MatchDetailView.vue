@@ -18,6 +18,9 @@ import type { MatchPlayer } from '../types/opendota'
 
 const route = useRoute()
 
+// Zvýrazni hráča, z ktorého profilu sme prišli (?player=), inak vlastný.
+const highlightId = computed(() => String(route.query.player ?? ACCOUNT_ID))
+
 const { data, loading, error } = useAsync(async () => {
   const matchId = String(route.params.id)
   const [match, heroMap, itemMap] = await Promise.all([
@@ -35,7 +38,7 @@ function playerRow(p: MatchPlayer) {
     ...p,
     hero: data.value?.heroMap.get(p.hero_id),
     items: ITEM_SLOTS.map((slot) => data.value?.itemMap.get(p[slot])).filter(Boolean),
-    isMe: p.account_id != null && String(p.account_id) === ACCOUNT_ID,
+    isMe: p.account_id != null && String(p.account_id) === highlightId.value,
   }
 }
 
@@ -104,7 +107,12 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
           <tbody>
             <tr v-for="p in team.players" :key="p.player_slot" :class="{ me: p.isMe }">
               <td><HeroIcon :hero="p.hero" :show-name="false" /></td>
-              <td class="name">{{ p.personaname ?? 'Anonymous' }}</td>
+              <td class="name">
+                <RouterLink v-if="p.account_id != null" :to="`/player/${p.account_id}`">
+                  {{ p.personaname ?? `Player ${p.account_id}` }}
+                </RouterLink>
+                <span v-else class="muted">Anonymous</span>
+              </td>
               <td>{{ p.level }}</td>
               <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
               <td>{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</td>
@@ -191,6 +199,14 @@ tr.me td {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.name a {
+  color: var(--ink);
+}
+
+.name a:hover {
+  color: var(--accent);
 }
 
 .items {

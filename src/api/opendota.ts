@@ -6,6 +6,7 @@ import type {
   PlayerHero,
   PlayerMatch,
   PlayerProfile,
+  SearchResult,
   WinLoss,
 } from '../types/opendota'
 
@@ -65,6 +66,9 @@ export const getPlayerHeroes = (accountId: string) =>
 // Detail matchu je nemenný — drž ho v cache celú session.
 export const getMatch = (matchId: string) =>
   fetchJson<MatchDetail>(`/matches/${matchId}`, 24 * 60 * MINUTE)
+
+export const searchPlayers = (query: string) =>
+  fetchJson<SearchResult[]>(`/search?q=${encodeURIComponent(query)}`)
 
 // --- Constants (heroes, items) ---
 
