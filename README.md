@@ -48,7 +48,7 @@ Obľúbené veci sa riešia v localStorage (Fáza 4). Keby sa appka niekedy stal
 verejnou multi-user službou, tu je pôvodná úvaha: Steam OpenID je bezpečný
 (redirect na `steamcommunity.com`), ale nie ako jediná možnosť.
 
-### 🔜 Fáza 3 — Hlbšie štatistiky
+### ✅ Fáza 3 — Hlbšie štatistiky (hotové 3. 7. 2026)
 
 - Filter matchov podľa hrdinu (a prípadne módu/výsledku)
 - Rolling-window winrate graf (napr. okno 20 matchov) namiesto kumulatívneho —
@@ -56,7 +56,7 @@ verejnou multi-user službou, tu je pôvodná úvaha: Steam OpenID je bezpečný
 - KDA / GPM / XPM trendy v čase
 - Winrate podľa game módu (All Pick vs Turbo vs Ranked…)
 
-### 🔜 Fáza 4 — Obľúbení hráči
+### ✅ Fáza 4 — Obľúbení hráči (hotové 3. 7. 2026)
 
 - Hviezdička na profile hráča (toggle)
 - Sekcia „Obľúbení“ na home page nad „Nedávno pozreté“
