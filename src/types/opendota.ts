@@ -33,6 +33,21 @@ export interface PlayerMatch {
   kills: number
   deaths: number
   assists: number
+  /** Len ak sa vyžiadajú cez ?project= */
+  gold_per_min?: number
+  xp_per_min?: number
+}
+
+export interface CountBucket {
+  games: number
+  win: number
+}
+
+/** GET /players/{id}/counts — all-time počty podľa kategórií. */
+export interface PlayerCounts {
+  game_mode: Record<string, CountBucket>
+  lobby_type: Record<string, CountBucket>
+  is_radiant: Record<string, CountBucket>
 }
 
 /** OpenDota vracia v /players/{id}/heroes hero_id ako string. */

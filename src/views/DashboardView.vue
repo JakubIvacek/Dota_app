@@ -2,6 +2,10 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import {
+  GAME_MODES,
+  MATCH_TREND_FIELDS,
+  gameModeName,
+  getCounts,
   getHeroMap,
   getMatches,
   getPlayerHeroes,
@@ -10,6 +14,7 @@ import {
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDate, winratePct } from '../utils/format'
+import { pickWindow, rollingAvg } from '../utils/stats'
 import StatCard from '../components/StatCard.vue'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
@@ -18,29 +23,42 @@ const route = useRoute()
 
 const { data, loading, error } = useAsync(async () => {
   const accountId = String(route.params.accountId)
-  const [wl, recentMatches, playerHeroes, heroMap] = await Promise.all([
+  const [wl, recentMatches, playerHeroes, counts, heroMap] = await Promise.all([
     getWinLoss(accountId),
-    getMatches(accountId, 100),
+    getMatches(accountId, { limit: 100, project: MATCH_TREND_FIELDS }),
     getPlayerHeroes(accountId),
+    getCounts(accountId),
     getHeroMap(),
   ])
-  return { wl, recentMatches, playerHeroes, heroMap }
+  return { wl, recentMatches, playerHeroes, counts, heroMap }
 })
 
-/** Kumulatívny winrate cez posledných 100 matchov (chronologicky). */
-const winrateSeries = computed(() => {
-  const matches = [...(data.value?.recentMatches ?? [])].sort(
-    (a, b) => a.start_time - b.start_time,
-  )
-  let wins = 0
-  const labels: string[] = []
-  const values: number[] = []
-  matches.forEach((m, i) => {
-    if (wonMatch(m)) wins++
-    labels.push(formatDate(m.start_time))
-    values.push((wins / (i + 1)) * 100)
-  })
-  return { labels, values }
+/** Matche chronologicky — základ pre všetky trendy. */
+const chronological = computed(() =>
+  [...(data.value?.recentMatches ?? [])].sort((a, b) => a.start_time - b.start_time),
+)
+
+function trend(perMatch: number[], preferredWindow: number) {
+  const window = pickWindow(perMatch.length, preferredWindow)
+  return {
+    window,
+    labels: chronological.value.slice(window - 1).map((m) => formatDate(m.start_time)),
+    values: rollingAvg(perMatch, window),
+  }
+}
+
+const winrateTrend = computed(() =>
+  trend(chronological.value.map((m) => (wonMatch(m) ? 100 : 0)), 20),
+)
+
+const kdaTrend = computed(() =>
+  trend(chronological.value.map((m) => (m.kills + m.assists) / Math.max(1, m.deaths)), 10),
+)
+
+const farmTrend = computed(() => {
+  const gold = trend(chronological.value.map((m) => m.gold_per_min ?? 0), 10)
+  const xp = rollingAvg(chronological.value.map((m) => m.xp_per_min ?? 0), gold.window)
+  return { ...gold, xp }
 })
 
 const topHeroes = computed(() =>
@@ -48,6 +66,15 @@ const topHeroes = computed(() =>
     .sort((a, b) => b.games - a.games)
     .slice(0, 8)
     .map((h) => ({ ...h, hero: data.value?.heroMap.get(Number(h.hero_id)) })),
+)
+
+/** All-time winrate podľa game módu (z /counts), len módy so slušnou vzorkou. */
+const modeStats = computed(() =>
+  Object.entries(data.value?.counts.game_mode ?? {})
+    .map(([mode, c]) => ({ mode: Number(mode), ...c }))
+    .filter((c) => c.games >= 10 && (GAME_MODES[c.mode] || c.games >= 100))
+    .sort((a, b) => b.games - a.games)
+    .slice(0, 8),
 )
 
 const recentWinrate = computed(() => {
@@ -77,37 +104,81 @@ const recentWinrate = computed(() => {
     </section>
 
     <section class="card">
-      <h2>Winrate v čase — posledných {{ data.recentMatches.length }} matchov</h2>
+      <h2>Winrate — kĺzavé okno {{ winrateTrend.window }} matchov</h2>
       <LineChart
-        :labels="winrateSeries.labels"
-        :datasets="[{ label: 'Winrate', data: winrateSeries.values, color: '#3987e5' }]"
+        :labels="winrateTrend.labels"
+        :datasets="[{ label: 'Winrate', data: winrateTrend.values, color: '#3987e5' }]"
         :y-format="(v) => `${v.toFixed(0)} %`"
       />
     </section>
 
-    <section class="card">
-      <h2>Najhranejší hrdinovia</h2>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Hero</th>
-            <th>Games</th>
-            <th>Wins</th>
-            <th>Winrate</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="h in topHeroes" :key="h.hero_id">
-            <td><HeroIcon :hero="h.hero" /></td>
-            <td>{{ h.games }}</td>
-            <td>{{ h.win }}</td>
-            <td>{{ winratePct(h.win, h.games) }} %</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="muted more">
-        <RouterLink :to="`/player/${route.params.accountId}/heroes`">Všetci hrdinovia →</RouterLink>
-      </p>
+    <section class="chart-grid">
+      <div class="card">
+        <h2>GPM / XPM — priemer {{ farmTrend.window }} matchov</h2>
+        <LineChart
+          :labels="farmTrend.labels"
+          :datasets="[
+            { label: 'GPM', data: farmTrend.values, color: '#c98500' },
+            { label: 'XPM', data: farmTrend.xp, color: '#3987e5' },
+          ]"
+          :y-format="(v) => v.toFixed(0)"
+          :height="220"
+        />
+      </div>
+      <div class="card">
+        <h2>KDA — priemer {{ kdaTrend.window }} matchov</h2>
+        <LineChart
+          :labels="kdaTrend.labels"
+          :datasets="[{ label: 'KDA', data: kdaTrend.values, color: '#199e70' }]"
+          :y-format="(v) => v.toFixed(1)"
+          :height="220"
+        />
+      </div>
+    </section>
+
+    <section class="chart-grid">
+      <div class="card">
+        <h2>Winrate podľa módu (all time)</h2>
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Games</th>
+              <th>Winrate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="m in modeStats" :key="m.mode">
+              <td>{{ gameModeName(m.mode) }}</td>
+              <td>{{ m.games }}</td>
+              <td>{{ winratePct(m.win, m.games) }} %</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Najhranejší hrdinovia</h2>
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Hero</th>
+              <th>Games</th>
+              <th>Winrate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="h in topHeroes" :key="h.hero_id">
+              <td><HeroIcon :hero="h.hero" /></td>
+              <td>{{ h.games }}</td>
+              <td>{{ winratePct(h.win, h.games) }} %</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted more">
+          <RouterLink :to="`/player/${route.params.accountId}/heroes`">Všetci hrdinovia →</RouterLink>
+        </p>
+      </div>
     </section>
   </template>
 </template>
@@ -121,6 +192,13 @@ const recentWinrate = computed(() => {
 }
 
 section.card {
+  margin-bottom: 1rem;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
