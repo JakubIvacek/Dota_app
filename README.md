@@ -62,6 +62,20 @@ verejnou multi-user službou, tu je pôvodná úvaha: Steam OpenID je bezpečný
 - Sekcia „Obľúbení“ na home page nad „Nedávno pozreté“
 - localStorage, rovnaký princíp ako história (`useRecentPlayers` → `useFavorites`)
 
+### ✅ Vylepšenia mimo fáz (3. 7. 2026)
+
+- **Auto-parse replayov** — otvorenie nesparsovaného matchu (<30 dní) samo pošle
+  `POST /request/{match_id}` a graf sa doplní poll-om; staršie matche dostanú
+  vysvetlenie, že replay expiroval
+- **Dizajn pass** — vizuálny jazyk (tokeny, brand mark, tóny stat kariet),
+  winrate bary v Heroes, Radiant/Dire identita v match detaile
+- **Infinite scroll** v zozname matchov (OpenDota `offset`)
+- **Activity heatmapa** (GitHub-style, posledný rok) na Overview + nové poradie sekcií
+- **Leaderboards** — oficiálne Valve rebríčky (EU/Americas/SEA/China) cez
+  `www.dota2.com/webapi`; endpoint nemá CORS, rieši to Vite proxy `/valve`
+  (pri deployi treba proxy pravidlo hostingu). Valve nedáva account ID —
+  klik na meno hráča ide na OpenDota search
+
 ### 🔜 Fáza 5 — 3D hero modely (stretch goal)
 
 Namiesto 2D ikon v match detaile rotovateľný statický 3D model hrdinu
