@@ -93,9 +93,18 @@ export const getCounts = (accountId: string) =>
 export const getPlayerHeroes = (accountId: string) =>
   fetchJson<PlayerHero[]>(`/players/${accountId}/heroes`)
 
-// Detail matchu je nemenný — drž ho v cache celú session.
-export const getMatch = (matchId: string) =>
-  fetchJson<MatchDetail>(`/matches/${matchId}`, 24 * 60 * MINUTE)
+// Detail matchu je nemenný — drž ho v cache celú session. `fresh` obíde cache
+// (poll po parse requeste, kým sa nedoplnia replay dáta).
+export function getMatch(matchId: string, opts: { fresh?: boolean } = {}) {
+  if (opts.fresh) memoryCache.delete(`${OPENDOTA_BASE}/matches/${matchId}`)
+  return fetchJson<MatchDetail>(`/matches/${matchId}`, 24 * 60 * MINUTE)
+}
+
+/** Vyžiada u OpenDoty sparsovanie replayu — graf sa objaví o pár minút. */
+export async function requestMatchParse(matchId: string): Promise<void> {
+  const res = await fetch(`${OPENDOTA_BASE}/request/${matchId}`, { method: 'POST' })
+  if (!res.ok) throw new Error(`OpenDota ${res.status}: parse request`)
+}
 
 export const searchPlayers = (query: string) =>
   fetchJson<SearchResult[]>(`/search?q=${encodeURIComponent(query)}`)

@@ -102,6 +102,9 @@ privátny projekt — nehostovať Valve assety verejne, radšej poskytnúť extr
 - `GET /players/{account_id}/wl` — win/loss split
 - `GET /matches/{match_id}` — detail matchu (items, gold/XP graf cez čas)
 - `GET /search?q=` — hľadanie hráčov podľa mena (pozor, vie trvať aj ~7 s)
+- `POST /request/{match_id}` — vyžiadanie parse replayu; appka ho posiela
+  automaticky pri otvorení nesparsovaného matchu (<30 dní) a graf si dotiahne
+  poll-om každú minútu
 
 **Poznámka:** aby boli vidieť detailné dáta matchu (items cez čas, gold/xp graf),
 treba mať v Dota klientovi zapnuté `Settings → Advanced Options → Expose Public

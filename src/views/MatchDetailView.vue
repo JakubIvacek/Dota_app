@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ACCOUNT_ID } from '../config'
 import {
@@ -9,6 +9,7 @@ import {
   getMatch,
   isRadiantSlot,
   itemImageUrl,
+  requestMatchParse,
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDate, formatDuration } from '../utils/format'
@@ -48,6 +49,77 @@ const radiant = computed(() =>
 const dire = computed(() =>
   (data.value?.match.players ?? []).filter((p) => !isRadiantSlot(p.player_slot)).map(playerRow),
 )
+
+/**
+ * Auto-parse: nesparsovaný match → pošli OpenDote parse request a každú
+ * minútu skús graf doťiahnuť. Replaye expirujú (~2–4 týždne), staré matche
+ * preto ani neskúšame.
+ */
+const REPLAY_EXPIRY_DAYS = 30
+const POLL_MS = 60_000
+const MAX_POLLS = 8
+
+type ParseState = 'idle' | 'polling' | 'expired' | 'gave_up'
+const parseState = ref<ParseState>('idle')
+
+// Dedup v rámci života komponentu; prípadný duplicitný request po remounte OpenDote nevadí.
+const alreadyRequested = new Set<string>()
+
+let pollTimer: number | undefined
+let polls = 0
+
+function stopPolling() {
+  if (pollTimer != null) window.clearInterval(pollTimer)
+  pollTimer = undefined
+}
+
+async function startAutoParse(matchId: string) {
+  parseState.value = 'polling'
+  polls = 0
+  if (!alreadyRequested.has(matchId)) {
+    alreadyRequested.add(matchId)
+    // Aj keby request zlyhal (rate limit…), poll má zmysel — parse mohol vyžiadať niekto iný.
+    await requestMatchParse(matchId).catch(() => {})
+  }
+  pollTimer = window.setInterval(async () => {
+    polls++
+    const fresh = await getMatch(matchId, { fresh: true }).catch(() => null)
+    if (fresh?.radiant_gold_adv?.length && data.value) {
+      stopPolling()
+      data.value = { ...data.value, match: fresh }
+    } else if (polls >= MAX_POLLS) {
+      stopPolling()
+      parseState.value = 'gave_up'
+    }
+  }, POLL_MS)
+}
+
+watch(
+  () => data.value?.match,
+  (match) => {
+    stopPolling()
+    if (!match) return
+    if (match.radiant_gold_adv?.length) {
+      parseState.value = 'idle'
+      return
+    }
+    const ageDays = (Date.now() / 1000 - match.start_time) / 86_400
+    if (ageDays > REPLAY_EXPIRY_DAYS) {
+      parseState.value = 'expired'
+      return
+    }
+    startAutoParse(String(match.match_id))
+  },
+)
+
+function retryParse() {
+  const match = data.value?.match
+  if (!match) return
+  alreadyRequested.delete(String(match.match_id))
+  startAutoParse(String(match.match_id))
+}
+
+onBeforeUnmount(stopPolling)
 
 const advantage = computed(() => {
   const m = data.value?.match
@@ -150,9 +222,22 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
         :height="300"
       />
       <div v-else class="status-note">
-        Tento match nemá sparsovaný replay — graf nie je dostupný. Detailné dáta
-        vyžadujú zapnuté <em>Settings → Advanced Options → Expose Public Match Data</em>
-        v Dota klientovi (a chvíľu, kým OpenDota replay spracuje).
+        <template v-if="parseState === 'polling'">
+          Match nemá sparsovaný replay — parse request je odoslaný na OpenDota.
+          Graf sa doplní automaticky, zvyčajne do pár minút (kontrolujem každú minútu…).
+        </template>
+        <template v-else-if="parseState === 'gave_up'">
+          Parse sa zatiaľ nedokončil — OpenDota môže mať dlhšiu frontu.
+          <button class="retry" @click="retryParse">Skúsiť znova</button>
+        </template>
+        <template v-else-if="parseState === 'expired'">
+          Replay tohto matchu už expiroval (Valve ich drží ~2–4 týždne), graf sa
+          nedá doplniť. Pri čerstvých matchoch ho appka vyžiada automaticky —
+          stačí mať zapnuté <em>Expose Public Match Data</em> v Dota klientovi.
+        </template>
+        <template v-else>
+          Tento match nemá sparsovaný replay — graf nie je dostupný.
+        </template>
       </div>
     </section>
   </template>
@@ -220,5 +305,17 @@ tr.me td {
   object-fit: cover;
   border-radius: 3px;
   display: block;
+}
+
+.retry {
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.2rem 0.7rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
 }
 </style>
