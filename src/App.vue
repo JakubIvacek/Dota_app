@@ -6,7 +6,15 @@ import SearchBox from './components/SearchBox.vue'
 <template>
   <header class="topbar">
     <div class="container topbar-inner">
-      <RouterLink to="/" class="brand">Dota Stats</RouterLink>
+      <RouterLink to="/" class="brand">
+        <!-- Zjednodušený Dota motív: štvorec + jedna diagonála (nie X, nech to nevyzerá ako close) -->
+        <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="21" height="21" rx="5" fill="#b83b34" />
+          <path d="M6.5 6.5 L17.5 17.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" />
+          <path d="M6.5 12.8 L6.5 6.5 L12.8 6.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none" stroke-linejoin="round" />
+        </svg>
+        Dota Stats
+      </RouterLink>
       <nav v-if="ACCOUNT_ID">
         <RouterLink :to="`/player/${ACCOUNT_ID}`">Môj profil</RouterLink>
       </nav>
@@ -21,7 +29,8 @@ import SearchBox from './components/SearchBox.vue'
 
 <style scoped>
 .topbar {
-  background: var(--surface);
+  background: rgba(21, 23, 27, 0.82);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
@@ -37,10 +46,19 @@ import SearchBox from './components/SearchBox.vue'
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-weight: 750;
   font-size: 1.05rem;
   color: var(--ink);
   letter-spacing: 0.01em;
+}
+
+.mark {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 nav a {

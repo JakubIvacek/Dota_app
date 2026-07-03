@@ -84,7 +84,12 @@ const shownRecents = computed(() =>
 }
 
 .landing h1 {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(180deg, #fff, #b9bec7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .me {

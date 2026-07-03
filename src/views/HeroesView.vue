@@ -57,8 +57,8 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
       <thead>
         <tr>
           <th class="sortable" @click="sortBy('name')">Hero{{ arrow('name') }}</th>
-          <th class="sortable" @click="sortBy('games')">Games{{ arrow('games') }}</th>
-          <th class="sortable" @click="sortBy('win')">Wins{{ arrow('win') }}</th>
+          <th class="sortable num" @click="sortBy('games')">Games{{ arrow('games') }}</th>
+          <th class="sortable num" @click="sortBy('win')">Wins{{ arrow('win') }}</th>
           <th class="sortable" @click="sortBy('winrate')">Winrate{{ arrow('winrate') }}</th>
           <th class="sortable" @click="sortBy('last_played')">Last played{{ arrow('last_played') }}</th>
         </tr>
@@ -66,9 +66,20 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
       <tbody>
         <tr v-for="h in rows" :key="h.hero_id">
           <td><HeroIcon :hero="h.hero" /></td>
-          <td>{{ h.games }}</td>
-          <td>{{ h.win }}</td>
-          <td>{{ winratePct(h.win, h.games) }} %</td>
+          <td class="num">{{ h.games }}</td>
+          <td class="num">{{ h.win }}</td>
+          <td>
+            <div class="wr">
+              <span class="wr-value">{{ winratePct(h.win, h.games) }} %</span>
+              <span class="wr-track">
+                <span
+                  class="wr-fill"
+                  :class="h.winrate >= 0.5 ? 'good' : 'bad'"
+                  :style="{ width: `${h.winrate * 100}%` }"
+                />
+              </span>
+            </div>
+          </td>
           <td class="muted">{{ h.last_played ? timeAgo(h.last_played) : '—' }}</td>
         </tr>
       </tbody>
@@ -85,4 +96,33 @@ th.sortable {
 th.sortable:hover {
   color: var(--ink-2);
 }
+
+/* Winrate ako číslo + tichý bar — na 100+ riadkoch sa percentá inak nedajú skenovať. */
+.wr {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.wr-value {
+  min-width: 3.6rem;
+  text-align: right;
+}
+
+.wr-track {
+  width: 72px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--grid);
+  overflow: hidden;
+}
+
+.wr-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.wr-fill.good { background: var(--win); }
+.wr-fill.bad { background: rgba(224, 82, 79, 0.75); }
 </style>

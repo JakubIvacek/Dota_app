@@ -141,9 +141,9 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
   <template v-else-if="data">
     <section class="card header">
       <div class="score">
-        <span :class="{ winner: data.match.radiant_win }">Radiant {{ data.match.radiant_score }}</span>
+        <span class="side radiant" :class="{ loser: !data.match.radiant_win }">Radiant {{ data.match.radiant_score }}</span>
         <span class="muted">:</span>
-        <span :class="{ winner: !data.match.radiant_win }">{{ data.match.dire_score }} Dire</span>
+        <span class="side dire" :class="{ loser: data.match.radiant_win }">{{ data.match.dire_score }} Dire</span>
       </div>
       <div class="muted">
         {{ gameModeName(data.match.game_mode) }} ·
@@ -156,8 +156,8 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
     <section v-for="team in [
         { name: 'Radiant', players: radiant, won: data.match.radiant_win },
         { name: 'Dire', players: dire, won: !data.match.radiant_win },
-      ]" :key="team.name" class="card team">
-      <h2>
+      ]" :key="team.name" class="card team" :class="team.name.toLowerCase()">
+      <h2 class="team-name">
         {{ team.name }}
         <span v-if="team.won" class="badge win">Victory</span>
       </h2>
@@ -167,12 +167,12 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
             <tr>
               <th>Hero</th>
               <th>Player</th>
-              <th>LVL</th>
+              <th class="num">LVL</th>
               <th>K / D / A</th>
-              <th>Net</th>
-              <th>GPM / XPM</th>
-              <th>LH / DN</th>
-              <th>DMG</th>
+              <th class="num">Net</th>
+              <th class="num">GPM / XPM</th>
+              <th class="num">LH / DN</th>
+              <th class="num">DMG</th>
               <th>Items</th>
             </tr>
           </thead>
@@ -185,12 +185,12 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
                 </RouterLink>
                 <span v-else class="muted">Anonymous</span>
               </td>
-              <td>{{ p.level }}</td>
+              <td class="num">{{ p.level }}</td>
               <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
-              <td>{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</td>
-              <td>{{ p.gold_per_min }} / {{ p.xp_per_min }}</td>
-              <td>{{ p.last_hits }} / {{ p.denies }}</td>
-              <td>{{ formatK(p.hero_damage) }}</td>
+              <td class="num">{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</td>
+              <td class="num">{{ p.gold_per_min }} / {{ p.xp_per_min }}</td>
+              <td class="num">{{ p.last_hits }} / {{ p.denies }}</td>
+              <td class="num">{{ formatK(p.hero_damage) }}</td>
               <td>
                 <span class="items">
                   <img
@@ -257,13 +257,21 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
   gap: 0.75rem;
 }
 
-.score .winner {
-  color: var(--win);
-}
+.score .side.radiant { color: var(--radiant); }
+.score .side.dire { color: var(--dire); }
+.score .side.loser { opacity: 0.5; }
 
 .team {
   margin-bottom: 1rem;
+  border-top: 2px solid transparent;
 }
+
+/* Dota konvencia: Radiant zelená, Dire červená. */
+.team.radiant { border-top-color: var(--radiant); }
+.team.dire { border-top-color: var(--dire); }
+
+.team.radiant .team-name { color: var(--radiant); }
+.team.dire .team-name { color: var(--dire); }
 
 .team h2 {
   display: flex;
