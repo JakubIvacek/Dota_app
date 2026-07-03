@@ -18,20 +18,27 @@ import { pickWindow, rollingAvg } from '../utils/stats'
 import StatCard from '../components/StatCard.vue'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
+import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 
 const route = useRoute()
 
 const { data, loading, error } = useAsync(async () => {
   const accountId = String(route.params.accountId)
-  const [wl, recentMatches, playerHeroes, counts, heroMap] = await Promise.all([
+  const [wl, recentMatches, yearMatches, playerHeroes, counts, heroMap] = await Promise.all([
     getWinLoss(accountId),
     getMatches(accountId, { limit: 100, project: MATCH_TREND_FIELDS }),
+    // Celý posledný rok pre heatmapu — len minimálne polia, bez limitu.
+    getMatches(accountId, { date: 365, project: ['start_time', 'player_slot', 'radiant_win'] }),
     getPlayerHeroes(accountId),
     getCounts(accountId),
     getHeroMap(),
   ])
-  return { wl, recentMatches, playerHeroes, counts, heroMap }
+  return { wl, recentMatches, yearMatches, playerHeroes, counts, heroMap }
 })
+
+const activityMatches = computed(() =>
+  (data.value?.yearMatches ?? []).map((m) => ({ start_time: m.start_time, won: wonMatch(m) })),
+)
 
 /** Matche chronologicky — základ pre všetky trendy. */
 const chronological = computed(() =>
@@ -46,10 +53,6 @@ function trend(perMatch: number[], preferredWindow: number) {
     values: rollingAvg(perMatch, window),
   }
 }
-
-const winrateTrend = computed(() =>
-  trend(chronological.value.map((m) => (wonMatch(m) ? 100 : 0)), 20),
-)
 
 const kdaTrend = computed(() =>
   trend(chronological.value.map((m) => (m.kills + m.assists) / Math.max(1, m.deaths)), 10),
@@ -93,85 +96,34 @@ const recentWinrate = computed(() => {
         label="Winrate (all time)"
         :value="`${winratePct(data.wl.win, data.wl.win + data.wl.lose)} %`"
         :sub="`${data.wl.win} W – ${data.wl.lose} L`"
+        :tone="data.wl.win >= data.wl.lose ? 'win' : 'loss'"
       />
-      <StatCard label="Wins" :value="String(data.wl.win)" />
-      <StatCard label="Losses" :value="String(data.wl.lose)" />
+      <StatCard label="Wins" :value="String(data.wl.win)" tone="win" />
+      <StatCard label="Losses" :value="String(data.wl.lose)" tone="loss" />
       <StatCard
         label="Winrate (last 100)"
         :value="`${recentWinrate} %`"
         :sub="`${data.recentMatches.length} matches`"
-      />
-    </section>
-
-    <section class="card">
-      <h2>Winrate — kĺzavé okno {{ winrateTrend.window }} matchov</h2>
-      <LineChart
-        :labels="winrateTrend.labels"
-        :datasets="[{ label: 'Winrate', data: winrateTrend.values, color: '#3987e5' }]"
-        :y-format="(v) => `${v.toFixed(0)} %`"
+        :tone="recentWinrate === '—' ? 'default' : Number(recentWinrate) >= 50 ? 'win' : 'loss'"
       />
     </section>
 
     <section class="chart-grid">
-      <div class="card">
-        <h2>GPM / XPM — priemer {{ farmTrend.window }} matchov</h2>
-        <LineChart
-          :labels="farmTrend.labels"
-          :datasets="[
-            { label: 'GPM', data: farmTrend.values, color: '#c98500' },
-            { label: 'XPM', data: farmTrend.xp, color: '#3987e5' },
-          ]"
-          :y-format="(v) => v.toFixed(0)"
-          :height="220"
-        />
-      </div>
-      <div class="card">
-        <h2>KDA — priemer {{ kdaTrend.window }} matchov</h2>
-        <LineChart
-          :labels="kdaTrend.labels"
-          :datasets="[{ label: 'KDA', data: kdaTrend.values, color: '#199e70' }]"
-          :y-format="(v) => v.toFixed(1)"
-          :height="220"
-        />
-      </div>
-    </section>
-
-    <section class="chart-grid">
-      <div class="card">
-        <h2>Winrate podľa módu (all time)</h2>
-        <table class="data">
-          <thead>
-            <tr>
-              <th>Mode</th>
-              <th>Games</th>
-              <th>Winrate</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="m in modeStats" :key="m.mode">
-              <td>{{ gameModeName(m.mode) }}</td>
-              <td>{{ m.games }}</td>
-              <td>{{ winratePct(m.win, m.games) }} %</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
       <div class="card">
         <h2>Najhranejší hrdinovia</h2>
         <table class="data">
           <thead>
             <tr>
               <th>Hero</th>
-              <th>Games</th>
-              <th>Winrate</th>
+              <th class="num">Games</th>
+              <th class="num">Winrate</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="h in topHeroes" :key="h.hero_id">
               <td><HeroIcon :hero="h.hero" /></td>
-              <td>{{ h.games }}</td>
-              <td>{{ winratePct(h.win, h.games) }} %</td>
+              <td class="num">{{ h.games }}</td>
+              <td class="num">{{ winratePct(h.win, h.games) }} %</td>
             </tr>
           </tbody>
         </table>
@@ -179,6 +131,54 @@ const recentWinrate = computed(() => {
           <RouterLink :to="`/player/${route.params.accountId}/heroes`">Všetci hrdinovia →</RouterLink>
         </p>
       </div>
+
+      <div class="card">
+        <h2>KDA — priemer {{ kdaTrend.window }} matchov</h2>
+        <LineChart
+          :labels="kdaTrend.labels"
+          :datasets="[{ label: 'KDA', data: kdaTrend.values, color: '#199e70' }]"
+          :y-format="(v) => v.toFixed(1)"
+          :height="392"
+        />
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Aktivita — posledný rok</h2>
+      <ActivityHeatmap :matches="activityMatches" />
+    </section>
+
+    <section class="card">
+      <h2>GPM / XPM — priemer {{ farmTrend.window }} matchov</h2>
+      <LineChart
+        :labels="farmTrend.labels"
+        :datasets="[
+          { label: 'GPM', data: farmTrend.values, color: '#c98500' },
+          { label: 'XPM', data: farmTrend.xp, color: '#3987e5' },
+        ]"
+        :y-format="(v) => v.toFixed(0)"
+        :height="220"
+      />
+    </section>
+
+    <section class="card">
+      <h2>Winrate podľa módu (all time)</h2>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Mode</th>
+            <th class="num">Games</th>
+            <th class="num">Winrate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="m in modeStats" :key="m.mode">
+            <td>{{ gameModeName(m.mode) }}</td>
+            <td class="num">{{ m.games }}</td>
+            <td class="num">{{ winratePct(m.win, m.games) }} %</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
   </template>
 </template>
