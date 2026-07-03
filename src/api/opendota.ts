@@ -2,6 +2,7 @@ import { OPENDOTA_BASE, STEAM_CDN } from '../config'
 import type {
   HeroConstant,
   ItemConstant,
+  LeaderboardResponse,
   MatchDetail,
   PlayerCounts,
   PlayerHero,
@@ -22,17 +23,19 @@ const MINUTE = 60_000
 const DEFAULT_TTL = 5 * MINUTE
 const CONSTANTS_TTL = 24 * 60 * MINUTE
 
-async function fetchJson<T>(path: string, ttl = DEFAULT_TTL): Promise<T> {
-  const url = `${OPENDOTA_BASE}${path}`
+async function fetchJsonFromUrl<T>(url: string, ttl = DEFAULT_TTL, label = 'HTTP'): Promise<T> {
   const cached = memoryCache.get(url)
   if (cached && cached.expires > Date.now()) return cached.data as T
 
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`OpenDota ${res.status}: ${path}`)
+  if (!res.ok) throw new Error(`${label} ${res.status}`)
   const data = (await res.json()) as T
   memoryCache.set(url, { expires: Date.now() + ttl, data })
   return data
 }
+
+const fetchJson = <T>(path: string, ttl = DEFAULT_TTL) =>
+  fetchJsonFromUrl<T>(`${OPENDOTA_BASE}${path}`, ttl, `OpenDota ${path.split('?')[0]}:`)
 
 async function fetchConstants<T>(resource: string): Promise<T> {
   const key = `opendota:constants:${resource}`
@@ -115,6 +118,25 @@ export async function requestMatchParse(matchId: string): Promise<void> {
 
 export const searchPlayers = (query: string) =>
   fetchJson<SearchResult[]>(`/search?q=${encodeURIComponent(query)}`)
+
+// --- Valve leaderboard (cez /valve proxy, viď vite.config.ts) ---
+
+export const LEADERBOARD_DIVISIONS = [
+  { id: 'europe', label: 'Europe' },
+  { id: 'americas', label: 'Americas' },
+  { id: 'se_asia', label: 'SE Asia' },
+  { id: 'china', label: 'China' },
+] as const
+
+export type LeaderboardDivision = (typeof LEADERBOARD_DIVISIONS)[number]['id']
+
+// Valve prepočítava rebríček ~raz za hodinu; fetchJson cache (5 min) stačí.
+export const getLeaderboard = (division: LeaderboardDivision) =>
+  fetchJsonFromUrl<LeaderboardResponse>(
+    `/valve/webapi/ILeaderboard/GetDivisionLeaderboard/v0001?division=${division}&leaderboard=0`,
+    DEFAULT_TTL,
+    'Valve leaderboard:',
+  )
 
 // --- Constants (heroes, items) ---
 

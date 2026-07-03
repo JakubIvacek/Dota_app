@@ -101,6 +101,23 @@ export interface MatchDetail {
   players: MatchPlayer[]
 }
 
+// --- Valve leaderboard (www.dota2.com/webapi, nie OpenDota) ---
+
+export interface LeaderboardEntry {
+  rank: number
+  name: string
+  team_id?: number
+  team_tag?: string
+  /** ISO kód krajiny, malé písmená (nie vždy prítomný). */
+  country?: string
+}
+
+export interface LeaderboardResponse {
+  time_posted: number
+  next_scheduled_post_time: number
+  leaderboard: LeaderboardEntry[]
+}
+
 export interface HeroConstant {
   id: number
   name: string

@@ -15,8 +15,9 @@ import SearchBox from './components/SearchBox.vue'
         </svg>
         Dota Stats
       </RouterLink>
-      <nav v-if="ACCOUNT_ID">
-        <RouterLink :to="`/player/${ACCOUNT_ID}`">Môj profil</RouterLink>
+      <nav>
+        <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`">Môj profil</RouterLink>
+        <RouterLink to="/leaderboard">Leaderboards</RouterLink>
       </nav>
       <SearchBox class="topbar-search" />
     </div>
@@ -59,6 +60,11 @@ import SearchBox from './components/SearchBox.vue'
   width: 22px;
   height: 22px;
   display: block;
+}
+
+nav {
+  display: flex;
+  gap: 1.2rem;
 }
 
 nav a {
