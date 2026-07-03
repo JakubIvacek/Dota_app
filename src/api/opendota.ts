@@ -59,7 +59,12 @@ export const getWinLoss = (accountId: string) =>
   fetchJson<WinLoss>(`/players/${accountId}/wl`)
 
 export interface MatchFilters {
+  /** Bez limitu vráti OpenDota všetky matche (v kombinácii s `date` je to OK). */
   limit?: number
+  /** Koľko matchov preskočiť — stránkovanie / infinite scroll. */
+  offset?: number
+  /** Len matche za posledných N dní. */
+  date?: number
   hero_id?: number
   win?: 0 | 1
   game_mode?: number
@@ -73,7 +78,9 @@ export interface MatchFilters {
  */
 export function getMatches(accountId: string, filters: MatchFilters = {}) {
   const params = new URLSearchParams()
-  params.set('limit', String(filters.limit ?? 50))
+  if (filters.limit != null) params.set('limit', String(filters.limit))
+  if (filters.offset) params.set('offset', String(filters.offset))
+  if (filters.date != null) params.set('date', String(filters.date))
   if (filters.hero_id != null) params.set('hero_id', String(filters.hero_id))
   if (filters.win != null) params.set('win', String(filters.win))
   if (filters.game_mode != null) params.set('game_mode', String(filters.game_mode))
