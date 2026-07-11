@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { Analytics } from '@vercel/analytics/vue'
 import { ACCOUNT_ID } from './config'
 import { SUPPORTED_LOCALES, persistLocale, type LocaleCode } from './i18n'
 import SearchBox from './components/SearchBox.vue'
@@ -57,6 +58,8 @@ function onLocaleChange(e: Event) {
       <span class="footer-copy muted">© {{ new Date().getFullYear() }}</span>
     </div>
   </footer>
+
+  <Analytics />
 </template>
 
 <style scoped>

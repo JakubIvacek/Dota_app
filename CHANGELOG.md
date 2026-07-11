@@ -15,6 +15,8 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-12
+
 ### Added
 
 - Live deploy on Vercel (<https://dota-stats-by-keno.vercel.app/>): `vercel.json`
@@ -23,6 +25,8 @@ a dated version section when released.
   `/valve` rewrite proxying `www.dota2.com/webapi` for production, replacing
   the dev-only Vite proxy from `vite.config.ts` so Leaderboards works in prod.
 - `LICENSE` (MIT).
+- Vercel Web Analytics (`@vercel/analytics/vue`), tracking pageviews across
+  route changes via a single `<Analytics />` component in `App.vue`.
 
 ## [0.2.0] — 2026-07-11
 

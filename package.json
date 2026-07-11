@@ -1,7 +1,7 @@
 {
   "name": "dota-stats",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "chart.js": "^4.5.1",
     "vue": "^3.5.39",
     "vue-i18n": "^11.4.6",
