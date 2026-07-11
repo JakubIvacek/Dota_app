@@ -23,11 +23,28 @@ const MINUTE = 60_000
 const DEFAULT_TTL = 5 * MINUTE
 const CONSTANTS_TTL = 24 * 60 * MINUTE
 
+// OpenDota (cez Cloudflare) vie visieť desiatky sekúnd pred timeoutom namiesto
+// rýchleho erroru — radšej zlyhať za 12s s jasnou správou než nechať UI
+// "loadovať" dve minúty.
+const FETCH_TIMEOUT_MS = 12_000
+
 async function fetchJsonFromUrl<T>(url: string, ttl = DEFAULT_TTL, label = 'HTTP'): Promise<T> {
   const cached = memoryCache.get(url)
   if (cached && cached.expires > Date.now()) return cached.data as T
 
-  const res = await fetch(url)
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, { signal: controller.signal })
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error(`${label} neodpovedá (timeout ${FETCH_TIMEOUT_MS / 1000}s)`)
+    }
+    throw e
+  } finally {
+    clearTimeout(timeout)
+  }
   if (!res.ok) throw new Error(`${label} ${res.status}`)
   const data = (await res.json()) as T
   memoryCache.set(url, { expires: Date.now() + ttl, data })
@@ -60,6 +77,18 @@ export const getPlayer = (accountId: string) =>
 
 export const getWinLoss = (accountId: string) =>
   fetchJson<WinLoss>(`/players/${accountId}/wl`)
+
+/**
+ * Vyžiada u OpenDoty prehľadanie hráčovej histórie — nutné, keď account ešte
+ * nikdy nebol vyhľadaný (matches/wl vrátia prázdno, kým OpenDota nezaindexuje).
+ */
+export async function requestPlayerRefresh(accountId: string): Promise<void> {
+  const res = await fetch(`${OPENDOTA_BASE}/players/${accountId}/refresh`, { method: 'POST' })
+  if (!res.ok) throw new Error(`OpenDota ${res.status}: refresh request`)
+  for (const key of memoryCache.keys()) {
+    if (key.startsWith(`${OPENDOTA_BASE}/players/${accountId}`)) memoryCache.delete(key)
+  }
+}
 
 export interface MatchFilters {
   /** Bez limitu vráti OpenDota všetky matche (v kombinácii s `date` je to OK). */

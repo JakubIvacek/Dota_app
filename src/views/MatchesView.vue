@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { GAME_MODES, gameModeName, getHeroMap, getMatches, wonMatch } from '../api/opendota'
+import {
+  GAME_MODES,
+  gameModeName,
+  getHeroMap,
+  getMatches,
+  requestPlayerRefresh,
+  wonMatch,
+} from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDuration, timeAgo } from '../utils/format'
 import HeroIcon from '../components/HeroIcon.vue'
@@ -98,6 +105,12 @@ const modeOptions = Object.entries(GAME_MODES).map(([id, name]) => ({
   name,
 }))
 
+const RESULT_OPTIONS: { value: 'all' | 'win' | 'loss'; label: string }[] = [
+  { value: 'all', label: 'Všetko' },
+  { value: 'win', label: 'Výhry' },
+  { value: 'loss', label: 'Prehry' },
+]
+
 const rows = computed(() =>
   (matches.value ?? []).map((m) => ({
     ...m,
@@ -109,6 +122,28 @@ const rows = computed(() =>
 function openMatch(matchId: number) {
   // ?player= — nech match detail vie, koho riadok zvýrazniť.
   router.push({ path: `/matches/${matchId}`, query: { player: String(route.params.accountId) } })
+}
+
+// Bez filtrov + prázdny zoznam = OpenDota tohto hráča ešte nezaindexovala,
+// nie "žiadne matche podľa filtra". Ponúkni refresh, nie tichý slepý koniec.
+const noFiltersActive = computed(
+  () => heroFilter.value === null && resultFilter.value === 'all' && modeFilter.value === null,
+)
+
+const refreshing = ref(false)
+const refreshError = ref<string | null>(null)
+
+async function refreshFromOpenDota() {
+  refreshing.value = true
+  refreshError.value = null
+  try {
+    await requestPlayerRefresh(String(route.params.accountId))
+    await loadPage(true)
+  } catch (e) {
+    refreshError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    refreshing.value = false
+  }
 }
 </script>
 
@@ -122,24 +157,41 @@ function openMatch(matchId: number) {
       </select>
     </label>
     <label>
-      Result
-      <select v-model="resultFilter">
-        <option value="all">Všetko</option>
-        <option value="win">Výhry</option>
-        <option value="loss">Prehry</option>
-      </select>
-    </label>
-    <label>
       Mode
       <select v-model="modeFilter">
         <option :value="null">Všetky</option>
         <option v-for="m in modeOptions" :key="m.id" :value="m.id">{{ m.name }}</option>
       </select>
     </label>
+    <div class="result-toggle" role="group" aria-label="Result filter">
+      <button
+        v-for="opt in RESULT_OPTIONS"
+        :key="opt.value"
+        type="button"
+        class="result-btn"
+        :class="[opt.value, { active: resultFilter === opt.value }]"
+        @click="resultFilter = opt.value"
+      >
+        {{ opt.label }}
+      </button>
+    </div>
   </div>
 
-  <p v-if="loading" class="muted">Loading…</p>
+  <section v-if="loading" class="card skeleton-table">
+    <div v-for="i in 8" :key="i" class="skeleton skeleton-row" />
+  </section>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať matche: {{ error }}</div>
+
+  <div v-else-if="!rows.length && noFiltersActive" class="card empty-state">
+    <p class="muted">
+      OpenDota nemá pre tohto hráča zatiaľ zaindexovaný žiadny match. Zvyčajne
+      to znamená, že OpenDota ho ešte nikdy neprehľadala — skús vyžiadať refresh.
+    </p>
+    <button class="refresh-btn" :disabled="refreshing" @click="refreshFromOpenDota">
+      {{ refreshing ? 'Žiadam OpenDota…' : 'Refresh z OpenDota' }}
+    </button>
+    <p v-if="refreshError" class="error-box">{{ refreshError }}</p>
+  </div>
   <p v-else-if="!rows.length" class="muted">Žiadne matche nezodpovedajú filtru.</p>
 
   <div v-else class="card">
@@ -182,9 +234,83 @@ function openMatch(matchId: number) {
 .filters {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 1.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   padding: 0.7rem 1.25rem;
+}
+
+.result-toggle {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: auto;
+  padding: 3px;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.result-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  padding: 0.3rem 0.85rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+
+.result-btn:hover {
+  color: var(--ink);
+}
+
+.result-btn.active {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.result-btn.win.active { color: var(--win); }
+.result-btn.loss.active { color: var(--loss); }
+
+.skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-row {
+  height: 40px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.refresh-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.refresh-btn:hover {
+  opacity: 0.9;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .filters label {

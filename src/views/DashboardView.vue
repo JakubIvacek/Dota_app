@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   GAME_MODES,
@@ -10,11 +10,13 @@ import {
   getMatches,
   getPlayerHeroes,
   getWinLoss,
+  requestPlayerRefresh,
   wonMatch,
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDate, winratePct } from '../utils/format'
 import { pickWindow, rollingAvg } from '../utils/stats'
+import { cssVar } from '../utils/theme'
 import StatCard from '../components/StatCard.vue'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
@@ -85,19 +87,59 @@ const recentWinrate = computed(() => {
   const matches = data.value?.recentMatches ?? []
   return winratePct(matches.filter(wonMatch).length, matches.length)
 })
+
+// Nulové wl + žiadne matche = OpenDota tohto hráča ešte nezaindexovala.
+const notIndexed = computed(
+  () => !!data.value && data.value.wl.win + data.value.wl.lose === 0 && data.value.recentMatches.length === 0,
+)
+
+const refreshing = ref(false)
+const refreshRequested = ref(false)
+const refreshError = ref<string | null>(null)
+
+async function refreshFromOpenDota() {
+  refreshing.value = true
+  refreshError.value = null
+  try {
+    await requestPlayerRefresh(String(route.params.accountId))
+    refreshRequested.value = true
+  } catch (e) {
+    refreshError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    refreshing.value = false
+  }
+}
 </script>
 
 <template>
-  <p v-if="loading" class="muted">Loading…</p>
+  <section v-if="loading" class="stats">
+    <div class="card stat lg skeleton" style="height: 108px" />
+    <div class="card skeleton" style="height: 108px" />
+    <div class="card skeleton" style="height: 108px" />
+    <div class="card skeleton" style="height: 108px" />
+  </section>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať dáta: {{ error }}</div>
 
   <template v-else-if="data">
+    <div v-if="notIndexed" class="card empty-state">
+      <p class="muted">
+        OpenDota nemá pre tohto hráča zatiaľ zaindexovaný žiadny match — zvyčajne
+        preto, že ho ešte nikdy neprehľadala. Vyžiadaj refresh a skús o pár minút
+        znova obnoviť stránku.
+      </p>
+      <button class="refresh-btn" :disabled="refreshing || refreshRequested" @click="refreshFromOpenDota">
+        {{ refreshing ? 'Žiadam OpenDota…' : refreshRequested ? 'Vyžiadané ✓' : 'Refresh z OpenDota' }}
+      </button>
+      <p v-if="refreshError" class="error-box">{{ refreshError }}</p>
+    </div>
+
     <section class="stats">
       <StatCard
         label="Winrate (all time)"
         :value="`${winratePct(data.wl.win, data.wl.win + data.wl.lose)} %`"
         :sub="`${data.wl.win} W – ${data.wl.lose} L`"
         :tone="data.wl.win >= data.wl.lose ? 'win' : 'loss'"
+        size="lg"
       />
       <StatCard label="Wins" :value="String(data.wl.win)" tone="win" />
       <StatCard label="Losses" :value="String(data.wl.lose)" tone="loss" />
@@ -137,7 +179,7 @@ const recentWinrate = computed(() => {
         <h2>KDA — priemer {{ kdaTrend.window }} matchov</h2>
         <LineChart
           :labels="kdaTrend.labels"
-          :datasets="[{ label: 'KDA', data: kdaTrend.values, color: '#199e70' }]"
+          :datasets="[{ label: 'KDA', data: kdaTrend.values, color: cssVar('--kda') }]"
           :y-format="(v) => v.toFixed(1)"
           :height="392"
         />
@@ -154,8 +196,8 @@ const recentWinrate = computed(() => {
       <LineChart
         :labels="farmTrend.labels"
         :datasets="[
-          { label: 'GPM', data: farmTrend.values, color: '#c98500' },
-          { label: 'XPM', data: farmTrend.xp, color: '#3987e5' },
+          { label: 'GPM', data: farmTrend.values, color: cssVar('--gold') },
+          { label: 'XPM', data: farmTrend.xp, color: cssVar('--accent') },
         ]"
         :y-format="(v) => v.toFixed(0)"
         :height="220"
@@ -185,11 +227,51 @@ const recentWinrate = computed(() => {
 </template>
 
 <style scoped>
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.refresh-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.refresh-btn:hover {
+  opacity: 0.9;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* Featured stat gets double width — bento, not four identical boxes. */
+.stats > :first-child {
+  grid-column: span 2;
+}
+
+@media (max-width: 720px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 section.card {
