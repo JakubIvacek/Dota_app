@@ -28,13 +28,14 @@ const shownRecents = computed(() =>
 
 <template>
   <div class="landing">
+    <span class="eyebrow">Dota 2 · match stats</span>
     <h1>Dota Stats</h1>
-    <p class="muted">
+    <p class="muted lede">
       Zadaj meno hráča alebo Dota account ID (Friend Code) a pozri si štatistiky.
     </p>
     <SearchBox size="large" />
 
-    <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`" class="card me">
+    <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`" class="card card--interactive me">
       <img v-if="me?.profile" :src="me.profile.avatarfull" alt="" />
       <div class="me-info">
         <div class="me-label">Môj profil</div>
@@ -79,38 +80,43 @@ const shownRecents = computed(() =>
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
-  padding-top: 9vh;
+  padding-top: 8vh;
+  padding-bottom: var(--space-8);
   text-align: center;
 }
 
 .landing h1 {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
+  font-size: clamp(2.4rem, 5vw + 1rem, var(--text-2xl));
+  font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-tight);
-  background: linear-gradient(180deg, #fff, #b9bec7);
+  line-height: 1.05;
+  background: linear-gradient(160deg, #fff 20%, #b9bec7 75%, var(--accent) 130%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.landing .lede {
+  max-width: 34rem;
 }
 
 .me {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-top: var(--space-6);
-  min-width: min(420px, 90vw);
+  margin-top: var(--space-2);
+  min-width: min(440px, 90vw);
   color: var(--ink);
   text-align: left;
-}
-
-.me:hover {
-  border-color: var(--accent);
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .me img {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .me-label {
@@ -136,7 +142,8 @@ const shownRecents = computed(() =>
 .group {
   margin-top: var(--space-8);
   width: 100%;
-  max-width: 720px;
+  max-width: 760px;
+  text-align: left;
 }
 
 .group h2 {

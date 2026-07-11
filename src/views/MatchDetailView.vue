@@ -13,6 +13,7 @@ import {
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDate, formatDuration } from '../utils/format'
+import { cssVar } from '../utils/theme'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import TeamGlyph from '../components/TeamGlyph.vue'
@@ -136,7 +137,11 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 </script>
 
 <template>
-  <p v-if="loading" class="muted">Loading…</p>
+  <section v-if="loading" class="skeleton-match">
+    <div class="card skeleton" style="height: 84px" />
+    <div class="card skeleton" style="height: 280px" />
+    <div class="card skeleton" style="height: 280px" />
+  </section>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať match: {{ error }}</div>
 
   <template v-else-if="data">
@@ -221,8 +226,8 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
         v-if="advantage"
         :labels="advantage.labels"
         :datasets="[
-          { label: 'Gold', data: advantage.gold, color: '#c98500' },
-          { label: 'XP', data: advantage.xp, color: '#3987e5' },
+          { label: 'Gold', data: advantage.gold, color: cssVar('--gold') },
+          { label: 'XP', data: advantage.xp, color: cssVar('--accent') },
         ]"
         :y-format="formatK"
         :height="300"
@@ -250,6 +255,12 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 </template>
 
 <style scoped>
+.skeleton-match {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .header {
   margin-bottom: var(--space-4);
   text-align: center;

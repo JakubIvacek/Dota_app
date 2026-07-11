@@ -50,7 +50,9 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
 </script>
 
 <template>
-  <p v-if="loading" class="muted">Loading…</p>
+  <section v-if="loading" class="card skeleton-table">
+    <div v-for="i in 10" :key="i" class="skeleton skeleton-row" />
+  </section>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať hero štatistiky: {{ error }}</div>
 
   <div v-else class="card">
@@ -65,7 +67,7 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
         </tr>
       </thead>
       <tbody>
-        <tr v-for="h in rows" :key="h.hero_id">
+        <tr v-for="h in rows" :key="h.hero_id" class="hero-row">
           <td><HeroIcon :hero="h.hero" /></td>
           <td class="num">{{ h.games }}</td>
           <td class="num">{{ h.win }}</td>
@@ -81,9 +83,28 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
 th.sortable {
   cursor: pointer;
   user-select: none;
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
 th.sortable:hover {
   color: var(--ink-2);
+}
+
+.hero-row {
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.hero-row:hover td {
+  background: var(--surface-2);
+}
+
+.skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-row {
+  height: 36px;
 }
 </style>

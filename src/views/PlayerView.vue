@@ -20,7 +20,10 @@ const { isFavorite, toggle } = useFavorites()
 </script>
 
 <template>
-  <p v-if="loading" class="muted">Loading…</p>
+  <section v-if="loading" class="card profile skeleton-profile">
+    <div class="skeleton avatar" />
+    <div class="skeleton skeleton-line" style="width: 220px" />
+  </section>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať hráča: {{ error }}</div>
 
   <template v-else-if="player">
@@ -69,7 +72,17 @@ const { isFavorite, toggle } = useFavorites()
 .avatar {
   width: 64px;
   height: 64px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-profile.profile {
+  margin-bottom: var(--space-4);
+}
+
+.skeleton-line {
+  height: 20px;
+  border-radius: var(--radius-sm);
 }
 
 .tabs {
@@ -80,9 +93,10 @@ const { isFavorite, toggle } = useFavorites()
 
 .tabs a {
   color: var(--ink-2);
-  font-weight: 550;
+  font-weight: var(--weight-medium);
   padding: 0.35rem 0.8rem;
   border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
 
 .tabs a:hover {
@@ -90,7 +104,7 @@ const { isFavorite, toggle } = useFavorites()
 }
 
 .tabs a.active {
-  background: rgba(57, 135, 229, 0.15);
+  background: var(--accent-soft);
   color: var(--accent);
 }
 

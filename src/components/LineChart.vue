@@ -10,6 +10,7 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js'
+import { cssVar } from '../utils/theme'
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend)
 
@@ -27,8 +28,6 @@ const canvas = ref<HTMLCanvasElement | null>(null)
 let chart: Chart | null = null
 
 /* Čítať skutočné CSS premenné namiesto duplicitných hexov — jeden zdroj pravdy v tokens.css. */
-const style = getComputedStyle(document.documentElement)
-const cssVar = (name: string) => style.getPropertyValue(name).trim()
 const INK_2 = cssVar('--ink-2')
 const MUTED = cssVar('--muted')
 const GRID = cssVar('--grid')

@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <RouterLink :to="`/player/${accountId}`" class="card player-link">
+  <RouterLink :to="`/player/${accountId}`" class="card card--interactive player-link">
     <img :src="avatarfull" alt="" />
     <div>
       <div class="player-name">{{ personaname }}</div>
@@ -25,10 +25,6 @@ defineProps<{
   padding: 0.6rem 0.8rem;
   color: var(--ink);
   text-align: left;
-}
-
-.player-link:hover {
-  border-color: var(--accent);
 }
 
 .player-link img {

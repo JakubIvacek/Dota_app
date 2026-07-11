@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="320" viewBox="0 0 1440 320" role="img" aria-labelledby="title desc">
+  <rect width="1440" height="320" fill="#0b0c0e"/>
+  <title id="title">Dota Stats horizontal logo</title>
+  <desc id="desc">Original split green and red analytics icon with the Dota Stats wordmark.</desc>
+  <g transform="translate(26 24) scale(0.53125000)">
+    <g id="dota-stats-mark" fill="none" stroke-linejoin="miter" shape-rendering="geometricPrecision">
+    <path d="M 246 58 L 82 153 L 82 359 L 246 454"
+          stroke="#26b04c" stroke-width="42" stroke-linecap="butt"/>
+    <path d="M 266 58 L 430 153 L 430 359 L 266 454"
+          stroke="#e0524f" stroke-width="42" stroke-linecap="butt"/>
+    <g fill="#f2f3f5" stroke="none">
+      <path d="M148 307 H202 V368 H148 Z"/>
+      <path d="M229 249 H283 V368 H229 Z"/>
+      <path d="M310 181 H364 V368 H310 Z"/>
+    </g>
+  </g>
+  </g>
+  <rect x="332" y="68" width="3" height="184" rx="1.5" fill="#2b2e33"/>
+  <g id="wordmark" shape-rendering="geometricPrecision">
+    <path d="M637 0C1094 0 1373 287 1373 746C1373 1203 1091 1490 643 1490H111V0ZM419 259V1231H624C920 1231 1063 1059 1063 746C1063 432 922 259 621 259Z" transform="translate(390.000 214.000) scale(0.064453 -0.064453)" fill="#f2f3f5"/>
+    <path d="M765 -24C1166 -24 1468 270 1468 744C1468 1219 1166 1514 765 1514C364 1514 63 1219 63 744C63 272 364 -24 765 -24ZM765 248C535 248 373 428 373 744C373 1062 535 1242 765 1242C995 1242 1158 1062 1158 744C1158 428 995 248 765 248Z" transform="translate(488.555 214.000) scale(0.064453 -0.064453)" fill="#f2f3f5"/>
+    <path d="M45 1226H497V0H805V1226H1256V1490H45Z" transform="translate(593.232 214.000) scale(0.064453 -0.064453)" fill="#f2f3f5"/>
+    <path d="M9 0H341L449 325H1006L1110 0H1451L928 1490H532ZM532 571 583 725C631 877 677 1029 731 1214C784 1029 830 877 876 725L926 571Z" transform="translate(683.086 214.000) scale(0.064453 -0.064453)" fill="#f2f3f5"/>
+    <path d="M675 -24C1042 -24 1266 153 1266 440C1266 664 1125 795 807 862L664 893C481 933 407 984 407 1076C407 1185 514 1261 666 1261C826 1261 931 1174 942 1033H1230C1221 1333 1008 1514 665 1514C326 1514 99 1332 99 1061C99 848 242 711 537 647L694 613C883 572 961 516 961 420C961 304 848 229 677 229C486 229 371 325 367 489H70C70 165 293 -24 675 -24Z" transform="translate(821.252 214.000) scale(0.064453 -0.064453)" fill="#3987e5"/>
+    <path d="M45 1226H497V0H805V1226H1256V1490H45Z" transform="translate(913.361 214.000) scale(0.064453 -0.064453)" fill="#3987e5"/>
+    <path d="M9 0H341L449 325H1006L1110 0H1451L928 1490H532ZM532 571 583 725C631 877 677 1029 731 1214C784 1029 830 877 876 725L926 571Z" transform="translate(1003.215 214.000) scale(0.064453 -0.064453)" fill="#3987e5"/>
+    <path d="M45 1226H497V0H805V1226H1256V1490H45Z" transform="translate(1103.381 214.000) scale(0.064453 -0.064453)" fill="#3987e5"/>
+    <path d="M675 -24C1042 -24 1266 153 1266 440C1266 664 1125 795 807 862L664 893C481 933 407 984 407 1076C407 1185 514 1261 666 1261C826 1261 931 1174 942 1033H1230C1221 1333 1008 1514 665 1514C326 1514 99 1332 99 1061C99 848 242 711 537 647L694 613C883 572 961 516 961 420C961 304 848 229 677 229C486 229 371 325 367 489H70C70 165 293 -24 675 -24Z" transform="translate(1193.234 214.000) scale(0.064453 -0.064453)" fill="#3987e5"/>
+  </g>
+</svg>

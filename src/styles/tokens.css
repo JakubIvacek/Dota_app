@@ -18,6 +18,7 @@
   /* ---- Chart aids ---------------------------------------------------- */
   --grid: #24272d;
   --baseline: #343841;
+  --kda: #2fb88f; /* KDA trend line — deliberately distinct from win/loss green */
 
   /* ---- Brand / semantic ---------------------------------------------- */
   --accent: #3987e5;
@@ -45,7 +46,9 @@
      and page headlines, so big numbers read as a distinct register
      without pulling in a webfont dependency. */
   --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Display: distinct register for headlines + stat numbers, so the app doesn't
+     read as "system font everywhere". Falls back cleanly if the webfont is slow/blocked. */
+  --font-display: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --text-xs: 0.72rem;   /* eyebrow / table head */
   --text-sm: 0.82rem;   /* secondary body */
@@ -81,8 +84,22 @@
   --radius-lg: 12px; /* cards, panels */
   --radius-pill: 999px; /* badges, tab pills */
 
-  /* ---- Elevation --------------------------------------------------- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+  /* ---- Elevation -----------------------------------------------------
+     Shadows carry a faint cool tint (not pure black) so they read as part
+     of the same dark surface, not a generic drop-shadow bolted on. */
+  --shadow-sm: 0 1px 2px rgba(4, 6, 12, 0.45);
+  --shadow-md: 0 1px 2px rgba(4, 6, 12, 0.45), 0 8px 24px -12px rgba(4, 6, 16, 0.65);
+  --shadow-lg: 0 4px 8px rgba(4, 6, 12, 0.5), 0 24px 56px -20px rgba(4, 6, 16, 0.75);
+  --shadow-glow-accent: 0 0 0 1px rgba(57, 135, 229, 0.25), 0 12px 32px -12px rgba(57, 135, 229, 0.35);
+  --shadow-glow-radiant: 0 0 0 1px rgba(38, 176, 76, 0.22), 0 12px 32px -12px rgba(38, 176, 76, 0.3);
+  --shadow-glow-dire: 0 0 0 1px rgba(224, 82, 79, 0.22), 0 12px 32px -12px rgba(224, 82, 79, 0.3);
+
+  /* ---- Motion --------------------------------------------------------- */
+  --duration-fast: 140ms;
+  --duration-normal: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- Z-index scale ---------------------------------------------------- */
+  --z-sticky: 10;
+  --z-overlay: 20;
 }

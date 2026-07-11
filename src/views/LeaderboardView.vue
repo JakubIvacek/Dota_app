@@ -50,7 +50,9 @@ function flag(country?: string): string {
     </nav>
   </div>
 
-  <p v-if="loading" class="muted">Loading…</p>
+  <section v-if="loading" class="card skeleton-table">
+    <div v-for="i in 12" :key="i" class="skeleton skeleton-row" />
+  </section>
   <div v-else-if="error" class="error-box">Nepodarilo sa načítať leaderboard: {{ error }}</div>
 
   <template v-else-if="data">
@@ -69,7 +71,7 @@ function flag(country?: string): string {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="p in rows" :key="p.rank">
+          <tr v-for="p in rows" :key="p.rank" class="lb-row">
             <td class="num rank">{{ p.rank }}</td>
             <td>
               <RouterLink class="player" :to="{ name: 'search', query: { q: p.name } }">
@@ -112,10 +114,11 @@ function flag(country?: string): string {
   border: none;
   color: var(--ink-2);
   font: inherit;
-  font-weight: 550;
+  font-weight: var(--weight-medium);
   padding: 0.35rem 0.8rem;
   border-radius: var(--radius-md);
   cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
 
 .tabs button:hover {
@@ -123,8 +126,26 @@ function flag(country?: string): string {
 }
 
 .tabs button.active {
-  background: rgba(57, 135, 229, 0.15);
+  background: var(--accent-soft);
   color: var(--accent);
+}
+
+.lb-row {
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.lb-row:hover td {
+  background: var(--surface-2);
+}
+
+.skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-row {
+  height: 34px;
 }
 
 .note {

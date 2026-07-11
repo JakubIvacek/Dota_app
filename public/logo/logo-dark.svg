@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <rect width="512" height="512" fill="#0b0c0e"/>
+  <title id="title">Dota Stats icon</title>
+  <desc id="desc">Original split green and red hexagonal analytics mark with three ascending stat bars.</desc>
+  <g id="dota-stats-mark" fill="none" stroke-linejoin="miter" shape-rendering="geometricPrecision">
+    <path d="M 246 58 L 82 153 L 82 359 L 246 454"
+          stroke="#26b04c" stroke-width="42" stroke-linecap="butt"/>
+    <path d="M 266 58 L 430 153 L 430 359 L 266 454"
+          stroke="#e0524f" stroke-width="42" stroke-linecap="butt"/>
+    <g fill="#f2f3f5" stroke="none">
+      <path d="M148 307 H202 V368 H148 Z"/>
+      <path d="M229 249 H283 V368 H229 Z"/>
+      <path d="M310 181 H364 V368 H310 Z"/>
+    </g>
+  </g>
+</svg>

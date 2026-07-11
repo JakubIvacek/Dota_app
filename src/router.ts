@@ -16,5 +16,7 @@ export const router = createRouter({
       ],
     },
     { path: '/matches/:id', name: 'match-detail', component: () => import('./views/MatchDetailView.vue') },
+    { path: '/terms', name: 'terms', component: () => import('./views/TermsView.vue') },
+    { path: '/privacy', name: 'privacy', component: () => import('./views/PrivacyView.vue') },
   ],
 })

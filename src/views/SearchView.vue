@@ -14,7 +14,9 @@ const { data: results, loading, error } = useAsync(() =>
 <template>
   <h1>Výsledky pre „{{ route.query.q }}“</h1>
 
-  <p v-if="loading" class="muted">Searching…</p>
+  <section v-if="loading" class="card skeleton-results">
+    <div v-for="i in 6" :key="i" class="skeleton skeleton-row" />
+  </section>
   <div v-else-if="error" class="error-box">Search zlyhal: {{ error }}</div>
   <p v-else-if="!results?.length" class="muted">Žiadny hráč sa nenašiel.</p>
 
@@ -47,10 +49,24 @@ const { data: results, loading, error } = useAsync(() =>
   padding: 0.5rem 0.8rem;
   border-radius: var(--radius-md);
   color: var(--ink);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
-.result:hover {
+.result:hover,
+.result:focus-visible {
   background: var(--surface-2);
+}
+
+.skeleton-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0.4rem;
+}
+
+.skeleton-row {
+  height: 56px;
+  border-radius: var(--radius-md);
 }
 
 .result img {
