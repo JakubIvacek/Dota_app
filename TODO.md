@@ -6,13 +6,6 @@ documented in [CHANGELOG.md](./CHANGELOG.md), not here.
 
 ## Backlog
 
-- **Vercel deploy** — frontend-only, so free (`vercel.json` or import the
-  repo via the Vercel dashboard, build command `npm run build`, output
-  `dist/`). Blocker: the `/valve` proxy in `vite.config.ts` (Valve's
-  leaderboard webapi doesn't send CORS headers) only works in the dev/preview
-  server — production needs a Vercel rewrite or serverless function to
-  `www.dota2.com/webapi`, otherwise the Leaderboards page breaks on CORS.
-  For now the app only runs locally.
 - **Real-time match tracking** (GSI, websockets) — nice to have.
 - **Custom replay parser** — only if the app ever diverges from the OpenDota
   API.

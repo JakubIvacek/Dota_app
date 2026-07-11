@@ -15,6 +15,15 @@ a dated version section when released.
 
 ## [Unreleased]
 
+### Added
+
+- Live deploy on Vercel (<https://dota-stats-by-keno.vercel.app/>): `vercel.json`
+  adds a SPA rewrite fallback (client-side routes like `/player/:accountId`
+  now resolve on direct load/refresh, not just in-app navigation) and a
+  `/valve` rewrite proxying `www.dota2.com/webapi` for production, replacing
+  the dev-only Vite proxy from `vite.config.ts` so Leaderboards works in prod.
+- `LICENSE` (MIT).
+
 ## [0.2.0] — 2026-07-11
 
 ### Added
