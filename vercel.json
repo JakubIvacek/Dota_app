@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/valve/:path*", "destination": "https://www.dota2.com/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

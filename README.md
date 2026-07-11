@@ -1,137 +1,102 @@
 # Dota Stats App
 
-Osobný Dota 2 štatistický nástroj inšpirovaný Dotabuff/OpenDota. Frontend-only —
-**rozhodnutie z 2026-07-03: žiadny vlastný backend**, cachovanie rieši in-memory
-cache + localStorage priamo v appke.
+A personal Dota 2 stats tool inspired by Dotabuff/OpenDota. Frontend-only —
+**decision from 2026-07-03: no custom backend**, caching is handled by an
+in-memory cache + localStorage directly in the app.
 
-Zoznam zmien: [CHANGELOG.md](./CHANGELOG.md).
+Changelog: [CHANGELOG.md](./CHANGELOG.md). Unfinished/planned work:
+[TODO.md](./TODO.md). License: [MIT](./LICENSE).
 
-## Cieľ
+## Goal
 
-Prehľadné zobrazenie vlastných aj cudzích Dota 2 štatistík — matche, winrate podľa
-hrdinov, detail konkrétneho matchu (itemizácia, gold/XP graf), trendy v čase.
-Postavené nad verejným [OpenDota API](https://docs.opendota.com/), takže netreba
-riešiť vlastný replay parser.
+A clear view of your own and other players' Dota 2 stats — matches, winrate
+by hero, match detail (itemization, gold/XP graph), trends over time. Built
+on top of the public [OpenDota API](https://docs.opendota.com/), so there's
+no need to build a custom replay parser.
 
-## Spustenie
+## Features
+
+- **Dashboard** — winrate, rolling-window winrate graph (e.g. a 20-match
+  window, so it doesn't swing wildly on a small sample), top heroes,
+  GitHub-style activity heatmap for the last year, KDA/GPM/XPM trends,
+  winrate by game mode (All Pick vs Turbo vs Ranked…)
+- **Matches list** — infinite scroll (OpenDota `offset` pagination), filter
+  by hero (and mode/result)
+- **Match detail** — scoreboard, itemization, gold/XP graph from
+  `radiant_gold_adv`; opening an unparsed match (<30 days old) automatically
+  requests a parse and the graph fills in via polling; older matches get an
+  explanation that the replay has expired; player names are clickable and
+  link to their profiles
+- **Hero stats** — sortable winrate/games-per-hero table
+- **Guest mode** — `/player/:accountId` routes with Overview/Matches/Heroes
+  tabs, search by name or account ID, no login and no backend required
+- **Home page** — large search box, "My profile" card, recently viewed
+  profiles and favorite players (star toggle on a profile, both stored in
+  localStorage)
+- **Leaderboards** — official Valve division rankings (EU/Americas/SEA/China)
+  via `www.dota2.com/webapi`; the endpoint doesn't send CORS headers, so
+  dev/preview routes it through a Vite proxy at `/valve` (`vite.config.ts`).
+  Valve doesn't expose account IDs, so clicking a player name goes to
+  OpenDota search instead
+- **Multi-language support** — `vue-i18n`, 10 languages (English default:
+  en, sk, ru, uk, de, pt, es, zh, fil, tr), a switcher in the topbar, and a
+  persisted choice (`dotastats:locale`); dates/relative time follow the
+  active locale via `Intl`
+- **Resilience** — OpenDota requests have a client-side timeout (12s), plus
+  a "Refresh from OpenDota" action for players OpenDota hasn't indexed yet
+
+## Getting started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Vlastný profil: skopíruj `.env.example` do `.env.local` a nastav `VITE_ACCOUNT_ID`
-(Friend Code z Dota profilu). Bez neho appka funguje v guest móde cez search.
+For your own profile: copy `.env.example` to `.env.local` and set
+`VITE_ACCOUNT_ID` (the Friend Code from your Dota profile). Without it the
+app runs in guest mode via search.
 
-## Roadmap
-
-### ✅ Fáza 1 — MVP (hotové 3. 7. 2026)
-
-- Vue 3 + Vite + TypeScript, Chart.js, vue-router
-- Priame volania na OpenDota API, in-memory cache s TTL (rate limit ~60 req/min),
-  hero/item konštanty v localStorage
-- Obrazovky: **Dashboard** (winrate, graf v čase, top hrdinovia), **Matches list**,
-  **Match detail** (scoreboard, itemizácia, gold/XP graf z `radiant_gold_adv`),
-  **Hero stats** (triediteľná tabuľka)
-
-### ✅ Fáza 2 — Guest mód (hotové 3. 7. 2026, bez backendu)
-
-- `/player/:accountId` routy s tabmi Overview / Matches / Heroes
-- Search podľa mena (OpenDota `/search`) aj číselného account ID
-- Home page: veľký search, karta „Môj profil“, nedávno pozreté profily (localStorage)
-- Klikateľné mená hráčov v match detaile → ich profily; zvýraznenie riadku sleduje
-  profil, z ktorého bol match otvorený
-- ~~Spring Boot backend na cachovanie~~ — zrušené, frontend cache stačí
-
-### ~~Fáza 3 — Účty~~ (zrušené)
-
-Email/heslo, Steam OpenID, uložené preferencie — padlo spolu s backendom.
-Obľúbené veci sa riešia v localStorage (Fáza 4). Keby sa appka niekedy stala
-verejnou multi-user službou, tu je pôvodná úvaha: Steam OpenID je bezpečný
-(redirect na `steamcommunity.com`), ale nie ako jediná možnosť.
-
-### ✅ Fáza 3 — Hlbšie štatistiky (hotové 3. 7. 2026)
-
-- Filter matchov podľa hrdinu (a prípadne módu/výsledku)
-- Rolling-window winrate graf (napr. okno 20 matchov) namiesto kumulatívneho —
-  kumulatívny na začiatku divoko skáče pri malej vzorke
-- KDA / GPM / XPM trendy v čase
-- Winrate podľa game módu (All Pick vs Turbo vs Ranked…)
-
-### ✅ Fáza 4 — Obľúbení hráči (hotové 3. 7. 2026)
-
-- Hviezdička na profile hráča (toggle)
-- Sekcia „Obľúbení“ na home page nad „Nedávno pozreté“
-- localStorage, rovnaký princíp ako história (`useRecentPlayers` → `useFavorites`)
-
-### ✅ Vylepšenia mimo fáz (3. 7. 2026)
-
-- **Auto-parse replayov** — otvorenie nesparsovaného matchu (<30 dní) samo pošle
-  `POST /request/{match_id}` a graf sa doplní poll-om; staršie matche dostanú
-  vysvetlenie, že replay expiroval
-- **Dizajn pass** — vizuálny jazyk (tokeny, brand mark, tóny stat kariet),
-  winrate bary v Heroes, Radiant/Dire identita v match detaile; neskôr
-  systemizované do `src/styles/tokens.css` (type scale, spacing, radius,
-  elevation), `WinrateBar` a `TeamGlyph` extrahované ako zdieľané komponenty,
-  opravená farebná nekonzistencia v `LineChart`
-- **Infinite scroll** v zozname matchov (OpenDota `offset`)
-- **Activity heatmapa** (GitHub-style, posledný rok) na Overview + nové poradie sekcií
-- **Leaderboards** — oficiálne Valve rebríčky (EU/Americas/SEA/China) cez
-  `www.dota2.com/webapi`; endpoint nemá CORS, rieši to Vite proxy `/valve`
-  (pri deployi treba proxy pravidlo hostingu). Valve nedáva account ID —
-  klik na meno hráča ide na OpenDota search
-
-### 🔜 Fáza 5 — 3D hero modely (stretch goal)
-
-Namiesto 2D ikon v match detaile rotovateľný statický 3D model hrdinu
-(jedna default póza, bez animácií — žiadny skeleton/keyframes, len zamrznutý mesh).
-
-**Extrakcia (jednorazovo, offline, nie za behu appky):**
-1. Nástroj: [Source 2 Viewer](https://github.com/ValveResourceFormat/ValveResourceFormat)
-   (open-source), spustiť nad lokálnou inštaláciou Dota 2 (`game/dota/pak01_dir.vpk`)
-   — **nie** Workshop súbory, tie obsahujú len cosmetics, nie základné telá hrdinov
-2. Exportovať mesh v default/idle póze priamo ako statický `.glb` (Source 2 Viewer
-   toto vie natívne, netreba riešiť animation retargeting)
-3. Skontrolovať textúry/materiály — niektoré Source 2 material setupy sa nemapujú
-   1:1 na glTF PBR, môže byť treba ručne doladiť v Blenderi alebo shader kóde
-
-**Ukladanie:**
-- Statické `.glb` súbory (rádovo 1–5 MB/hrdina), `/public/models/{hero_id}.glb`;
-  keby ich bolo veľa, presunúť mimo build (napr. Supabase Storage)
-
-**Frontend:**
-- Three.js, `GLTFLoader` podľa `hero_id`, `OrbitControls`, ambient + directional light
-- Render do `<canvas>` v match detail komponente
-
-**Postup:** proof of concept na 3–5 najhranejších hrdinoch, overiť celý pipeline
-(extrakcia → glTF → loader → rotovanie), až potom škálovať. Legálne šedá zóna pre
-privátny projekt — nehostovať Valve assety verejne, radšej poskytnúť extrakčný skript.
+Other commands: `npm run build` (typecheck via `vue-tsc -b` + Vite build),
+`npm run preview` (local preview of the build).
 
 ## Tech stack
 
-- **Frontend:** Vue 3 + Vite + TypeScript, Chart.js na grafy
-- **Dáta:** OpenDota API (public), Steam CDN pre hero/item ikony
-- **Perzistencia:** localStorage (história, neskôr obľúbení) — žiadna DB, žiadny backend
+- **Frontend:** Vue 3 + Vite + TypeScript, Chart.js for charts, vue-router,
+  vue-i18n
+- **Data:** OpenDota API (public), Steam CDN for hero/item icons, Valve
+  webapi for leaderboards
+- **Persistence:** localStorage (history, favorites, locale) — no database,
+  no backend
 
-## Kľúčové OpenDota endpointy
+## Structure
 
-- `GET /players/{account_id}` — profil, rank
-- `GET /players/{account_id}/matches` — posledné matche
+- `src/views/` — pages (Dashboard, Matches, MatchDetail, Heroes, Player,
+  Search, Home, Leaderboard, Terms, Privacy)
+- `src/components/` — shared components (`WinrateBar`, `TeamGlyph`,
+  `LineChart`, `ActivityHeatmap`, `HeroIcon`, `PlayerLinkCard`, `SearchBox`,
+  `StatCard`)
+- `src/composables/` — `useAsync`, `useFavorites`, `useRecentPlayers`,
+  `useAppLocale`
+- `src/api/opendota.ts` — all OpenDota API calls
+- `src/i18n/` — `vue-i18n` config and translations (`locales/*.ts`)
+- `src/styles/tokens.css` — design tokens (type scale, spacing, radius,
+  elevation)
+- `src/utils/` — formatting (`format.ts`), stats (`stats.ts`), theme
+  (`theme.ts`)
+
+## Key OpenDota endpoints
+
+- `GET /players/{account_id}` — profile, rank
+- `GET /players/{account_id}/matches` — recent matches
 - `GET /players/{account_id}/heroes` — winrate/games per hero
 - `GET /players/{account_id}/wl` — win/loss split
-- `GET /matches/{match_id}` — detail matchu (items, gold/XP graf cez čas)
-- `GET /search?q=` — hľadanie hráčov podľa mena (pozor, vie trvať aj ~7 s)
-- `POST /request/{match_id}` — vyžiadanie parse replayu; appka ho posiela
-  automaticky pri otvorení nesparsovaného matchu (<30 dní) a graf si dotiahne
-  poll-om každú minútu
+- `GET /matches/{match_id}` — match detail (items, gold/XP graph over time)
+- `GET /search?q=` — search players by name (can take up to ~7s)
+- `POST /request/{match_id}` — request a replay parse; the app sends this
+  automatically when opening an unparsed match (<30 days old) and polls for
+  the chart data every minute
 
-**Poznámka:** aby boli vidieť detailné dáta matchu (items cez čas, gold/xp graf),
-treba mať v Dota klientovi zapnuté `Settings → Advanced Options → Expose Public
-Match Data` — inak sa replay neparsuje a API vráti len základné info.
-
-## Otvorené otázky / na doriešenie neskôr
-
-- Deploy na web (GitHub Pages/Netlify/Vercel) — frontend-only, takže zadarmo;
-  zatiaľ beží len lokálne
-- Real-time match tracking (GSI, websockety) — nice to have
-- Vlastný replay parser — len ak by sa appka niekedy odklonila od OpenDota
+**Note:** to see detailed match data (items over time, gold/XP graph), you
+need `Settings → Advanced Options → Expose Public Match Data` enabled in the
+Dota client — otherwise the replay never gets parsed and the API only
+returns basic info.
