@@ -45,7 +45,7 @@ const { data: results, loading, error } = useAsync(() =>
   align-items: center;
   gap: 0.8rem;
   padding: 0.5rem 0.8rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--ink);
 }
 
@@ -56,7 +56,7 @@ const { data: results, loading, error } = useAsync(() =>
 .result img {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .name {

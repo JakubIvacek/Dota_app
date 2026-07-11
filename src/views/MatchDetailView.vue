@@ -15,6 +15,7 @@ import { useAsync } from '../composables/useAsync'
 import { formatDate, formatDuration } from '../utils/format'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
+import TeamGlyph from '../components/TeamGlyph.vue'
 import type { MatchPlayer } from '../types/opendota'
 
 const route = useRoute()
@@ -141,9 +142,13 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
   <template v-else-if="data">
     <section class="card header">
       <div class="score">
-        <span class="side radiant" :class="{ loser: !data.match.radiant_win }">Radiant {{ data.match.radiant_score }}</span>
+        <span class="side radiant" :class="{ loser: !data.match.radiant_win }">
+          <TeamGlyph side="radiant" />Radiant {{ data.match.radiant_score }}
+        </span>
         <span class="muted">:</span>
-        <span class="side dire" :class="{ loser: data.match.radiant_win }">{{ data.match.dire_score }} Dire</span>
+        <span class="side dire" :class="{ loser: data.match.radiant_win }">
+          {{ data.match.dire_score }} Dire<TeamGlyph side="dire" />
+        </span>
       </div>
       <div class="muted">
         {{ gameModeName(data.match.game_mode) }} ·
@@ -158,6 +163,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
         { name: 'Dire', players: dire, won: !data.match.radiant_win },
       ]" :key="team.name" class="card team" :class="team.name.toLowerCase()">
       <h2 class="team-name">
+        <TeamGlyph :side="team.name.toLowerCase() as 'radiant' | 'dire'" />
         {{ team.name }}
         <span v-if="team.won" class="badge win">Victory</span>
       </h2>
@@ -245,30 +251,43 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 
 <style scoped>
 .header {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   text-align: center;
 }
 
 .score {
-  font-size: 1.5rem;
-  font-weight: 750;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
   display: flex;
   justify-content: center;
   gap: 0.75rem;
 }
 
+.score .side {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
 .score .side.radiant { color: var(--radiant); }
-.score .side.dire { color: var(--dire); }
+.score .side.dire { color: var(--dire); flex-direction: row-reverse; }
 .score .side.loser { opacity: 0.5; }
 
 .team {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   border-top: 2px solid transparent;
 }
 
-/* Dota konvencia: Radiant zelená, Dire červená. */
-.team.radiant { border-top-color: var(--radiant); }
-.team.dire { border-top-color: var(--dire); }
+/* Dota konvencia: Radiant zelená, Dire červená — plus jemný farebný wash panelu,
+   nech identita tímu nesedí len na jednom pixelovom pruhu. */
+.team.radiant {
+  border-top-color: var(--radiant);
+  background: var(--radiant-wash), linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%), var(--surface);
+}
+.team.dire {
+  border-top-color: var(--dire);
+  background: var(--dire-wash), linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%), var(--surface);
+}
 
 .team.radiant .team-name { color: var(--radiant); }
 .team.dire .team-name { color: var(--dire); }
@@ -284,7 +303,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 }
 
 tr.me td {
-  background: rgba(57, 135, 229, 0.08);
+  background: var(--accent-soft);
 }
 
 .name {
@@ -311,19 +330,19 @@ tr.me td {
   width: 30px;
   height: 22px;
   object-fit: cover;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   display: block;
 }
 
 .retry {
   background: var(--accent);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: #fff;
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   padding: 0.2rem 0.7rem;
-  margin-left: 0.5rem;
+  margin-left: var(--space-2);
   cursor: pointer;
 }
 </style>

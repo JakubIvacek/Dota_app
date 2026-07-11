@@ -41,7 +41,7 @@ function submit() {
 input {
   background: var(--page);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--ink);
   padding: 0.4rem 0.7rem;
   font: inherit;
@@ -56,7 +56,7 @@ input:focus {
 button {
   background: var(--accent);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: #fff;
   font: inherit;
   font-weight: 600;

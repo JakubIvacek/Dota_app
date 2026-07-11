@@ -68,7 +68,10 @@ verejnou multi-user službou, tu je pôvodná úvaha: Steam OpenID je bezpečný
   `POST /request/{match_id}` a graf sa doplní poll-om; staršie matche dostanú
   vysvetlenie, že replay expiroval
 - **Dizajn pass** — vizuálny jazyk (tokeny, brand mark, tóny stat kariet),
-  winrate bary v Heroes, Radiant/Dire identita v match detaile
+  winrate bary v Heroes, Radiant/Dire identita v match detaile; neskôr
+  systemizované do `src/styles/tokens.css` (type scale, spacing, radius,
+  elevation), `WinrateBar` a `TeamGlyph` extrahované ako zdieľané komponenty,
+  opravená farebná nekonzistencia v `LineChart`
 - **Infinite scroll** v zozname matchov (OpenDota `offset`)
 - **Activity heatmapa** (GitHub-style, posledný rok) na Overview + nové poradie sekcií
 - **Leaderboards** — oficiálne Valve rebríčky (EU/Americas/SEA/China) cez

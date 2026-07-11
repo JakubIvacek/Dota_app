@@ -201,7 +201,7 @@ function openMatch(matchId: number) {
 .filters select {
   background: var(--page);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--ink);
   font: inherit;
   text-transform: none;
@@ -226,7 +226,7 @@ function openMatch(matchId: number) {
 .load-more {
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--ink-2);
   font: inherit;
   font-weight: 600;

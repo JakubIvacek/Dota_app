@@ -1,25 +1,4 @@
-/* Dark-only theme — chart tokeny podľa validovanej dataviz palety,
-   surface vrstvy mierne do modra nech pôsobia menej "prašivo". */
-:root {
-  --page: #0b0c0e;
-  --surface: #15171b;
-  --surface-2: #1d2026;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --ink: #f2f3f5;
-  --ink-2: #c4c7cd;
-  --muted: #8b8f97;
-  --grid: #24272d;
-  --baseline: #343841;
-  --accent: #3987e5;
-  --accent-soft: rgba(57, 135, 229, 0.14);
-  --gold: #c98500;
-  --win: #26b04c;
-  --loss: #e0524f;
-  --radiant: #26b04c;
-  --dire: #e0524f;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
-}
+@import './styles/tokens.css';
 
 * {
   box-sizing: border-box;
@@ -35,7 +14,7 @@ body {
   background: radial-gradient(1100px 500px at 50% -120px, rgba(57, 135, 229, 0.07), transparent 65%);
   background-repeat: no-repeat;
   color: var(--ink);
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -46,13 +25,14 @@ a {
 }
 
 h1, h2, h3 {
-  margin: 0 0 0.5rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
 }
 
-h1 { font-size: 1.4rem; }
-h2 { font-size: 1.05rem; }
+h1 { font-size: var(--text-lg); }
+h2 { font-size: var(--text-md); }
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -62,18 +42,27 @@ h2 { font-size: 1.05rem; }
 .container {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 1.25rem;
+  padding: var(--space-5);
 }
 
 .card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%), var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-md);
 }
 
 .muted { color: var(--muted); }
+
+/* Eyebrow — small uppercase label, used sparingly (group headers, table heads). */
+.eyebrow {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--muted);
+  font-weight: var(--weight-semibold);
+}
 
 /* Tabuľky (matches, heroes, scoreboard) */
 table.data {
@@ -84,18 +73,18 @@ table.data {
 
 table.data th {
   text-align: left;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--tracking-eyebrow);
   color: var(--muted);
-  font-weight: 600;
-  padding: 0.5rem 0.65rem;
+  font-weight: var(--weight-semibold);
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--baseline);
   white-space: nowrap;
 }
 
 table.data td {
-  padding: 0.55rem 0.65rem;
+  padding: 0.55rem var(--space-3);
   border-bottom: 1px solid var(--grid);
   vertical-align: middle;
 }
@@ -123,38 +112,38 @@ tr.clickable:hover td {
   display: inline-block;
   min-width: 2.4rem;
   text-align: center;
-  padding: 0.14rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  padding: 0.14rem var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
 }
 
 .badge.win {
-  color: #5fd785;
-  background: rgba(38, 176, 76, 0.13);
+  color: var(--radiant-strong);
+  background: var(--win-soft);
   border: 1px solid rgba(38, 176, 76, 0.35);
 }
 
 .badge.loss {
-  color: #f08c8a;
-  background: rgba(224, 82, 79, 0.12);
+  color: var(--dire-strong);
+  background: var(--loss-soft);
   border: 1px solid rgba(224, 82, 79, 0.32);
 }
 
 .status-note {
   border-left: 3px solid var(--gold);
-  padding: 0.6rem 0.9rem;
+  padding: var(--space-3) var(--space-4);
   background: var(--surface);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   color: var(--ink-2);
 }
 
 .error-box {
   border-left: 3px solid var(--loss);
-  padding: 0.6rem 0.9rem;
+  padding: var(--space-3) var(--space-4);
   background: var(--surface);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   color: var(--ink-2);
 }

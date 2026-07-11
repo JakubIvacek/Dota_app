@@ -19,6 +19,7 @@ import StatCard from '../components/StatCard.vue'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import ActivityHeatmap from '../components/ActivityHeatmap.vue'
+import WinrateBar from '../components/WinrateBar.vue'
 
 const route = useRoute()
 
@@ -175,7 +176,7 @@ const recentWinrate = computed(() => {
           <tr v-for="m in modeStats" :key="m.mode">
             <td>{{ gameModeName(m.mode) }}</td>
             <td class="num">{{ m.games }}</td>
-            <td class="num">{{ winratePct(m.win, m.games) }} %</td>
+            <td><WinrateBar :win="m.win" :games="m.games" /></td>
           </tr>
         </tbody>
       </table>

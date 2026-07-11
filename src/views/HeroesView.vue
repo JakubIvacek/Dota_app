@@ -3,8 +3,9 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { getHeroMap, getPlayerHeroes } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
-import { timeAgo, winratePct } from '../utils/format'
+import { timeAgo } from '../utils/format'
 import HeroIcon from '../components/HeroIcon.vue'
+import WinrateBar from '../components/WinrateBar.vue'
 
 const route = useRoute()
 
@@ -68,18 +69,7 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
           <td><HeroIcon :hero="h.hero" /></td>
           <td class="num">{{ h.games }}</td>
           <td class="num">{{ h.win }}</td>
-          <td>
-            <div class="wr">
-              <span class="wr-value">{{ winratePct(h.win, h.games) }} %</span>
-              <span class="wr-track">
-                <span
-                  class="wr-fill"
-                  :class="h.winrate >= 0.5 ? 'good' : 'bad'"
-                  :style="{ width: `${h.winrate * 100}%` }"
-                />
-              </span>
-            </div>
-          </td>
+          <td><WinrateBar :win="h.win" :games="h.games" /></td>
           <td class="muted">{{ h.last_played ? timeAgo(h.last_played) : '—' }}</td>
         </tr>
       </tbody>
@@ -96,33 +86,4 @@ th.sortable {
 th.sortable:hover {
   color: var(--ink-2);
 }
-
-/* Winrate ako číslo + tichý bar — na 100+ riadkoch sa percentá inak nedajú skenovať. */
-.wr {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.wr-value {
-  min-width: 3.6rem;
-  text-align: right;
-}
-
-.wr-track {
-  width: 72px;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--grid);
-  overflow: hidden;
-}
-
-.wr-fill {
-  display: block;
-  height: 100%;
-  border-radius: 3px;
-}
-
-.wr-fill.good { background: var(--win); }
-.wr-fill.bad { background: rgba(224, 82, 79, 0.75); }
 </style>

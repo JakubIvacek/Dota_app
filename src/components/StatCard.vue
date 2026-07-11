@@ -21,20 +21,22 @@ withDefaults(
 
 <style scoped>
 .stat {
-  padding: 0.85rem 1.1rem;
+  padding: var(--space-3) var(--space-5);
 }
 
 .label {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--tracking-eyebrow);
   color: var(--muted);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .value {
-  font-size: 1.7rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
 }
@@ -44,7 +46,7 @@ withDefaults(
 .value.accent { color: var(--accent); }
 
 .sub {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--ink-2);
 }
 </style>

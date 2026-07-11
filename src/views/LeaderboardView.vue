@@ -114,7 +114,7 @@ function flag(country?: string): string {
   font: inherit;
   font-weight: 550;
   padding: 0.35rem 0.8rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
@@ -166,7 +166,7 @@ function flag(country?: string): string {
   margin-top: 0.5rem;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--ink-2);
   font: inherit;
   font-weight: 600;

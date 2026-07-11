@@ -1,0 +1,88 @@
+/* Design tokens — single source of truth for color, type, space, radius,
+   elevation. Everything else in the app should reference these, never
+   hardcode a hex/px value that already exists here. */
+:root {
+  /* ---- Surfaces ---------------------------------------------------- */
+  --page: #0b0c0e;
+  --surface: #15171b;
+  --surface-2: #1d2026;
+  --surface-3: #262a32; /* hover / active state on top of surface-2 */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* ---- Ink (text) ---------------------------------------------------- */
+  --ink: #f2f3f5;
+  --ink-2: #c4c7cd;
+  --muted: #8b8f97;
+
+  /* ---- Chart aids ---------------------------------------------------- */
+  --grid: #24272d;
+  --baseline: #343841;
+
+  /* ---- Brand / semantic ---------------------------------------------- */
+  --accent: #3987e5;
+  --accent-soft: rgba(57, 135, 229, 0.14);
+  --gold: #c98500;
+  --gold-soft: rgba(201, 133, 0, 0.14);
+  --win: #26b04c;
+  --win-soft: rgba(38, 176, 76, 0.13);
+  --loss: #e0524f;
+  --loss-soft: rgba(224, 82, 79, 0.12);
+
+  /* ---- Radiant / Dire — team identity, not just win/loss reskinned --- */
+  --radiant: #26b04c;
+  --radiant-strong: #5fd785;
+  --radiant-soft: rgba(38, 176, 76, 0.12);
+  --radiant-wash: linear-gradient(180deg, rgba(38, 176, 76, 0.08), transparent 60%);
+  --dire: #e0524f;
+  --dire-strong: #f08c8a;
+  --dire-soft: rgba(224, 82, 79, 0.12);
+  --dire-wash: linear-gradient(180deg, rgba(224, 82, 79, 0.08), transparent 60%);
+
+  /* ---- Type scale -----------------------------------------------------
+     Body/UI: system stack (tables, labels, nav — optimized for density).
+     Display: same stack but heavier + tighter, reserved for stat numbers
+     and page headlines, so big numbers read as a distinct register
+     without pulling in a webfont dependency. */
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-xs: 0.72rem;   /* eyebrow / table head */
+  --text-sm: 0.82rem;   /* secondary body */
+  --text-base: 0.94rem; /* body */
+  --text-md: 1.05rem;   /* section head */
+  --text-lg: 1.4rem;    /* page head */
+  --text-xl: 1.7rem;    /* stat card value */
+  --text-2xl: 2.4rem;   /* hero number / home headline */
+
+  --weight-body: 400;
+  --weight-medium: 550;
+  --weight-semibold: 650;
+  --weight-bold: 750;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-eyebrow: 0.07em;
+
+  /* ---- Spacing scale (4px base) ---------------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+
+  /* ---- Radius — one scale, applied by role, never mixed freely -------- */
+  --radius-sm: 6px;  /* inputs, chips, item icons */
+  --radius-md: 8px;  /* buttons, badges-as-rects, nested controls */
+  --radius-lg: 12px; /* cards, panels */
+  --radius-pill: 999px; /* badges, tab pills */
+
+  /* ---- Elevation --------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+}

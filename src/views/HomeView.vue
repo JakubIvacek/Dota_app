@@ -78,14 +78,15 @@ const shownRecents = computed(() =>
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   padding-top: 9vh;
   text-align: center;
 }
 
 .landing h1 {
-  font-size: 2.4rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-tight);
   background: linear-gradient(180deg, #fff, #b9bec7);
   -webkit-background-clip: text;
   background-clip: text;
@@ -95,8 +96,8 @@ const shownRecents = computed(() =>
 .me {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
   min-width: min(420px, 90vw);
   color: var(--ink);
   text-align: left;
@@ -109,19 +110,20 @@ const shownRecents = computed(() =>
 .me img {
   width: 56px;
   height: 56px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
 .me-label {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-wide);
   color: var(--muted);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .me-name {
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
   font-size: 1.15rem;
 }
 
@@ -132,21 +134,21 @@ const shownRecents = computed(() =>
 }
 
 .group {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   width: 100%;
   max-width: 720px;
 }
 
 .group h2 {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-wide);
   color: var(--muted);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.6rem;
+  gap: var(--space-3);
 }
 </style>

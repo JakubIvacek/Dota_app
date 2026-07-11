@@ -82,7 +82,7 @@ const { isFavorite, toggle } = useFavorites()
   color: var(--ink-2);
   font-weight: 550;
   padding: 0.35rem 0.8rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .tabs a:hover {

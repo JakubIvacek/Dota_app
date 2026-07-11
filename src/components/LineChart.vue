@@ -26,10 +26,13 @@ const props = withDefaults(
 const canvas = ref<HTMLCanvasElement | null>(null)
 let chart: Chart | null = null
 
-const INK_2 = '#c3c2b7'
-const MUTED = '#898781'
-const GRID = '#2c2c2a'
-const BASELINE = '#55554f'
+/* Čítať skutočné CSS premenné namiesto duplicitných hexov — jeden zdroj pravdy v tokens.css. */
+const style = getComputedStyle(document.documentElement)
+const cssVar = (name: string) => style.getPropertyValue(name).trim()
+const INK_2 = cssVar('--ink-2')
+const MUTED = cssVar('--muted')
+const GRID = cssVar('--grid')
+const BASELINE = cssVar('--baseline')
 
 function buildData() {
   return {
