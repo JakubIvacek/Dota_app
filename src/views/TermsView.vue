@@ -1,45 +1,44 @@
+<script setup lang="ts">
+import { useAppLocale } from '../composables/useAppLocale'
+
+const EFFECTIVE_DATE = '2026-07-11'
+const { t } = useAppLocale()
+</script>
+
 <template>
   <div class="legal">
-    <h1>Podmienky používania</h1>
-    <p class="muted">Platné od 2026-07-11.</p>
+    <h1>{{ t('terms.title') }}</h1>
+    <p class="muted">{{ t('terms.effectiveDate', { date: EFFECTIVE_DATE }) }}</p>
 
     <section>
-      <h2>Čo je Dota Stats</h2>
-      <p>
-        Dota Stats je neoficiálny, fanúšikovský nástroj na prehľad Dota 2 štatistík.
-        Nie je vytvorený, sponzorovaný ani schválený spoločnosťou Valve Corporation.
-        <strong>Dota 2</strong>, <strong>Steam</strong> a súvisiace ochranné známky
-        patria Valve Corporation.
-      </p>
+      <h2>{{ t('terms.whatSectionTitle') }}</h2>
+      <i18n-t keypath="terms.whatSectionBody" tag="p">
+        <template #dota2><strong>Dota 2</strong></template>
+        <template #steam><strong>Steam</strong></template>
+      </i18n-t>
     </section>
 
     <section>
-      <h2>Zdroj dát</h2>
-      <p>
-        Všetky zobrazené štatistiky (matche, hrdinovia, rebríčky) pochádzajú z
-        verejného <a href="https://www.opendota.com/" target="_blank" rel="noopener">OpenDota API</a>
-        a zo Steam CDN (ikony hrdinov/itemov). Dota Stats tieto dáta len zobrazuje —
-        nezasahuje do nich a nezaručuje ich presnosť, úplnosť ani dostupnosť.
-        OpenDota je nezávislý projekt s vlastnou infraštruktúrou; ak je dočasne
-        pomalý alebo nedostupný, appka to nedokáže ovplyvniť.
-      </p>
+      <h2>{{ t('terms.dataSectionTitle') }}</h2>
+      <i18n-t keypath="terms.dataSectionBody" tag="p">
+        <template #opendota>
+          <a href="https://www.opendota.com/" target="_blank" rel="noopener">OpenDota API</a>
+        </template>
+      </i18n-t>
     </section>
 
     <section>
-      <h2>Bez záruky</h2>
-      <p>
-        Appka je poskytovaná „tak ako je" (as is), zadarmo, bez akejkoľvek záruky.
-        Nie je určená ako jediný zdroj pravdy pre súťažné alebo komerčné rozhodnutia.
-      </p>
+      <h2>{{ t('terms.warrantySectionTitle') }}</h2>
+      <p>{{ t('terms.warrantySectionBody') }}</p>
     </section>
 
     <section>
-      <h2>Kontakt</h2>
-      <p>
-        Otázky, chyby alebo návrhy patria na
-        <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">GitHub</a>
-        — otvor issue.
-      </p>
+      <h2>{{ t('terms.contactSectionTitle') }}</h2>
+      <i18n-t keypath="terms.contactSectionBody" tag="p">
+        <template #github>
+          <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">GitHub</a>
+        </template>
+      </i18n-t>
     </section>
   </div>
 </template>

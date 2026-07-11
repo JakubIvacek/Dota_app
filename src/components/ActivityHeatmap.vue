@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useAppLocale } from '../composables/useAppLocale'
 
 const props = defineProps<{
   /** Matche za posledný rok — stačí start_time + výsledok. */
   matches: { start_time: number; won: boolean }[]
 }>()
+
+const { t, intlLocale } = useAppLocale()
 
 const CELL = 12
 const GAP = 3
@@ -63,21 +66,21 @@ const grid = computed(() => {
       if (date > today) break
       const b = buckets.value.get(dayKey(date))
       const games = b?.games ?? 0
-      const label = date.toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric', year: 'numeric' })
+      const label = date.toLocaleDateString(intlLocale.value, { day: 'numeric', month: 'numeric', year: 'numeric' })
       cells.push({
         x: LABEL_LEFT + w * PITCH,
         y: LABEL_TOP + d * PITCH,
         fill: LEVELS[level(games)],
         title: games
-          ? `${label} — ${games} ${games === 1 ? 'match' : games < 5 ? 'matche' : 'matchov'} (${b!.wins}W – ${games - b!.wins}L)`
-          : `${label} — bez matchov`,
+          ? t('activity.tooltip', { date: label, n: games, wins: b!.wins, losses: games - b!.wins }, games)
+          : t('activity.noMatchesOnDate', { date: label }),
       })
       // Popisok mesiaca nad prvým týždňom, ktorý doň spadá.
       if (d === 0 && date.getMonth() !== lastMonth) {
         lastMonth = date.getMonth()
         months.push({
           x: LABEL_LEFT + w * PITCH,
-          label: date.toLocaleDateString('sk-SK', { month: 'short' }).replace('.', ''),
+          label: date.toLocaleDateString(intlLocale.value, { month: 'short' }).replace('.', ''),
         })
       }
     }
@@ -90,18 +93,24 @@ const grid = computed(() => {
 const width = LABEL_LEFT + WEEKS * PITCH
 const height = LABEL_TOP + 7 * PITCH
 
-const DAY_LABELS = [
-  { label: 'Po', row: 0 },
-  { label: 'St', row: 2 },
-  { label: 'Pi', row: 4 },
-]
+// Referenčný týždeň (pondelok 2024-01-01) — len na vytiahnutie krátkych
+// názvov dní cez Intl, nech sa neprekladajú ručne pre každý jazyk zvlášť.
+const REF_MONDAY = new Date(2024, 0, 1)
+const weekdayShort = (offset: number) =>
+  new Date(REF_MONDAY.getTime() + offset * 86_400_000).toLocaleDateString(intlLocale.value, { weekday: 'short' })
+
+const DAY_LABELS = computed(() => [
+  { label: weekdayShort(0), row: 0 },
+  { label: weekdayShort(2), row: 2 },
+  { label: weekdayShort(4), row: 4 },
+])
 
 const totalGames = computed(() => props.matches.length)
 </script>
 
 <template>
   <div class="heatmap">
-    <svg :viewBox="`0 0 ${width} ${height}`" :aria-label="`Aktivita za posledný rok — ${totalGames} matchov`">
+    <svg :viewBox="`0 0 ${width} ${height}`" :aria-label="t('activity.ariaLabel', { n: totalGames }, totalGames)">
       <text v-for="m in grid.months" :key="m.x" :x="m.x" :y="LABEL_TOP - 7" class="axis-label">
         {{ m.label }}
       </text>
@@ -130,11 +139,11 @@ const totalGames = computed(() => props.matches.length)
       </rect>
     </svg>
     <div class="legend">
-      <span class="muted">{{ totalGames }} matchov za posledný rok</span>
+      <span class="muted">{{ t('activity.totalGames', { n: totalGames }, totalGames) }}</span>
       <span class="scale">
-        <span class="muted">Menej</span>
+        <span class="muted">{{ t('activity.less') }}</span>
         <span v-for="(fill, i) in LEVELS" :key="i" class="swatch" :style="{ background: fill }" />
-        <span class="muted">Viac</span>
+        <span class="muted">{{ t('activity.more') }}</span>
       </span>
     </div>
   </div>

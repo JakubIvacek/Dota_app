@@ -5,8 +5,10 @@ import { getPlayer, rankTierName } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
 import { useFavorites } from '../composables/useFavorites'
+import { useAppLocale } from '../composables/useAppLocale'
 
 const route = useRoute()
+const { t } = useAppLocale()
 const accountId = computed(() => String(route.params.accountId))
 
 const { data: player, loading, error } = useAsync(() => getPlayer(accountId.value))
@@ -24,19 +26,19 @@ const { isFavorite, toggle } = useFavorites()
     <div class="skeleton avatar" />
     <div class="skeleton skeleton-line" style="width: 220px" />
   </section>
-  <div v-else-if="error" class="error-box">Nepodarilo sa načítať hráča: {{ error }}</div>
+  <div v-else-if="error" class="error-box">{{ t('player.errorLoad', { error }) }}</div>
 
   <template v-else-if="player">
     <section class="profile card">
       <img v-if="player.profile" :src="player.profile.avatarfull" alt="" class="avatar" />
       <div>
         <h1>
-          {{ player.profile?.personaname ?? `Player ${accountId}` }}
+          {{ player.profile?.personaname ?? t('common.playerFallback', { id: accountId }) }}
           <button
             v-if="player.profile"
             class="star"
             :class="{ active: isFavorite(accountId) }"
-            :title="isFavorite(accountId) ? 'Odobrať z obľúbených' : 'Pridať do obľúbených'"
+            :title="isFavorite(accountId) ? t('player.removeFavorite') : t('player.addFavorite')"
             @click="toggle(player)"
           >
             {{ isFavorite(accountId) ? '★' : '☆' }}
@@ -45,15 +47,16 @@ const { isFavorite, toggle } = useFavorites()
         <div class="muted">{{ rankTierName(player.rank_tier) }}</div>
       </div>
       <nav class="tabs">
-        <RouterLink :to="`/player/${accountId}`" exact-active-class="active">Overview</RouterLink>
-        <RouterLink :to="`/player/${accountId}/matches`" exact-active-class="active">Matches</RouterLink>
-        <RouterLink :to="`/player/${accountId}/heroes`" exact-active-class="active">Heroes</RouterLink>
+        <RouterLink :to="`/player/${accountId}`" exact-active-class="active">{{ t('player.tabOverview') }}</RouterLink>
+        <RouterLink :to="`/player/${accountId}/matches`" exact-active-class="active">{{ t('player.tabMatches') }}</RouterLink>
+        <RouterLink :to="`/player/${accountId}/heroes`" exact-active-class="active">{{ t('player.tabHeroes') }}</RouterLink>
       </nav>
     </section>
 
     <div v-if="!player.profile" class="status-note">
-      Tento profil OpenDota nepozná — skontroluj account ID, alebo hráč nemá
-      verejnú match history (<em>Expose Public Match Data</em>).
+      <i18n-t keypath="player.unknownProfile">
+        <template #tag><em>Expose Public Match Data</em></template>
+      </i18n-t>
     </div>
 
     <RouterView v-else />

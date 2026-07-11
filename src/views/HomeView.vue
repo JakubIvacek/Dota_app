@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ACCOUNT_ID } from '../config'
+import { useAppLocale } from '../composables/useAppLocale'
 import { getPlayer, rankTierName } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
@@ -8,6 +9,8 @@ import { useFavorites } from '../composables/useFavorites'
 import { timeAgo } from '../utils/format'
 import SearchBox from '../components/SearchBox.vue'
 import PlayerLinkCard from '../components/PlayerLinkCard.vue'
+
+const { t, intlLocale } = useAppLocale()
 
 const { data: me } = useAsync(async () =>
   ACCOUNT_ID ? getPlayer(ACCOUNT_ID) : null,
@@ -28,25 +31,25 @@ const shownRecents = computed(() =>
 
 <template>
   <div class="landing">
-    <span class="eyebrow">Dota 2 · match stats</span>
+    <span class="eyebrow">{{ t('home.eyebrow') }}</span>
     <h1>Dota Stats</h1>
     <p class="muted lede">
-      Zadaj meno hráča alebo Dota account ID (Friend Code) a pozri si štatistiky.
+      {{ t('home.tagline') }}
     </p>
     <SearchBox size="large" />
 
     <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`" class="card card--interactive me">
       <img v-if="me?.profile" :src="me.profile.avatarfull" alt="" />
       <div class="me-info">
-        <div class="me-label">Môj profil</div>
-        <div class="me-name">{{ me?.profile?.personaname ?? `Player ${ACCOUNT_ID}` }}</div>
+        <div class="me-label">{{ t('home.myProfile') }}</div>
+        <div class="me-name">{{ me?.profile?.personaname ?? t('common.playerFallback', { id: ACCOUNT_ID }) }}</div>
         <div class="muted" v-if="me">{{ rankTierName(me.rank_tier) }}</div>
       </div>
       <span class="arrow">→</span>
     </RouterLink>
 
     <section v-if="shownFavorites.length" class="group">
-      <h2>★ Obľúbení</h2>
+      <h2>{{ t('home.favorites') }}</h2>
       <div class="grid">
         <PlayerLinkCard
           v-for="f in shownFavorites"
@@ -59,7 +62,7 @@ const shownRecents = computed(() =>
     </section>
 
     <section v-if="shownRecents.length" class="group">
-      <h2>Nedávno pozreté</h2>
+      <h2>{{ t('home.recentlyViewed') }}</h2>
       <div class="grid">
         <PlayerLinkCard
           v-for="r in shownRecents"
@@ -67,7 +70,7 @@ const shownRecents = computed(() =>
           :account-id="r.account_id"
           :personaname="r.personaname"
           :avatarfull="r.avatarfull"
-          :sub="timeAgo(r.visited_at / 1000)"
+          :sub="timeAgo(r.visited_at / 1000, intlLocale)"
         />
       </div>
     </section>

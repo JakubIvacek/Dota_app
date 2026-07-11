@@ -1,6 +1,11 @@
-import { createApp } from 'vue'
+import { createApp, watchEffect } from 'vue'
 import App from './App.vue'
 import { router } from './router'
+import { i18n } from './i18n'
 import './style.css'
 
-createApp(App).use(router).mount('#app')
+watchEffect(() => {
+  document.documentElement.lang = i18n.global.locale.value
+})
+
+createApp(App).use(router).use(i18n).mount('#app')

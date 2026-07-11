@@ -3,8 +3,10 @@ import { useRoute } from 'vue-router'
 import { searchPlayers } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { timeAgo } from '../utils/format'
+import { useAppLocale } from '../composables/useAppLocale'
 
 const route = useRoute()
+const { t, intlLocale } = useAppLocale()
 
 const { data: results, loading, error } = useAsync(() =>
   searchPlayers(String(route.query.q ?? '')),
@@ -12,13 +14,13 @@ const { data: results, loading, error } = useAsync(() =>
 </script>
 
 <template>
-  <h1>Výsledky pre „{{ route.query.q }}“</h1>
+  <h1>{{ t('search.resultsFor', { query: route.query.q }) }}</h1>
 
   <section v-if="loading" class="card skeleton-results">
     <div v-for="i in 6" :key="i" class="skeleton skeleton-row" />
   </section>
-  <div v-else-if="error" class="error-box">Search zlyhal: {{ error }}</div>
-  <p v-else-if="!results?.length" class="muted">Žiadny hráč sa nenašiel.</p>
+  <div v-else-if="error" class="error-box">{{ t('search.errorLoad', { error }) }}</div>
+  <p v-else-if="!results?.length" class="muted">{{ t('search.noResults') }}</p>
 
   <div v-else class="card">
     <RouterLink
@@ -30,8 +32,8 @@ const { data: results, loading, error } = useAsync(() =>
       <img :src="r.avatarfull" alt="" />
       <span class="name">{{ r.personaname }}</span>
       <span class="muted meta">
-        ID {{ r.account_id }}
-        <template v-if="r.last_match_time"> · last match {{ timeAgo(Date.parse(r.last_match_time) / 1000) }}</template>
+        {{ t('search.idLabel', { id: r.account_id }) }}
+        <template v-if="r.last_match_time"> · {{ t('search.lastMatch', { time: timeAgo(Date.parse(r.last_match_time) / 1000, intlLocale) }) }}</template>
       </span>
     </RouterLink>
   </div>

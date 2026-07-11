@@ -1,6 +1,16 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { ACCOUNT_ID } from './config'
+import { SUPPORTED_LOCALES, persistLocale, type LocaleCode } from './i18n'
 import SearchBox from './components/SearchBox.vue'
+
+const { t, locale } = useI18n()
+
+function onLocaleChange(e: Event) {
+  const code = (e.target as HTMLSelectElement).value as LocaleCode
+  locale.value = code
+  persistLocale(code)
+}
 </script>
 
 <template>
@@ -11,9 +21,12 @@ import SearchBox from './components/SearchBox.vue'
         Dota Stats
       </RouterLink>
       <nav>
-        <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`">Môj profil</RouterLink>
-        <RouterLink to="/leaderboard">Leaderboards</RouterLink>
+        <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`">{{ t('app.nav.profile') }}</RouterLink>
+        <RouterLink to="/leaderboard">{{ t('app.nav.leaderboards') }}</RouterLink>
       </nav>
+      <select class="locale-select" :value="locale" aria-label="Language" @change="onLocaleChange">
+        <option v-for="l in SUPPORTED_LOCALES" :key="l.code" :value="l.code">{{ l.label }}</option>
+      </select>
       <SearchBox class="topbar-search" />
     </div>
   </header>
@@ -29,15 +42,16 @@ import SearchBox from './components/SearchBox.vue'
         Dota Stats
       </RouterLink>
 
-      <p class="footer-disclaimer">
-        Neoficiálny fanúšikovský nástroj, nespojený s Valve Corporation. Dáta cez
-        <a href="https://www.opendota.com/" target="_blank" rel="noopener">OpenDota API</a>.
-      </p>
+      <i18n-t keypath="app.footer.disclaimer" tag="p" class="footer-disclaimer">
+        <template #link>
+          <a href="https://www.opendota.com/" target="_blank" rel="noopener">OpenDota API</a>
+        </template>
+      </i18n-t>
 
       <nav class="footer-links">
-        <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">GitHub</a>
-        <RouterLink to="/terms">Podmienky</RouterLink>
-        <RouterLink to="/privacy">Súkromie</RouterLink>
+        <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">{{ t('app.footer.github') }}</a>
+        <RouterLink to="/terms">{{ t('app.footer.terms') }}</RouterLink>
+        <RouterLink to="/privacy">{{ t('app.footer.privacy') }}</RouterLink>
       </nav>
 
       <span class="footer-copy muted">© {{ new Date().getFullYear() }}</span>
@@ -124,8 +138,30 @@ nav a.router-link-active::after {
   right: 0;
 }
 
-.topbar-search {
+.locale-select {
   margin-left: auto;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+
+.locale-select:hover {
+  color: var(--ink);
+}
+
+.locale-select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.topbar-search {
+  margin-left: 0;
 }
 
 .footer {

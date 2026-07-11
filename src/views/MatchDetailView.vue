@@ -14,12 +14,14 @@ import {
 import { useAsync } from '../composables/useAsync'
 import { formatDate, formatDuration } from '../utils/format'
 import { cssVar } from '../utils/theme'
+import { useAppLocale } from '../composables/useAppLocale'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import TeamGlyph from '../components/TeamGlyph.vue'
 import type { MatchPlayer } from '../types/opendota'
 
 const route = useRoute()
+const { t, intlLocale } = useAppLocale()
 
 // Zvýrazni hráča, z ktorého profilu sme prišli (?player=), inak vlastný.
 const highlightId = computed(() => String(route.query.player ?? ACCOUNT_ID))
@@ -142,7 +144,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
     <div class="card skeleton" style="height: 280px" />
     <div class="card skeleton" style="height: 280px" />
   </section>
-  <div v-else-if="error" class="error-box">Nepodarilo sa načítať match: {{ error }}</div>
+  <div v-else-if="error" class="error-box">{{ t('matchDetail.errorLoad', { error }) }}</div>
 
   <template v-else-if="data">
     <section class="card header">
@@ -158,7 +160,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
       <div class="muted">
         {{ gameModeName(data.match.game_mode) }} ·
         {{ formatDuration(data.match.duration) }} ·
-        {{ formatDate(data.match.start_time) }} ·
+        {{ formatDate(data.match.start_time, intlLocale) }} ·
         Match {{ data.match.match_id }}
       </div>
     </section>
@@ -170,21 +172,21 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
       <h2 class="team-name">
         <TeamGlyph :side="team.name.toLowerCase() as 'radiant' | 'dire'" />
         {{ team.name }}
-        <span v-if="team.won" class="badge win">Victory</span>
+        <span v-if="team.won" class="badge win">{{ t('matchDetail.victory') }}</span>
       </h2>
       <div class="table-scroll">
         <table class="data">
           <thead>
             <tr>
               <th>Hero</th>
-              <th>Player</th>
+              <th>{{ t('matchDetail.colPlayer') }}</th>
               <th class="num">LVL</th>
               <th>K / D / A</th>
               <th class="num">Net</th>
               <th class="num">GPM / XPM</th>
               <th class="num">LH / DN</th>
               <th class="num">DMG</th>
-              <th>Items</th>
+              <th>{{ t('matchDetail.colItems') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -192,9 +194,9 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
               <td><HeroIcon :hero="p.hero" :show-name="false" /></td>
               <td class="name">
                 <RouterLink v-if="p.account_id != null" :to="`/player/${p.account_id}`">
-                  {{ p.personaname ?? `Player ${p.account_id}` }}
+                  {{ p.personaname ?? t('common.playerFallback', { id: p.account_id }) }}
                 </RouterLink>
-                <span v-else class="muted">Anonymous</span>
+                <span v-else class="muted">{{ t('matchDetail.anonymous') }}</span>
               </td>
               <td class="num">{{ p.level }}</td>
               <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
@@ -221,7 +223,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
     </section>
 
     <section class="card">
-      <h2>Gold &amp; XP advantage (Radiant +/−)</h2>
+      <h2>{{ t('matchDetail.goldXpAdvantage') }}</h2>
       <LineChart
         v-if="advantage"
         :labels="advantage.labels"
@@ -234,20 +236,19 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
       />
       <div v-else class="status-note">
         <template v-if="parseState === 'polling'">
-          Match nemá sparsovaný replay — parse request je odoslaný na OpenDota.
-          Graf sa doplní automaticky, zvyčajne do pár minút (kontrolujem každú minútu…).
+          {{ t('matchDetail.parsePolling') }}
         </template>
         <template v-else-if="parseState === 'gave_up'">
-          Parse sa zatiaľ nedokončil — OpenDota môže mať dlhšiu frontu.
-          <button class="retry" @click="retryParse">Skúsiť znova</button>
+          {{ t('matchDetail.parseGaveUp') }}
+          <button class="retry" @click="retryParse">{{ t('matchDetail.parseRetry') }}</button>
         </template>
         <template v-else-if="parseState === 'expired'">
-          Replay tohto matchu už expiroval (Valve ich drží ~2–4 týždne), graf sa
-          nedá doplniť. Pri čerstvých matchoch ho appka vyžiada automaticky —
-          stačí mať zapnuté <em>Expose Public Match Data</em> v Dota klientovi.
+          <i18n-t keypath="matchDetail.parseExpired">
+            <template #tag><em>Expose Public Match Data</em></template>
+          </i18n-t>
         </template>
         <template v-else>
-          Tento match nemá sparsovaný replay — graf nie je dostupný.
+          {{ t('matchDetail.parseUnavailable') }}
         </template>
       </div>
     </section>

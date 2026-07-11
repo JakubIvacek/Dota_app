@@ -1,56 +1,54 @@
+<script setup lang="ts">
+import { useAppLocale } from '../composables/useAppLocale'
+
+const EFFECTIVE_DATE = '2026-07-11'
+const { t } = useAppLocale()
+</script>
+
 <template>
   <div class="legal">
-    <h1>Ochrana súkromia</h1>
-    <p class="muted">Platné od 2026-07-11.</p>
+    <h1>{{ t('privacy.title') }}</h1>
+    <p class="muted">{{ t('privacy.effectiveDate', { date: EFFECTIVE_DATE }) }}</p>
 
     <section>
-      <h2>Žiadny backend, žiadny účet</h2>
-      <p>
-        Dota Stats nemá vlastný server ani databázu — je to čisto frontendová appka.
-        Nezbiera, neukladá ani neposiela žiadne osobné údaje na žiadny server pod
-        našou kontrolou. Neexistuje registrácia ani prihlásenie.
-      </p>
+      <h2>{{ t('privacy.noBackendTitle') }}</h2>
+      <p>{{ t('privacy.noBackendBody') }}</p>
     </section>
 
     <section>
-      <h2>Čo sa ukladá lokálne v prehliadači</h2>
-      <p>Appka si do <code>localStorage</code> tvojho prehliadača ukladá len:</p>
+      <h2>{{ t('privacy.localStorageTitle') }}</h2>
+      <i18n-t keypath="privacy.localStorageIntro" tag="p">
+        <template #code><code>localStorage</code></template>
+      </i18n-t>
       <ul>
-        <li>nedávno pozreté hráčske profily (na zobrazenie histórie na hlavnej stránke),</li>
-        <li>obľúbených hráčov, ak si niekoho označíš hviezdičkou,</li>
-        <li>cache konštánt hrdinov/itemov od OpenDota (kvôli rýchlosti, nemenia sa často).</li>
+        <li>{{ t('privacy.localStorageItem1') }}</li>
+        <li>{{ t('privacy.localStorageItem2') }}</li>
+        <li>{{ t('privacy.localStorageItem3') }}</li>
       </ul>
-      <p>
-        Toto všetko ostáva výhradne v tvojom prehliadači, nikam sa neodosiela a
-        vieš to kedykoľvek vymazať cez nastavenia prehliadača (vymazanie dát stránky).
-      </p>
+      <p>{{ t('privacy.localStorageOutro') }}</p>
     </section>
 
     <section>
-      <h2>Žiadne cookies, žiadna analytika</h2>
-      <p>
-        Appka nepoužíva cookies, sledovacie pixely ani analytické nástroje tretích strán.
-      </p>
+      <h2>{{ t('privacy.noCookiesTitle') }}</h2>
+      <p>{{ t('privacy.noCookiesBody') }}</p>
     </section>
 
     <section>
-      <h2>Externé requesty</h2>
-      <p>
-        Keď si prezeráš štatistiky, tvoj prehliadač posiela requesty priamo na
-        <a href="https://www.opendota.com/" target="_blank" rel="noopener">OpenDota API</a>
-        (dáta o matchoch/hráčoch) a na Steam CDN (ikony hrdinov a itemov). Tieto
-        requesty neprechádzajú cez žiadny náš server. Ako s dátami narába OpenDota,
-        popisujú vo svojich vlastných podmienkach.
-      </p>
+      <h2>{{ t('privacy.externalTitle') }}</h2>
+      <i18n-t keypath="privacy.externalBody" tag="p">
+        <template #opendota>
+          <a href="https://www.opendota.com/" target="_blank" rel="noopener">OpenDota API</a>
+        </template>
+      </i18n-t>
     </section>
 
     <section>
-      <h2>Kontakt</h2>
-      <p>
-        Otázky ohľadom súkromia patria na
-        <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">GitHub</a>
-        — otvor issue.
-      </p>
+      <h2>{{ t('privacy.contactTitle') }}</h2>
+      <i18n-t keypath="privacy.contactBody" tag="p">
+        <template #github>
+          <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">GitHub</a>
+        </template>
+      </i18n-t>
     </section>
   </div>
 </template>

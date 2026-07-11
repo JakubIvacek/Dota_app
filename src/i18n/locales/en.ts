@@ -1,0 +1,168 @@
+const en = {
+  app: {
+    nav: {
+      profile: 'My profile',
+      leaderboards: 'Leaderboards',
+    },
+    footer: {
+      disclaimer: 'Unofficial fan tool, not affiliated with Valve Corporation. Data via {link}.',
+      github: 'GitHub',
+      terms: 'Terms',
+      privacy: 'Privacy',
+    },
+  },
+  common: {
+    loading: 'Loading…',
+    playerFallback: 'Player {id}',
+    unknown: 'Unknown',
+  },
+  searchbox: {
+    placeholder: 'Player name or Dota ID…',
+    ariaLabel: 'Search for a player',
+    submit: 'Search',
+  },
+  home: {
+    eyebrow: 'Dota 2 · match stats',
+    tagline: 'Enter a player name or Dota account ID (Friend Code) to see their stats.',
+    myProfile: 'My profile',
+    favorites: '★ Favorites',
+    recentlyViewed: 'Recently viewed',
+  },
+  dashboard: {
+    errorLoad: 'Failed to load data: {error}',
+    notIndexedText:
+      "OpenDota hasn't indexed any matches for this player yet — usually because it has never searched them before. Request a refresh and try reloading the page in a few minutes.",
+    refreshIdle: 'Refresh from OpenDota',
+    refreshRequesting: 'Requesting OpenDota…',
+    refreshDone: 'Requested ✓',
+    statWinrateAllTime: 'Winrate (all time)',
+    statWins: 'Wins',
+    statLosses: 'Losses',
+    statWinrateRecent: 'Winrate (last 100)',
+    matchesSuffix: 'matches',
+    topHeroes: 'Most played heroes',
+    allHeroes: 'All heroes →',
+    kdaTrend: 'KDA — {window}-match average',
+    activityTitle: 'Activity — last year',
+    farmTrend: 'GPM / XPM — {window}-match average',
+    winrateByMode: 'Winrate by mode (all time)',
+  },
+  matches: {
+    filterHero: 'Hero',
+    filterHeroAll: 'All',
+    filterMode: 'Mode',
+    filterModeAll: 'All',
+    resultAll: 'All',
+    resultWin: 'Wins',
+    resultLoss: 'Losses',
+    resultGroupLabel: 'Result filter',
+    errorLoad: 'Failed to load matches: {error}',
+    notIndexedText:
+      "OpenDota doesn't have any indexed matches for this player. This usually means it has never searched them — try requesting a refresh.",
+    refreshIdle: 'Refresh from OpenDota',
+    refreshRequesting: 'Requesting OpenDota…',
+    emptyFiltered: 'No matches match the current filter.',
+    loadingMore: 'Loading more…',
+    loadMore: 'Load more',
+    endOfHistory: 'End of history — {n} match | End of history — {n} matches',
+    colResult: 'Result',
+    colDuration: 'Duration',
+    colMode: 'Mode',
+    colPlayed: 'Played',
+  },
+  matchDetail: {
+    errorLoad: 'Failed to load match: {error}',
+    victory: 'Victory',
+    anonymous: 'Anonymous',
+    goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
+    colPlayer: 'Player',
+    colItems: 'Items',
+    parsePolling:
+      "This match doesn't have a parsed replay yet — a parse request has been sent to OpenDota. The chart will fill in automatically, usually within a few minutes (checking every minute…).",
+    parseGaveUp: "The parse hasn't finished yet — OpenDota may have a longer queue.",
+    parseRetry: 'Try again',
+    parseExpired:
+      "This match's replay has already expired (Valve keeps them for ~2-4 weeks), so the chart can't be filled in. For fresh matches the app requests this automatically — just make sure {tag} is enabled in the Dota client.",
+    parseUnavailable: "This match doesn't have a parsed replay — the chart isn't available.",
+  },
+  player: {
+    errorLoad: 'Failed to load player: {error}',
+    addFavorite: 'Add to favorites',
+    removeFavorite: 'Remove from favorites',
+    tabOverview: 'Overview',
+    tabMatches: 'Matches',
+    tabHeroes: 'Heroes',
+    unknownProfile:
+      "OpenDota doesn't know this profile — check the account ID, or the player doesn't have public match history ({tag}).",
+  },
+  heroes: {
+    errorLoad: 'Failed to load hero stats: {error}',
+    colHero: 'Hero',
+    colGames: 'Games',
+    colWins: 'Wins',
+    colWinrate: 'Winrate',
+    colLastPlayed: 'Last played',
+  },
+  leaderboard: {
+    title: 'Leaderboards',
+    errorLoad: 'Failed to load leaderboard: {error}',
+    note: "Top {total} · updated {time} · source Valve. Valve doesn't publish account IDs — clicking a name tries to find the player via OpenDota search.",
+    colPlayer: 'Player',
+    colTeam: 'Team',
+    showMore: 'Show 200 more ({shown} / {total})',
+  },
+  search: {
+    resultsFor: 'Results for "{query}"',
+    errorLoad: 'Search failed: {error}',
+    noResults: 'No player found.',
+    lastMatch: 'last match {time}',
+    idLabel: 'ID {id}',
+  },
+  activity: {
+    tooltip: '{date} — {n} match ({wins}W – {losses}L) | {date} — {n} matches ({wins}W – {losses}L)',
+    noMatchesOnDate: '{date} — no matches',
+    ariaLabel: 'Activity in the last year — {n} match | Activity in the last year — {n} matches',
+    totalGames: '{n} match in the last year | {n} matches in the last year',
+    less: 'Less',
+    more: 'More',
+  },
+  terms: {
+    title: 'Terms of Use',
+    effectiveDate: 'Effective from {date}.',
+    whatSectionTitle: 'What Dota Stats is',
+    whatSectionBody:
+      'Dota Stats is an unofficial, fan-made tool for browsing Dota 2 statistics. It is not created, sponsored, or endorsed by Valve Corporation. {dota2}, {steam}, and related trademarks belong to Valve Corporation.',
+    dataSectionTitle: 'Data source',
+    dataSectionBody:
+      "All displayed statistics (matches, heroes, leaderboards) come from the public {opendota} and the Steam CDN (hero/item icons). Dota Stats only displays this data — it doesn't alter it and doesn't guarantee its accuracy, completeness, or availability. OpenDota is an independent project with its own infrastructure; if it's temporarily slow or unavailable, the app can't do anything about it.",
+    warrantySectionTitle: 'No warranty',
+    warrantySectionBody:
+      'The app is provided "as is", free of charge, without any warranty. It is not intended as the sole source of truth for competitive or commercial decisions.',
+    contactSectionTitle: 'Contact',
+    contactSectionBody: 'Questions, bugs, or suggestions belong on {github} — open an issue.',
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    effectiveDate: 'Effective from {date}.',
+    noBackendTitle: 'No backend, no account',
+    noBackendBody:
+      "Dota Stats has no server or database of its own — it's a purely front-end app. It doesn't collect, store, or send any personal data to any server under our control. There is no sign-up or login.",
+    localStorageTitle: 'What is stored locally in your browser',
+    localStorageIntro: 'The app only stores the following in your browser\'s {code}:',
+    localStorageItem1: 'recently viewed player profiles (to show history on the home page),',
+    localStorageItem2: 'favorite players, if you star someone,',
+    localStorageItem3: "OpenDota's hero/item constant cache (for speed, since these rarely change).",
+    localStorageOutro:
+      "All of this stays exclusively in your browser, is never sent anywhere, and you can clear it any time via your browser's settings (clear site data).",
+    noCookiesTitle: 'No cookies, no analytics',
+    noCookiesBody: 'The app uses no cookies, tracking pixels, or third-party analytics tools.',
+    externalTitle: 'External requests',
+    externalBody:
+      "While browsing stats, your browser sends requests directly to the {opendota} (match/player data) and the Steam CDN (hero/item icons). These requests never pass through any server of ours. How OpenDota handles data is described in their own terms.",
+    contactTitle: 'Contact',
+    contactBody: 'Privacy questions belong on {github} — open an issue.',
+  },
+}
+
+export type Messages = typeof en
+export default en

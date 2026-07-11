@@ -4,10 +4,12 @@ import { useRoute } from 'vue-router'
 import { getHeroMap, getPlayerHeroes } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { timeAgo } from '../utils/format'
+import { useAppLocale } from '../composables/useAppLocale'
 import HeroIcon from '../components/HeroIcon.vue'
 import WinrateBar from '../components/WinrateBar.vue'
 
 const route = useRoute()
+const { t, intlLocale } = useAppLocale()
 
 const { data, loading, error } = useAsync(async () => {
   const accountId = String(route.params.accountId)
@@ -53,17 +55,17 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
   <section v-if="loading" class="card skeleton-table">
     <div v-for="i in 10" :key="i" class="skeleton skeleton-row" />
   </section>
-  <div v-else-if="error" class="error-box">Nepodarilo sa načítať hero štatistiky: {{ error }}</div>
+  <div v-else-if="error" class="error-box">{{ t('heroes.errorLoad', { error }) }}</div>
 
   <div v-else class="card">
     <table class="data">
       <thead>
         <tr>
-          <th class="sortable" @click="sortBy('name')">Hero{{ arrow('name') }}</th>
-          <th class="sortable num" @click="sortBy('games')">Games{{ arrow('games') }}</th>
-          <th class="sortable num" @click="sortBy('win')">Wins{{ arrow('win') }}</th>
-          <th class="sortable" @click="sortBy('winrate')">Winrate{{ arrow('winrate') }}</th>
-          <th class="sortable" @click="sortBy('last_played')">Last played{{ arrow('last_played') }}</th>
+          <th class="sortable" @click="sortBy('name')">{{ t('heroes.colHero') }}{{ arrow('name') }}</th>
+          <th class="sortable num" @click="sortBy('games')">{{ t('heroes.colGames') }}{{ arrow('games') }}</th>
+          <th class="sortable num" @click="sortBy('win')">{{ t('heroes.colWins') }}{{ arrow('win') }}</th>
+          <th class="sortable" @click="sortBy('winrate')">{{ t('heroes.colWinrate') }}{{ arrow('winrate') }}</th>
+          <th class="sortable" @click="sortBy('last_played')">{{ t('heroes.colLastPlayed') }}{{ arrow('last_played') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -72,7 +74,7 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
           <td class="num">{{ h.games }}</td>
           <td class="num">{{ h.win }}</td>
           <td><WinrateBar :win="h.win" :games="h.games" /></td>
-          <td class="muted">{{ h.last_played ? timeAgo(h.last_played) : '—' }}</td>
+          <td class="muted">{{ h.last_played ? timeAgo(h.last_played, intlLocale) : '—' }}</td>
         </tr>
       </tbody>
     </table>

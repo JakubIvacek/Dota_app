@@ -6,7 +6,9 @@ import {
   type LeaderboardDivision,
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
+import { useAppLocale } from '../composables/useAppLocale'
 
+const { t, intlLocale } = useAppLocale()
 const division = ref<LeaderboardDivision>('europe')
 const shown = ref(100)
 
@@ -19,7 +21,7 @@ const total = computed(() => data.value?.leaderboard.length ?? 0)
 
 const updatedAt = computed(() =>
   data.value
-    ? new Date(data.value.time_posted * 1000).toLocaleTimeString('sk-SK', {
+    ? new Date(data.value.time_posted * 1000).toLocaleTimeString(intlLocale.value, {
         hour: 'numeric',
         minute: '2-digit',
       })
@@ -37,7 +39,7 @@ function flag(country?: string): string {
 
 <template>
   <div class="head">
-    <h1>Leaderboards</h1>
+    <h1>{{ t('leaderboard.title') }}</h1>
     <nav class="tabs">
       <button
         v-for="d in LEADERBOARD_DIVISIONS"
@@ -53,12 +55,11 @@ function flag(country?: string): string {
   <section v-if="loading" class="card skeleton-table">
     <div v-for="i in 12" :key="i" class="skeleton skeleton-row" />
   </section>
-  <div v-else-if="error" class="error-box">Nepodarilo sa načítať leaderboard: {{ error }}</div>
+  <div v-else-if="error" class="error-box">{{ t('leaderboard.errorLoad', { error }) }}</div>
 
   <template v-else-if="data">
     <p class="muted note">
-      Top {{ total.toLocaleString('sk-SK') }} · aktualizované {{ updatedAt }} · zdroj Valve.
-      Valve nezverejňuje account ID — klik na meno skúsi hráča nájsť cez OpenDota search.
+      {{ t('leaderboard.note', { total: total.toLocaleString(intlLocale), time: updatedAt }) }}
     </p>
 
     <div class="card">
@@ -66,8 +67,8 @@ function flag(country?: string): string {
         <thead>
           <tr>
             <th class="num">#</th>
-            <th>Player</th>
-            <th>Team</th>
+            <th>{{ t('leaderboard.colPlayer') }}</th>
+            <th>{{ t('leaderboard.colTeam') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -85,7 +86,7 @@ function flag(country?: string): string {
         </tbody>
       </table>
       <button v-if="shown < total" class="more" @click="shown += 200">
-        Zobraziť ďalších 200 ({{ shown }} / {{ total.toLocaleString('sk-SK') }})
+        {{ t('leaderboard.showMore', { shown, total: total.toLocaleString(intlLocale) }) }}
       </button>
     </div>
   </template>

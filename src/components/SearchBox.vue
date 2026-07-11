@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 withDefaults(defineProps<{ size?: 'normal' | 'large' }>(), { size: 'normal' })
 
+const { t } = useI18n()
 const router = useRouter()
 const query = ref('')
 
@@ -25,10 +27,10 @@ function submit() {
     <input
       v-model="query"
       type="search"
-      placeholder="Meno hráča alebo Dota ID…"
-      :aria-label="'Hľadať hráča'"
+      :placeholder="t('searchbox.placeholder')"
+      :aria-label="t('searchbox.ariaLabel')"
     />
-    <button type="submit">Hľadať</button>
+    <button type="submit">{{ t('searchbox.submit') }}</button>
   </form>
 </template>
 

@@ -4,6 +4,8 @@ Osobný Dota 2 štatistický nástroj inšpirovaný Dotabuff/OpenDota. Frontend-
 **rozhodnutie z 2026-07-03: žiadny vlastný backend**, cachovanie rieši in-memory
 cache + localStorage priamo v appke.
 
+Zoznam zmien: [CHANGELOG.md](./CHANGELOG.md).
+
 ## Cieľ
 
 Prehľadné zobrazenie vlastných aj cudzích Dota 2 štatistík — matche, winrate podľa

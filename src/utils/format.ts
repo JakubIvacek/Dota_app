@@ -6,21 +6,26 @@ export function formatDuration(seconds: number): string {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : ms
 }
 
-export function formatDate(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toLocaleDateString('sk-SK', {
+export function formatDate(unixSeconds: number, locale: string): string {
+  return new Date(unixSeconds * 1000).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'numeric',
     year: 'numeric',
   })
 }
 
-export function timeAgo(unixSeconds: number): string {
+/** Relatívny čas cez Intl.RelativeTimeFormat — gramaticky správne skloňovanie
+ * v akomkoľvek locale zadarmo, bez ručného prekladu "pred X minútami" pre
+ * každý jazyk zvlášť. */
+export function timeAgo(unixSeconds: number, locale: string): string {
   const diff = Date.now() / 1000 - unixSeconds
-  if (diff < 3600) return `${Math.max(1, Math.floor(diff / 60))} min ago`
-  if (diff < 86400) return `${Math.floor(diff / 3600)} h ago`
-  if (diff < 30 * 86400) return `${Math.floor(diff / 86400)} d ago`
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'short' })
+
+  if (diff < 3600) return rtf.format(-Math.max(1, Math.floor(diff / 60)), 'minute')
+  if (diff < 86400) return rtf.format(-Math.floor(diff / 3600), 'hour')
+  if (diff < 30 * 86400) return rtf.format(-Math.floor(diff / 86400), 'day')
   const months = Math.floor(diff / (30 * 86400))
-  return months < 12 ? `${months} mo ago` : `${Math.floor(months / 12)} y ago`
+  return months < 12 ? rtf.format(-months, 'month') : rtf.format(-Math.floor(months / 12), 'year')
 }
 
 export const winratePct = (wins: number, games: number) =>

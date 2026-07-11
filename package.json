@@ -1,7 +1,7 @@
 {
   "name": "dota-stats",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,7 @@
   "dependencies": {
     "chart.js": "^4.5.1",
     "vue": "^3.5.39",
+    "vue-i18n": "^11.4.6",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {

@@ -11,11 +11,13 @@ import {
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { formatDuration, timeAgo } from '../utils/format'
+import { useAppLocale } from '../composables/useAppLocale'
 import HeroIcon from '../components/HeroIcon.vue'
 import type { PlayerMatch } from '../types/opendota'
 
 const route = useRoute()
 const router = useRouter()
+const { t, intlLocale } = useAppLocale()
 
 // Filtre — null = bez filtra. Zmena resetne zoznam a načíta prvú stránku.
 const heroFilter = ref<number | null>(null)
@@ -105,11 +107,11 @@ const modeOptions = Object.entries(GAME_MODES).map(([id, name]) => ({
   name,
 }))
 
-const RESULT_OPTIONS: { value: 'all' | 'win' | 'loss'; label: string }[] = [
-  { value: 'all', label: 'Všetko' },
-  { value: 'win', label: 'Výhry' },
-  { value: 'loss', label: 'Prehry' },
-]
+const RESULT_OPTIONS = computed<{ value: 'all' | 'win' | 'loss'; label: string }[]>(() => [
+  { value: 'all', label: t('matches.resultAll') },
+  { value: 'win', label: t('matches.resultWin') },
+  { value: 'loss', label: t('matches.resultLoss') },
+])
 
 const rows = computed(() =>
   (matches.value ?? []).map((m) => ({
@@ -150,20 +152,20 @@ async function refreshFromOpenDota() {
 <template>
   <div class="filters card">
     <label>
-      Hero
+      {{ t('matches.filterHero') }}
       <select v-model="heroFilter">
-        <option :value="null">Všetci</option>
+        <option :value="null">{{ t('matches.filterHeroAll') }}</option>
         <option v-for="h in heroOptions" :key="h.id" :value="h.id">{{ h.localized_name }}</option>
       </select>
     </label>
     <label>
-      Mode
+      {{ t('matches.filterMode') }}
       <select v-model="modeFilter">
-        <option :value="null">Všetky</option>
+        <option :value="null">{{ t('matches.filterModeAll') }}</option>
         <option v-for="m in modeOptions" :key="m.id" :value="m.id">{{ m.name }}</option>
       </select>
     </label>
-    <div class="result-toggle" role="group" aria-label="Result filter">
+    <div class="result-toggle" role="group" :aria-label="t('matches.resultGroupLabel')">
       <button
         v-for="opt in RESULT_OPTIONS"
         :key="opt.value"
@@ -180,30 +182,27 @@ async function refreshFromOpenDota() {
   <section v-if="loading" class="card skeleton-table">
     <div v-for="i in 8" :key="i" class="skeleton skeleton-row" />
   </section>
-  <div v-else-if="error" class="error-box">Nepodarilo sa načítať matche: {{ error }}</div>
+  <div v-else-if="error" class="error-box">{{ t('matches.errorLoad', { error }) }}</div>
 
   <div v-else-if="!rows.length && noFiltersActive" class="card empty-state">
-    <p class="muted">
-      OpenDota nemá pre tohto hráča zatiaľ zaindexovaný žiadny match. Zvyčajne
-      to znamená, že OpenDota ho ešte nikdy neprehľadala — skús vyžiadať refresh.
-    </p>
+    <p class="muted">{{ t('matches.notIndexedText') }}</p>
     <button class="refresh-btn" :disabled="refreshing" @click="refreshFromOpenDota">
-      {{ refreshing ? 'Žiadam OpenDota…' : 'Refresh z OpenDota' }}
+      {{ refreshing ? t('matches.refreshRequesting') : t('matches.refreshIdle') }}
     </button>
     <p v-if="refreshError" class="error-box">{{ refreshError }}</p>
   </div>
-  <p v-else-if="!rows.length" class="muted">Žiadne matche nezodpovedajú filtru.</p>
+  <p v-else-if="!rows.length" class="muted">{{ t('matches.emptyFiltered') }}</p>
 
   <div v-else class="card">
     <table class="data">
       <thead>
         <tr>
           <th>Hero</th>
-          <th>Result</th>
+          <th>{{ t('matches.colResult') }}</th>
           <th>K / D / A</th>
-          <th class="num">Duration</th>
-          <th>Mode</th>
-          <th>Played</th>
+          <th class="num">{{ t('matches.colDuration') }}</th>
+          <th>{{ t('matches.colMode') }}</th>
+          <th>{{ t('matches.colPlayed') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -215,17 +214,17 @@ async function refreshFromOpenDota() {
           <td>{{ m.kills }} / {{ m.deaths }} / {{ m.assists }}</td>
           <td class="num">{{ formatDuration(m.duration) }}</td>
           <td>{{ gameModeName(m.game_mode) }}</td>
-          <td class="muted">{{ timeAgo(m.start_time) }}</td>
+          <td class="muted">{{ timeAgo(m.start_time, intlLocale) }}</td>
         </tr>
       </tbody>
     </table>
 
     <div ref="sentinel" class="scroll-footer">
-      <span v-if="loadingMore" class="muted">Načítavam ďalšie…</span>
+      <span v-if="loadingMore" class="muted">{{ t('matches.loadingMore') }}</span>
       <button v-else-if="hasMore" class="load-more" @click="loadPage(false)">
-        Načítať ďalšie
+        {{ t('matches.loadMore') }}
       </button>
-      <span v-else class="muted">Koniec histórie — {{ rows.length }} matchov.</span>
+      <span v-else class="muted">{{ t('matches.endOfHistory', { n: rows.length }, rows.length) }}</span>
     </div>
   </div>
 </template>

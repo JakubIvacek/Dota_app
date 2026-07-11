@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAppLocale } from '../composables/useAppLocale'
 import {
   GAME_MODES,
   MATCH_TREND_FIELDS,
@@ -24,6 +25,7 @@ import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 import WinrateBar from '../components/WinrateBar.vue'
 
 const route = useRoute()
+const { t, intlLocale } = useAppLocale()
 
 const { data, loading, error } = useAsync(async () => {
   const accountId = String(route.params.accountId)
@@ -52,7 +54,7 @@ function trend(perMatch: number[], preferredWindow: number) {
   const window = pickWindow(perMatch.length, preferredWindow)
   return {
     window,
-    labels: chronological.value.slice(window - 1).map((m) => formatDate(m.start_time)),
+    labels: chronological.value.slice(window - 1).map((m) => formatDate(m.start_time, intlLocale.value)),
     values: rollingAvg(perMatch, window),
   }
 }
@@ -118,42 +120,38 @@ async function refreshFromOpenDota() {
     <div class="card skeleton" style="height: 108px" />
     <div class="card skeleton" style="height: 108px" />
   </section>
-  <div v-else-if="error" class="error-box">Nepodarilo sa načítať dáta: {{ error }}</div>
+  <div v-else-if="error" class="error-box">{{ t('dashboard.errorLoad', { error }) }}</div>
 
   <template v-else-if="data">
     <div v-if="notIndexed" class="card empty-state">
-      <p class="muted">
-        OpenDota nemá pre tohto hráča zatiaľ zaindexovaný žiadny match — zvyčajne
-        preto, že ho ešte nikdy neprehľadala. Vyžiadaj refresh a skús o pár minút
-        znova obnoviť stránku.
-      </p>
+      <p class="muted">{{ t('dashboard.notIndexedText') }}</p>
       <button class="refresh-btn" :disabled="refreshing || refreshRequested" @click="refreshFromOpenDota">
-        {{ refreshing ? 'Žiadam OpenDota…' : refreshRequested ? 'Vyžiadané ✓' : 'Refresh z OpenDota' }}
+        {{ refreshing ? t('dashboard.refreshRequesting') : refreshRequested ? t('dashboard.refreshDone') : t('dashboard.refreshIdle') }}
       </button>
       <p v-if="refreshError" class="error-box">{{ refreshError }}</p>
     </div>
 
     <section class="stats">
       <StatCard
-        label="Winrate (all time)"
+        :label="t('dashboard.statWinrateAllTime')"
         :value="`${winratePct(data.wl.win, data.wl.win + data.wl.lose)} %`"
         :sub="`${data.wl.win} W – ${data.wl.lose} L`"
         :tone="data.wl.win >= data.wl.lose ? 'win' : 'loss'"
         size="lg"
       />
-      <StatCard label="Wins" :value="String(data.wl.win)" tone="win" />
-      <StatCard label="Losses" :value="String(data.wl.lose)" tone="loss" />
+      <StatCard :label="t('dashboard.statWins')" :value="String(data.wl.win)" tone="win" />
+      <StatCard :label="t('dashboard.statLosses')" :value="String(data.wl.lose)" tone="loss" />
       <StatCard
-        label="Winrate (last 100)"
+        :label="t('dashboard.statWinrateRecent')"
         :value="`${recentWinrate} %`"
-        :sub="`${data.recentMatches.length} matches`"
+        :sub="`${data.recentMatches.length} ${t('dashboard.matchesSuffix')}`"
         :tone="recentWinrate === '—' ? 'default' : Number(recentWinrate) >= 50 ? 'win' : 'loss'"
       />
     </section>
 
     <section class="chart-grid">
       <div class="card">
-        <h2>Najhranejší hrdinovia</h2>
+        <h2>{{ t('dashboard.topHeroes') }}</h2>
         <table class="data">
           <thead>
             <tr>
@@ -171,12 +169,12 @@ async function refreshFromOpenDota() {
           </tbody>
         </table>
         <p class="muted more">
-          <RouterLink :to="`/player/${route.params.accountId}/heroes`">Všetci hrdinovia →</RouterLink>
+          <RouterLink :to="`/player/${route.params.accountId}/heroes`">{{ t('dashboard.allHeroes') }}</RouterLink>
         </p>
       </div>
 
       <div class="card">
-        <h2>KDA — priemer {{ kdaTrend.window }} matchov</h2>
+        <h2>{{ t('dashboard.kdaTrend', { window: kdaTrend.window }) }}</h2>
         <LineChart
           :labels="kdaTrend.labels"
           :datasets="[{ label: 'KDA', data: kdaTrend.values, color: cssVar('--kda') }]"
@@ -187,12 +185,12 @@ async function refreshFromOpenDota() {
     </section>
 
     <section class="card">
-      <h2>Aktivita — posledný rok</h2>
+      <h2>{{ t('dashboard.activityTitle') }}</h2>
       <ActivityHeatmap :matches="activityMatches" />
     </section>
 
     <section class="card">
-      <h2>GPM / XPM — priemer {{ farmTrend.window }} matchov</h2>
+      <h2>{{ t('dashboard.farmTrend', { window: farmTrend.window }) }}</h2>
       <LineChart
         :labels="farmTrend.labels"
         :datasets="[
@@ -205,7 +203,7 @@ async function refreshFromOpenDota() {
     </section>
 
     <section class="card">
-      <h2>Winrate podľa módu (all time)</h2>
+      <h2>{{ t('dashboard.winrateByMode') }}</h2>
       <table class="data">
         <thead>
           <tr>

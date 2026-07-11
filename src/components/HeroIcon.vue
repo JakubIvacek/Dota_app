@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { heroImageUrl } from '../api/opendota'
 import type { HeroConstant } from '../types/opendota'
 
@@ -9,12 +10,14 @@ withDefaults(
   }>(),
   { showName: true },
 )
+
+const { t } = useI18n()
 </script>
 
 <template>
   <span class="hero">
     <img v-if="hero" :src="heroImageUrl(hero)" :alt="hero.localized_name" class="portrait" />
-    <span v-if="showName">{{ hero?.localized_name ?? 'Unknown' }}</span>
+    <span v-if="showName">{{ hero?.localized_name ?? t('common.unknown') }}</span>
   </span>
 </template>
 
