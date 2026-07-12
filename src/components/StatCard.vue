@@ -24,6 +24,9 @@ withDefaults(
 
 <style scoped>
 .stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: var(--space-3) var(--space-5);
 }
 

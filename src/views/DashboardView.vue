@@ -91,6 +91,18 @@ const recentWinrate = computed(() => {
   return winratePct(matches.filter(wonMatch).length, matches.length)
 })
 
+const recentWinLoss = computed(() => {
+  const matches = data.value?.recentMatches ?? []
+  const wins = matches.filter(wonMatch).length
+  return { wins, losses: matches.length - wins }
+})
+
+const lastMatchStats = computed(() => {
+  const match = data.value?.recentMatches[0]
+  if (!match) return null
+  return { ...match, won: wonMatch(match) }
+})
+
 const avgMatchStats = computed(() => {
   const matches = data.value?.recentMatches ?? []
   if (matches.length === 0) return null
@@ -149,24 +161,21 @@ async function refreshFromOpenDota() {
       <StatCard
         :label="t('dashboard.statWinrateAllTime')"
         :value="`${winratePct(data.wl.win, data.wl.win + data.wl.lose)} %`"
-        :sub="`${data.wl.win} W – ${data.wl.lose} L`"
+        :sub="`${data.wl.win + data.wl.lose} ${t('dashboard.gamesSuffix')} · ${data.wl.win} W – ${data.wl.lose} L`"
         :tone="data.wl.win >= data.wl.lose ? 'win' : 'loss'"
         size="lg"
       />
-      <div class="card stat wl-combo">
-        <div class="wl-row">
-          <div class="label">{{ t('dashboard.statWins') }}</div>
-          <div class="value win">{{ data.wl.win }}</div>
-        </div>
-        <div class="wl-row">
-          <div class="label">{{ t('dashboard.statLosses') }}</div>
-          <div class="value loss">{{ data.wl.lose }}</div>
-        </div>
-      </div>
+      <StatCard
+        v-if="lastMatchStats"
+        :label="t('dashboard.statLastMatch')"
+        :value="formatDuration(lastMatchStats.duration)"
+        :tone="lastMatchStats.won ? 'win' : 'loss'"
+        :sub="`${lastMatchStats.gold_per_min ?? 0} GPM · ${lastMatchStats.xp_per_min ?? 0} XPM\n${lastMatchStats.kills} K / ${lastMatchStats.deaths} D / ${lastMatchStats.assists} A`"
+      />
       <StatCard
         :label="t('dashboard.statWinrateRecent')"
         :value="`${recentWinrate} %`"
-        :sub="`${data.recentMatches.length} ${t('dashboard.matchesSuffix')}`"
+        :sub="`${data.recentMatches.length} ${t('dashboard.matchesSuffix')}\n${recentWinLoss.wins} W / ${recentWinLoss.losses} L`"
         :tone="recentWinrate === '—' ? 'default' : Number(recentWinrate) >= 50 ? 'win' : 'loss'"
       />
       <StatCard
@@ -293,33 +302,6 @@ async function refreshFromOpenDota() {
 .stats > :first-child {
   grid-column: span 2;
 }
-
-.wl-combo {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-3);
-}
-
-.wl-row .label {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-eyebrow);
-  color: var(--muted);
-  font-weight: var(--weight-semibold);
-}
-
-.wl-row .value {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-tight);
-  line-height: 1.25;
-  font-variant-numeric: tabular-nums;
-}
-
-.wl-row .value.win { color: var(--win); }
-.wl-row .value.loss { color: var(--loss); }
 
 @media (max-width: 720px) {
   .stats {
