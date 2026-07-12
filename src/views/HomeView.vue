@@ -9,10 +9,11 @@ import { useFavorites } from '../composables/useFavorites'
 import { timeAgo } from '../utils/format'
 import SearchBox from '../components/SearchBox.vue'
 import PlayerLinkCard from '../components/PlayerLinkCard.vue'
+import Skeleton from '../components/Skeleton.vue'
 
 const { t, intlLocale } = useAppLocale()
 
-const { data: me } = useAsync(async () =>
+const { data: me, loading: meLoading } = useAsync(async () =>
   ACCOUNT_ID ? getPlayer(ACCOUNT_ID) : null,
 )
 
@@ -39,7 +40,14 @@ const shownRecents = computed(() =>
     </p>
     <SearchBox size="large" />
 
-    <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`" class="card card--interactive me">
+    <div v-if="ACCOUNT_ID && meLoading" class="card me skeleton-me">
+      <Skeleton variant="avatar" width="56px" height="56px" />
+      <div class="me-info">
+        <Skeleton variant="line" width="80px" height="11px" />
+        <Skeleton variant="line" width="150px" />
+      </div>
+    </div>
+    <RouterLink v-else-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`" class="card card--interactive me">
       <img v-if="me?.profile" :src="me.profile.avatarfull" alt="" />
       <div class="me-info">
         <div class="me-label">{{ t('home.myProfile') }}</div>
@@ -139,6 +147,12 @@ const shownRecents = computed(() =>
   height: 56px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+.skeleton-me .me-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .me-label {

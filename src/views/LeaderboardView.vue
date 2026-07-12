@@ -7,6 +7,7 @@ import {
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
 import { useAppLocale } from '../composables/useAppLocale'
+import Skeleton from '../components/Skeleton.vue'
 
 const { t, intlLocale } = useAppLocale()
 const division = ref<LeaderboardDivision>('europe')
@@ -52,8 +53,8 @@ function flag(country?: string): string {
     </nav>
   </div>
 
-  <section v-if="loading" class="card skeleton-table">
-    <div v-for="i in 12" :key="i" class="skeleton skeleton-row" />
+  <section v-if="loading" class="card skeleton-stack">
+    <Skeleton v-for="i in 12" :key="i" variant="row" height="34px" />
   </section>
   <div v-else-if="error" class="error-box">{{ t('leaderboard.errorLoad', { error }) }}</div>
 
@@ -137,16 +138,6 @@ function flag(country?: string): string {
 
 .lb-row:hover td {
   background: var(--surface-2);
-}
-
-.skeleton-table {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.skeleton-row {
-  height: 34px;
 }
 
 .note {

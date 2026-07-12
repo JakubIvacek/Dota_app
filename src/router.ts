@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { routeLoading } from './composables/useNavProgress'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -19,4 +20,16 @@ export const router = createRouter({
     { path: '/terms', name: 'terms', component: () => import('./views/TermsView.vue') },
     { path: '/privacy', name: 'privacy', component: () => import('./views/PrivacyView.vue') },
   ],
+})
+
+// Top-of-page progress bar signal — chunk fetch + guard resolution latency.
+// OpenDota fetch latency itself is covered separately by useAsync's pendingCount.
+router.beforeEach(() => {
+  routeLoading.value = true
+})
+router.afterEach(() => {
+  routeLoading.value = false
+})
+router.onError(() => {
+  routeLoading.value = false
 })
