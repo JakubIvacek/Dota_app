@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { extractAccountId } from '../utils/accountId'
 
 withDefaults(defineProps<{ size?: 'normal' | 'large' }>(), { size: 'normal' })
 
@@ -16,9 +17,12 @@ async function submit() {
   query.value = ''
   submitting.value = true
   try {
-    // Číselný vstup berieme rovno ako account ID (Friend Code), inak fulltext search.
-    if (/^\d+$/.test(q)) {
-      await router.push(`/player/${q}`)
+    // Číselné ID, alebo ID vytiahnuté z prilepeného profilového linku
+    // (Steam/Dotabuff/OpenDota/Stratz), berieme rovno ako account ID —
+    // OpenDota /search je nespoľahlivý, takže priama navigácia je istejšia.
+    const accountId = extractAccountId(q)
+    if (accountId) {
+      await router.push(`/player/${accountId}`)
     } else {
       await router.push({ name: 'search', query: { q } })
     }

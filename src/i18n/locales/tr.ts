@@ -120,6 +120,7 @@ export default {
     noResults: 'Oyuncu bulunamadı.',
     lastMatch: 'son maç {time}',
     idLabel: 'ID {id}',
+    hint: 'OpenDota araması güvenilmez olabilir. Bunun yerine oyuncunun hesap ID’sini veya bir profil bağlantısını (Steam, Dotabuff, OpenDota) yapıştırmayı dene.',
   },
   activity: {
     tooltip: '{date} — {n} maç ({wins}W – {losses}L)',

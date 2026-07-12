@@ -117,6 +117,7 @@ export default {
     noResults: '未找到玩家。',
     lastMatch: '最近对局 {time}',
     idLabel: 'ID {id}',
+    hint: 'OpenDota 的搜索可能不太可靠。可以直接粘贴玩家的 account ID 或个人资料链接(Steam、Dotabuff、OpenDota)。',
   },
   activity: {
     tooltip: '{date} — {n} 场对局({wins}W – {losses}L)',

@@ -120,6 +120,7 @@ export default {
     noResults: 'Kein Spieler gefunden.',
     lastMatch: 'letztes Match {time}',
     idLabel: 'ID {id}',
+    hint: 'Die OpenDota-Suche kann unzuverlässig sein. Füge stattdessen die Account-ID des Spielers oder einen Profillink (Steam, Dotabuff, OpenDota) ein.',
   },
   activity: {
     tooltip: '{date} — {n} Match ({wins}W – {losses}L) | {date} — {n} Matches ({wins}W – {losses}L)',

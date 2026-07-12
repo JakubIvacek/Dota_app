@@ -16,6 +16,7 @@ const { data: results, loading, error } = useAsync(() =>
 
 <template>
   <h1>{{ t('search.resultsFor', { query: route.query.q }) }}</h1>
+  <p class="hint">{{ t('search.hint') }}</p>
 
   <section v-if="loading" class="card skeleton-stack">
     <Skeleton v-for="i in 6" :key="i" variant="row" height="56px" />
@@ -41,6 +42,13 @@ const { data: results, loading, error } = useAsync(() =>
 </template>
 
 <style scoped>
+.hint {
+  margin-top: -0.2rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .card {
   padding: 0.4rem;
 }

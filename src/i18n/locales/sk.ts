@@ -120,6 +120,7 @@ export default {
     noResults: 'Žiadny hráč sa nenašiel.',
     lastMatch: 'last match {time}',
     idLabel: 'ID {id}',
+    hint: 'OpenDota vyhľadávanie vie byť nespoľahlivé. Skús radšej prilepiť account ID hráča alebo link na profil (Steam, Dotabuff, OpenDota).',
   },
   activity: {
     tooltip: '{date} — {n} match ({wins}W – {losses}L) | {date} — {n} matche ({wins}W – {losses}L) | {date} — {n} matchov ({wins}W – {losses}L)',
