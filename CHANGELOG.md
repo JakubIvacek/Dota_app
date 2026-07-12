@@ -15,6 +15,30 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-07-12
+
+### Added
+
+- Homepage "Product Tour" section (`ProductTour` component) — a preview of
+  the player dashboard (winrate/avg-match stats + GPM/XPM trend chart, same
+  colors as the real dashboard chart), rank tracking, hero performance,
+  match timeline, and a leaderboard card linking to `/leaderboard`. Includes
+  notes that every match shows the full 10-player roster and that some
+  players keep their match history private.
+- Favorites and Recently Viewed now always render, with empty-state copy
+  when there's nothing yet, and a chevron affordance on `PlayerLinkCard`.
+
+### Changed
+
+- Removed the homepage "My Profile" card; the app has no saved-profile
+  feature, favorites/recently-viewed already serve as quick access.
+- Homepage hero copy rewritten (heading, tagline, eyebrow) to describe
+  searching a player rather than restating the app name.
+- The header's compact search box no longer duplicates the large hero
+  search on the homepage; it still shows on every other page.
+- Recently Viewed capped to 4 cards on the homepage.
+- All new/changed homepage strings added across all 10 locales.
+
 ## [0.5.1] — 2026-07-12
 
 ### Fixed

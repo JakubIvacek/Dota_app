@@ -24,11 +24,43 @@ export default {
     submit: 'Buscar',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'Digite o nome de um jogador ou o Dota account ID (Friend Code) para ver as estatísticas.',
-    myProfile: 'Meu perfil',
-    favorites: '★ Favoritos',
+    eyebrow: 'DOTA 2 · ESTATÍSTICAS DE JOGADORES',
+    heading: 'Pesquise qualquer jogador de Dota 2',
+    tagline: 'Veja partidas recentes, desempenho por herói, winrate e progresso de rank.',
+    favorites: 'Favoritos',
+    favoritesEmpty: 'Ainda não há jogadores favoritos. Adicione um jogador aos favoritos a partir do perfil dele.',
     recentlyViewed: 'Vistos recentemente',
+    recentlyViewedEmpty: 'Os jogadores que você pesquisar vão aparecer aqui.',
+    features: {
+      eyebrow: 'Tour do app',
+      title: 'Uma prévia do que tem por dentro — no perfil de cada jogador tem ainda mais.',
+      dashboard: {
+        title: 'Painel do jogador',
+        desc: 'Winrate, duração média de partida e rank — em um só lugar.',
+        statWinrate: 'Winrate (últimas 100)',
+        statAvg: 'Partida média',
+      },
+      heroes: {
+        title: 'Desempenho por herói',
+        desc: 'Winrate por herói, ordenado por partidas jogadas.',
+      },
+      matches: {
+        title: 'Histórico de partidas',
+        desc: 'Cada partida, Radiant vs Dire, com detalhamento completo.',
+        radiantWin: 'Vitória do Radiant',
+        direWin: 'Vitória do Dire',
+      },
+      ranks: {
+        title: 'Acompanhamento de rank',
+        desc: 'Veja a medalha subir, partida após partida.',
+      },
+      leaderboard: {
+        title: 'Rankings',
+        desc: 'Veja onde os melhores jogadores estão.',
+      },
+      teammatesNote: 'Cada partida mostra o elenco completo de 10 jogadores — clique para ver o perfil de qualquer companheiro ou adversário.',
+      privateNote: 'Alguns jogadores deixam o histórico de partidas da Dota como privado — nesse caso as estatísticas também não aparecem aqui.',
+    },
   },
   dashboard: {
     errorLoad: 'Falha ao carregar dados: {error}',

@@ -24,11 +24,43 @@ export default {
     submit: 'Suchen',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'Gib einen Spielernamen oder eine Dota Account ID (Friend Code) ein, um Statistiken zu sehen.',
-    myProfile: 'Mein Profil',
-    favorites: '★ Favoriten',
+    eyebrow: 'DOTA 2 · SPIELERSTATISTIKEN',
+    heading: 'Suche einen beliebigen Dota-2-Spieler',
+    tagline: 'Sieh dir letzte Matches, Helden-Performance, Winrate und Rangfortschritt an.',
+    favorites: 'Favoriten',
+    favoritesEmpty: 'Noch keine favorisierten Spieler. Füge einen Spieler über sein Profil zu den Favoriten hinzu.',
     recentlyViewed: 'Kürzlich angesehen',
+    recentlyViewedEmpty: 'Gesuchte Spieler erscheinen hier.',
+    features: {
+      eyebrow: 'Produktrundgang',
+      title: 'Eine Vorschau dessen, was dich erwartet — im Profil eines Spielers findest du noch mehr.',
+      dashboard: {
+        title: 'Spieler-Dashboard',
+        desc: 'Winrate, durchschnittliche Matchdauer und Rang — auf einen Blick.',
+        statWinrate: 'Winrate (letzte 100)',
+        statAvg: 'Ø Match',
+      },
+      heroes: {
+        title: 'Helden-Performance',
+        desc: 'Winrate pro Held, sortiert nach gespielten Matches.',
+      },
+      matches: {
+        title: 'Match-Verlauf',
+        desc: 'Jedes Match, Radiant gegen Dire, mit vollständiger Aufschlüsselung.',
+        radiantWin: 'Sieg für Radiant',
+        direWin: 'Sieg für Dire',
+      },
+      ranks: {
+        title: 'Rang-Tracking',
+        desc: 'Verfolge den Aufstieg der Medaille, Match für Match.',
+      },
+      leaderboard: {
+        title: 'Ranglisten',
+        desc: 'Sieh, wo die besten Spieler stehen.',
+      },
+      teammatesNote: 'Jedes Match zeigt das komplette 10-Spieler-Roster — klicke dich zum Profil eines beliebigen Mitspielers oder Gegners durch.',
+      privateNote: 'Manche Spieler stellen ihre Dota-Matchhistorie auf privat — dann werden ihre Statistiken auch hier nicht angezeigt.',
+    },
   },
   dashboard: {
     errorLoad: 'Daten konnten nicht geladen werden: {error}',

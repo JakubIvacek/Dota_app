@@ -24,11 +24,43 @@ export default {
     submit: 'Ara',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'İstatistikleri görmek için bir oyuncu adı veya Dota account ID (Friend Code) gir.',
-    myProfile: 'Profilim',
-    favorites: '★ Favoriler',
+    eyebrow: 'DOTA 2 · OYUNCU İSTATİSTİKLERİ',
+    heading: 'Herhangi bir Dota 2 oyuncusunu ara',
+    tagline: 'Son maçları, hero performansını, winrate ve rank ilerlemesini gör.',
+    favorites: 'Favoriler',
+    favoritesEmpty: 'Henüz favori oyuncu yok. Bir oyuncuyu profilinden favorilere ekle.',
     recentlyViewed: 'Son görüntülenenler',
+    recentlyViewedEmpty: 'Aradığın oyuncular burada görünecek.',
+    features: {
+      eyebrow: 'Ürün turu',
+      title: 'İçeride seni neler beklediğine dair bir önizleme — her oyuncunun profilinde çok daha fazlası var.',
+      dashboard: {
+        title: 'Oyuncu paneli',
+        desc: 'Winrate, ortalama maç süresi ve rank — tek bakışta.',
+        statWinrate: 'Winrate (son 100)',
+        statAvg: 'Ort. maç',
+      },
+      heroes: {
+        title: 'Hero performansı',
+        desc: 'Oynanan maç sayısına göre sıralanmış hero başına winrate.',
+      },
+      matches: {
+        title: 'Maç geçmişi',
+        desc: 'Her maç, Radiant vs Dire, tam detaylarıyla.',
+        radiantWin: 'Radiant galibiyeti',
+        direWin: 'Dire galibiyeti',
+      },
+      ranks: {
+        title: 'Rank takibi',
+        desc: 'Madalyanın maç maç yükselişini izle.',
+      },
+      leaderboard: {
+        title: 'Sıralama tabloları',
+        desc: 'En iyi oyuncuların nerede olduğunu gör.',
+      },
+      teammatesNote: 'Her maç 10 oyuncunun tam kadrosunu gösterir — herhangi bir takım arkadaşının veya rakibin profiline tıklayarak gidebilirsin.',
+      privateNote: 'Bazı oyuncular Dota maç geçmişini gizli tutar — bu durumda istatistikleri burada da görünmez.',
+    },
   },
   dashboard: {
     errorLoad: 'Veriler yüklenemedi: {error}',

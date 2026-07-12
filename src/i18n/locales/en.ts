@@ -22,11 +22,43 @@ const en = {
     submit: 'Search',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'Enter a player name or Dota account ID (Friend Code) to see their stats.',
-    myProfile: 'My profile',
-    favorites: '★ Favorites',
+    eyebrow: 'DOTA 2 · PLAYER STATS',
+    heading: 'Search any Dota 2 player',
+    tagline: 'View recent matches, hero performance, winrate and rank progression.',
+    favorites: 'Favorites',
+    favoritesEmpty: 'No favorite players yet. Add a player to favorites from their profile.',
     recentlyViewed: 'Recently viewed',
+    recentlyViewedEmpty: 'Players you search for will appear here.',
+    features: {
+      eyebrow: 'Product tour',
+      title: "A preview of what's inside — there's even more on every player's profile.",
+      dashboard: {
+        title: 'Player dashboard',
+        desc: 'Winrate, average match length, and rank — one glance.',
+        statWinrate: 'Winrate (last 100)',
+        statAvg: 'Avg match',
+      },
+      heroes: {
+        title: 'Hero performance',
+        desc: 'Winrate per hero, ranked by games played.',
+      },
+      matches: {
+        title: 'Match timeline',
+        desc: 'Every match, Radiant vs Dire, with full breakdowns.',
+        radiantWin: 'Radiant victory',
+        direWin: 'Dire victory',
+      },
+      ranks: {
+        title: 'Rank tracking',
+        desc: 'Watch the medal climb, match after match.',
+      },
+      leaderboard: {
+        title: 'Leaderboards',
+        desc: 'See where the best players rank.',
+      },
+      teammatesNote: 'Every match shows the full 10-player roster — click through to any teammate\'s or opponent\'s profile.',
+      privateNote: "Some players keep their Dota match history private — their stats won't show here either.",
+    },
   },
   dashboard: {
     errorLoad: 'Failed to load data: {error}',

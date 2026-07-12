@@ -24,11 +24,43 @@ export default {
     submit: 'Hanapin',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'Ilagay ang pangalan ng player o Dota account ID (Friend Code) para makita ang stats.',
-    myProfile: 'Aking Profile',
-    favorites: '★ Mga Paborito',
+    eyebrow: 'DOTA 2 · PLAYER STATS',
+    heading: 'Maghanap ng kahit sinong Dota 2 player',
+    tagline: 'Tingnan ang mga huling match, performance ng hero, winrate, at pag-angat ng rank.',
+    favorites: 'Mga Paborito',
+    favoritesEmpty: 'Wala pang paboritong player. Magdagdag ng player sa paborito mula sa profile nila.',
     recentlyViewed: 'Kamakailang Tiningnan',
+    recentlyViewedEmpty: 'Lalabas dito ang mga player na hinahanap mo.',
+    features: {
+      eyebrow: 'Product tour',
+      title: 'Isang preview ng nasa loob — mas marami pa sa profile ng bawat player.',
+      dashboard: {
+        title: 'Player dashboard',
+        desc: 'Winrate, average na tagal ng match, at rank — nasa iisang tingin.',
+        statWinrate: 'Winrate (huling 100)',
+        statAvg: 'Average na match',
+      },
+      heroes: {
+        title: 'Performance ng hero',
+        desc: 'Winrate kada hero, inayos ayon sa dami ng laro.',
+      },
+      matches: {
+        title: 'History ng match',
+        desc: 'Bawat match, Radiant vs Dire, may kumpletong breakdown.',
+        radiantWin: 'Panalo ang Radiant',
+        direWin: 'Panalo ang Dire',
+      },
+      ranks: {
+        title: 'Rank tracking',
+        desc: 'Panoorin ang pag-akyat ng medalya, match by match.',
+      },
+      leaderboard: {
+        title: 'Leaderboards',
+        desc: 'Tingnan kung saan naka-rank ang mga pinakamahusay na player.',
+      },
+      teammatesNote: 'Ipinapakita ng bawat match ang kumpletong 10-player roster — i-click para makita ang profile ng kahit sinong teammate o kalaban.',
+      privateNote: 'May mga player na pinipa-private ang match history nila sa Dota — kaya hindi rin lalabas ang stats nila dito.',
+    },
   },
   dashboard: {
     errorLoad: 'Hindi na-load ang data: {error}',

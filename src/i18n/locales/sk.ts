@@ -24,11 +24,43 @@ export default {
     submit: 'Hľadať',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'Zadaj meno hráča alebo Dota account ID (Friend Code) a pozri si štatistiky.',
-    myProfile: 'Môj profil',
-    favorites: '★ Obľúbení',
+    eyebrow: 'DOTA 2 · ŠTATISTIKY HRÁČOV',
+    heading: 'Vyhľadaj ľubovoľného hráča Dota 2',
+    tagline: 'Pozri si nedávne matche, výkon podľa hrdinov, winrate a postup v ranku.',
+    favorites: 'Obľúbení',
+    favoritesEmpty: 'Zatiaľ žiadni obľúbení hráči. Pridaj hráča do obľúbených z jeho profilu.',
     recentlyViewed: 'Nedávno pozreté',
+    recentlyViewedEmpty: 'Hráči, ktorých vyhľadáš, sa zobrazia tu.',
+    features: {
+      eyebrow: 'Prehliadka',
+      title: 'Ukážka toho, čo ťa čaká — na profile hráča toho nájdeš ešte viac.',
+      dashboard: {
+        title: 'Prehľad hráča',
+        desc: 'Winrate, priemerná dĺžka matchu a rank — na jeden pohľad.',
+        statWinrate: 'Winrate (posledných 100)',
+        statAvg: 'Priemerný match',
+      },
+      heroes: {
+        title: 'Výkon podľa hrdinov',
+        desc: 'Winrate pre každého hrdinu, zoradené podľa odohraných hier.',
+      },
+      matches: {
+        title: 'História matchov',
+        desc: 'Každý match, Radiant vs Dire, s plným rozpisom.',
+        radiantWin: 'Víťazstvo Radiant',
+        direWin: 'Víťazstvo Dire',
+      },
+      ranks: {
+        title: 'Sledovanie rank-u',
+        desc: 'Sleduj, ako medaila stúpa, match po matchi.',
+      },
+      leaderboard: {
+        title: 'Rebríčky',
+        desc: 'Pozri sa, kde sa umiestňujú najlepší hráči.',
+      },
+      teammatesNote: 'Každý match ukazuje kompletnú zostavu 10 hráčov — preklikni sa na profil ktoréhokoľvek spoluhráča alebo súpera.',
+      privateNote: 'Niektorí hráči majú históriu zápasov v Dote nastavenú ako súkromnú — ich štatistiky sa potom nezobrazia ani tu.',
+    },
   },
   dashboard: {
     errorLoad: 'Nepodarilo sa načítať dáta: {error}',

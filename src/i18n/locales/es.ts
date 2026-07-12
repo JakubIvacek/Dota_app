@@ -24,11 +24,43 @@ export default {
     submit: 'Buscar',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: 'Ingresá el nombre de un jugador o el Dota account ID (Friend Code) para ver sus estadísticas.',
-    myProfile: 'Mi perfil',
-    favorites: '★ Favoritos',
+    eyebrow: 'DOTA 2 · ESTADÍSTICAS DE JUGADORES',
+    heading: 'Buscá cualquier jugador de Dota 2',
+    tagline: 'Mirá partidas recientes, rendimiento por héroe, winrate y progreso de rango.',
+    favorites: 'Favoritos',
+    favoritesEmpty: 'Todavía no hay jugadores favoritos. Agregá un jugador a favoritos desde su perfil.',
     recentlyViewed: 'Vistos recientemente',
+    recentlyViewedEmpty: 'Los jugadores que busques van a aparecer acá.',
+    features: {
+      eyebrow: 'Recorrido',
+      title: 'Una vista previa de lo que hay adentro — en el perfil de cada jugador encontrás todavía más.',
+      dashboard: {
+        title: 'Panel del jugador',
+        desc: 'Winrate, duración promedio de partida y rango — de un vistazo.',
+        statWinrate: 'Winrate (últimas 100)',
+        statAvg: 'Partida promedio',
+      },
+      heroes: {
+        title: 'Rendimiento por héroe',
+        desc: 'Winrate por héroe, ordenado por partidas jugadas.',
+      },
+      matches: {
+        title: 'Historial de partidas',
+        desc: 'Cada partida, Radiant vs Dire, con el detalle completo.',
+        radiantWin: 'Victoria de Radiant',
+        direWin: 'Victoria de Dire',
+      },
+      ranks: {
+        title: 'Seguimiento de rango',
+        desc: 'Mirá cómo sube la medalla, partida tras partida.',
+      },
+      leaderboard: {
+        title: 'Tablas de posiciones',
+        desc: 'Mirá dónde se ubican los mejores jugadores.',
+      },
+      teammatesNote: 'Cada partida muestra el roster completo de 10 jugadores — hacé clic para ver el perfil de cualquier compañero o rival.',
+      privateNote: 'Algunos jugadores tienen su historial de partidas de Dota en privado — en ese caso tampoco vas a ver sus estadísticas acá.',
+    },
   },
   dashboard: {
     errorLoad: 'No se pudieron cargar los datos: {error}',

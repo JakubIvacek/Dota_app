@@ -1,71 +1,44 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ACCOUNT_ID } from '../config'
 import { useAppLocale } from '../composables/useAppLocale'
-import { getPlayer, rankTierName } from '../api/opendota'
-import { useAsync } from '../composables/useAsync'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
 import { useFavorites } from '../composables/useFavorites'
 import { timeAgo } from '../utils/format'
 import SearchBox from '../components/SearchBox.vue'
 import PlayerLinkCard from '../components/PlayerLinkCard.vue'
-import RankBadge from '../components/RankBadge.vue'
-import Skeleton from '../components/Skeleton.vue'
+import ProductTour from '../components/ProductTour.vue'
 
 const { t, intlLocale } = useAppLocale()
 
-const { data: me, loading: meLoading } = useAsync(async () =>
-  ACCOUNT_ID ? getPlayer(ACCOUNT_ID) : null,
-)
-
 const { recents } = useRecentPlayers()
-const { favorites, isFavorite } = useFavorites()
+const { favorites } = useFavorites()
 
-const shownFavorites = computed(() =>
-  favorites.value.filter((f) => f.account_id !== ACCOUNT_ID),
-)
-
-// Vlastný profil má vlastnú kartu a obľúbení vlastnú sekciu — v histórii nedupluj.
-const shownRecents = computed(() =>
-  recents.value.filter((r) => r.account_id !== ACCOUNT_ID && !isFavorite(r.account_id)),
-)
+/** Desktop shows a max of 4 — older visits live in localStorage, not on the landing page. */
+const MAX_RECENTS_SHOWN = 4
 </script>
 
 <template>
   <div class="landing">
     <div class="glow" aria-hidden="true" />
     <span class="eyebrow">{{ t('home.eyebrow') }}</span>
-    <h1>Dota Stats</h1>
+    <h1>{{ t('home.heading') }}</h1>
     <p class="muted lede">
       {{ t('home.tagline') }}
     </p>
     <SearchBox size="large" />
 
-    <div v-if="ACCOUNT_ID && meLoading" class="card me skeleton-me">
-      <Skeleton variant="avatar" width="56px" height="56px" />
-      <div class="me-info">
-        <Skeleton variant="line" width="80px" height="11px" />
-        <Skeleton variant="line" width="150px" />
-      </div>
-    </div>
-    <RouterLink v-else-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`" class="card card--interactive me">
-      <img v-if="me?.profile" :src="me.profile.avatarfull" alt="" />
-      <div class="me-info">
-        <div class="me-label">{{ t('home.myProfile') }}</div>
-        <div class="me-name">{{ me?.profile?.personaname ?? t('common.playerFallback', { id: ACCOUNT_ID }) }}</div>
-        <div class="muted rank-line" v-if="me">
-          <RankBadge :rank-tier="me.rank_tier" />
-          {{ rankTierName(me.rank_tier) }}
-        </div>
-      </div>
-      <span class="arrow">→</span>
-    </RouterLink>
-
-    <section v-if="shownFavorites.length" class="group">
-      <h2>{{ t('home.favorites') }}</h2>
-      <div class="grid">
+    <section class="group">
+      <h2>
+        <svg class="star-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path
+            d="M10 1.6l2.47 5.24 5.78.68-4.28 4.02 1.15 5.72L10 14.4l-5.12 2.86 1.15-5.72L1.75 7.52l5.78-.68L10 1.6z"
+            fill="currentColor"
+          />
+        </svg>
+        {{ t('home.favorites') }}
+      </h2>
+      <div v-if="favorites.length" class="grid">
         <PlayerLinkCard
-          v-for="(f, i) in shownFavorites"
+          v-for="(f, i) in favorites"
           :key="f.account_id"
           :account-id="f.account_id"
           :personaname="f.personaname"
@@ -73,13 +46,14 @@ const shownRecents = computed(() =>
           :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
         />
       </div>
+      <p v-else class="muted empty-note">{{ t('home.favoritesEmpty') }}</p>
     </section>
 
-    <section v-if="shownRecents.length" class="group">
+    <section class="group">
       <h2>{{ t('home.recentlyViewed') }}</h2>
-      <div class="grid">
+      <div v-if="recents.length" class="grid">
         <PlayerLinkCard
-          v-for="(r, i) in shownRecents"
+          v-for="(r, i) in recents.slice(0, MAX_RECENTS_SHOWN)"
           :key="r.account_id"
           :account-id="r.account_id"
           :personaname="r.personaname"
@@ -88,7 +62,10 @@ const shownRecents = computed(() =>
           :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
         />
       </div>
+      <p v-else class="muted empty-note">{{ t('home.recentlyViewedEmpty') }}</p>
     </section>
+
+    <ProductTour />
   </div>
 </template>
 
@@ -136,73 +113,36 @@ const shownRecents = computed(() =>
   max-width: 34rem;
 }
 
-.me {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-  min-width: min(440px, 90vw);
-  color: var(--ink);
-  text-align: left;
-  box-shadow: var(--shadow-glow-accent);
-}
-
-.me img {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.skeleton-me .me-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.me-label {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  color: var(--muted);
-  font-weight: var(--weight-semibold);
-}
-
-.me-name {
-  font-family: var(--font-display);
-  font-weight: var(--weight-bold);
-  font-size: 1.15rem;
-}
-
-.rank-line {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.arrow {
-  margin-left: auto;
-  color: var(--accent);
-  font-size: 1.3rem;
-}
-
 .group {
   margin-top: var(--space-8);
   width: 100%;
-  max-width: 760px;
+  max-width: 980px;
   text-align: left;
 }
 
 .group h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   color: var(--muted);
 }
 
+.star-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--gold);
+}
+
+.empty-note {
+  margin-top: var(--space-2);
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: var(--space-3);
 }
 

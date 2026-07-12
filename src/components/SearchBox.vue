@@ -162,7 +162,7 @@ button:disabled {
 }
 
 .large input {
-  width: min(420px, 60vw);
+  width: min(520px, 60vw);
   padding: 0.6rem 0.9rem 0.6rem 2.5rem;
   font-size: 1.05rem;
 }

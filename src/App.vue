@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { Analytics } from '@vercel/analytics/vue'
 import { ACCOUNT_ID } from './config'
 import { SUPPORTED_LOCALES, persistLocale, type LocaleCode } from './i18n'
@@ -7,6 +8,7 @@ import SearchBox from './components/SearchBox.vue'
 import TopProgressBar from './components/TopProgressBar.vue'
 
 const { t, locale } = useI18n()
+const route = useRoute()
 
 function onLocaleChange(e: Event) {
   const code = (e.target as HTMLSelectElement).value as LocaleCode
@@ -29,7 +31,9 @@ function onLocaleChange(e: Event) {
         <RouterLink to="/leaderboard">{{ t('app.nav.leaderboards') }}</RouterLink>
       </nav>
       <div class="topbar-actions">
-        <SearchBox class="topbar-search" />
+        <!-- The homepage already has a large primary search in the hero — showing it
+             again here would just duplicate it. Other pages still get the compact one. -->
+        <SearchBox v-if="route.name !== 'home'" class="topbar-search" />
         <div class="locale-wrap">
           <svg class="locale-icon" viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4" />

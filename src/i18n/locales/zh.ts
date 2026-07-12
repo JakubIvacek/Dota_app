@@ -24,11 +24,43 @@ export default {
     submit: '搜索',
   },
   home: {
-    eyebrow: 'Dota 2 · match stats',
-    tagline: '输入玩家名称或 Dota account ID(Friend Code)查看数据统计。',
-    myProfile: '我的主页',
-    favorites: '★ 收藏',
+    eyebrow: 'DOTA 2 · 玩家数据',
+    heading: '搜索任意 Dota 2 玩家',
+    tagline: '查看最近对局、英雄表现、胜率和段位进度。',
+    favorites: '收藏',
+    favoritesEmpty: '还没有收藏的玩家。可以在玩家主页中将其添加到收藏。',
     recentlyViewed: '最近浏览',
+    recentlyViewedEmpty: '你搜索过的玩家会显示在这里。',
+    features: {
+      eyebrow: '功能预览',
+      title: '先睹为快——玩家主页里还有更多内容。',
+      dashboard: {
+        title: '玩家仪表盘',
+        desc: '胜率、平均对局时长和段位 — 一目了然。',
+        statWinrate: '胜率(近100场)',
+        statAvg: '平均对局',
+      },
+      heroes: {
+        title: '英雄数据',
+        desc: '按对局数排序的每个英雄胜率。',
+      },
+      matches: {
+        title: '对局记录',
+        desc: '每一局比赛，天辉对夜魇，附完整数据。',
+        radiantWin: '天辉获胜',
+        direWin: '夜魇获胜',
+      },
+      ranks: {
+        title: '段位追踪',
+        desc: '一局一局，见证段位提升。',
+      },
+      leaderboard: {
+        title: '排行榜',
+        desc: '看看最强玩家的排名。',
+      },
+      teammatesNote: '每场对局都显示完整的10人名单——点击即可查看任意队友或对手的主页。',
+      privateNote: '有些玩家将 Dota 对局记录设为隐私——这种情况下这里也无法显示他们的数据。',
+    },
   },
   dashboard: {
     errorLoad: '数据加载失败:{error}',
