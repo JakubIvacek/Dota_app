@@ -86,10 +86,30 @@ h2 { font-size: var(--text-md); }
 
 /* Interactive card — same surface, but signals it responds to hover/focus
    (profile card, player links, favorites). Plain .card stays inert. */
+.card--interactive {
+  transition: border-color var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
+}
+
 .card--interactive:hover,
 .card--interactive:focus-visible {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card--interactive:active {
+  transform: translateY(0);
+  transition-duration: var(--duration-fast);
+}
+
+/* Press feedback — every button in the app gets a physical "click" instead of
+   an instant, weightless state change. */
+button:not(:disabled) {
+  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
 }
 
 .muted { color: var(--muted); }
@@ -203,7 +223,11 @@ tr.clickable:focus-visible {
   border: 1px solid rgba(224, 82, 79, 0.32);
 }
 
-.status-note {
+.status-note,
+.error-box {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
   border-left: 3px solid var(--gold);
   padding: var(--space-3) var(--space-4);
   background: var(--surface);
@@ -211,10 +235,22 @@ tr.clickable:focus-visible {
   color: var(--ink-2);
 }
 
+.status-note::before,
+.error-box::before {
+  flex-shrink: 0;
+  font-weight: var(--weight-bold);
+}
+
+.status-note::before {
+  content: '!';
+  color: var(--gold);
+}
+
 .error-box {
-  border-left: 3px solid var(--loss);
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  color: var(--ink-2);
+  border-left-color: var(--loss);
+}
+
+.error-box::before {
+  content: '×';
+  color: var(--loss);
 }

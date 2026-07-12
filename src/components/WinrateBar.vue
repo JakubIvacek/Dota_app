@@ -50,6 +50,7 @@ const ratio = computed(() => (props.games ? props.win / props.games : 0))
   display: block;
   height: 100%;
   border-radius: var(--radius-sm);
+  transition: width var(--duration-normal) var(--ease-out);
 }
 
 .wr-fill.good { background: var(--win); }
