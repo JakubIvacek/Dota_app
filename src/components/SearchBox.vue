@@ -87,7 +87,8 @@ input {
   color: var(--ink);
   padding: 0.4rem 0.7rem 0.4rem 2rem;
   font: inherit;
-  width: 220px;
+  max-width: 220px;
+  min-width: 0;
   flex: 1;
 }
 

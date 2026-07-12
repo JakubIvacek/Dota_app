@@ -195,30 +195,32 @@ async function refreshFromOpenDota() {
   <p v-else-if="!rows.length" class="muted">{{ t('matches.emptyFiltered') }}</p>
 
   <div v-else class="card">
-    <table class="data">
-      <thead>
-        <tr>
-          <th>Hero</th>
-          <th>{{ t('matches.colResult') }}</th>
-          <th>K / D / A</th>
-          <th class="num">{{ t('matches.colDuration') }}</th>
-          <th>{{ t('matches.colMode') }}</th>
-          <th>{{ t('matches.colPlayed') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="m in rows" :key="m.match_id" class="clickable" @click="openMatch(m.match_id)">
-          <td><HeroIcon :hero="m.hero" /></td>
-          <td>
-            <span class="badge" :class="m.won ? 'win' : 'loss'">{{ m.won ? 'W' : 'L' }}</span>
-          </td>
-          <td>{{ m.kills }} / {{ m.deaths }} / {{ m.assists }}</td>
-          <td class="num">{{ formatDuration(m.duration) }}</td>
-          <td>{{ gameModeName(m.game_mode) }}</td>
-          <td class="muted">{{ timeAgo(m.start_time, intlLocale) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Hero</th>
+            <th>{{ t('matches.colResult') }}</th>
+            <th>K / D / A</th>
+            <th class="num">{{ t('matches.colDuration') }}</th>
+            <th>{{ t('matches.colMode') }}</th>
+            <th>{{ t('matches.colPlayed') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="m in rows" :key="m.match_id" class="clickable" @click="openMatch(m.match_id)">
+            <td><HeroIcon :hero="m.hero" /></td>
+            <td>
+              <span class="badge" :class="m.won ? 'win' : 'loss'">{{ m.won ? 'W' : 'L' }}</span>
+            </td>
+            <td>{{ m.kills }} / {{ m.deaths }} / {{ m.assists }}</td>
+            <td class="num">{{ formatDuration(m.duration) }}</td>
+            <td>{{ gameModeName(m.game_mode) }}</td>
+            <td class="muted">{{ timeAgo(m.start_time, intlLocale) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div ref="sentinel" class="scroll-footer">
       <span v-if="loadingMore" class="muted">{{ t('matches.loadingMore') }}</span>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watchEffect, nextTick } from 'vue'
 import { useAppLocale } from '../composables/useAppLocale'
 
 const props = defineProps<{
@@ -8,6 +8,15 @@ const props = defineProps<{
 }>()
 
 const { t, intlLocale } = useAppLocale()
+
+// Mobilný scroll kontajner otvor na najnovšom týždni, nie na najstaršom.
+const scrollEl = ref<HTMLElement | null>(null)
+watchEffect(async () => {
+  const el = scrollEl.value
+  if (!el || !props.matches) return
+  await nextTick()
+  el.scrollLeft = el.scrollWidth
+})
 
 const CELL = 12
 const GAP = 3
@@ -110,34 +119,41 @@ const totalGames = computed(() => props.matches.length)
 
 <template>
   <div class="heatmap">
-    <svg :viewBox="`0 0 ${width} ${height}`" :aria-label="t('activity.ariaLabel', { n: totalGames }, totalGames)">
-      <text v-for="m in grid.months" :key="m.x" :x="m.x" :y="LABEL_TOP - 7" class="axis-label">
-        {{ m.label }}
-      </text>
-      <text
-        v-for="d in DAY_LABELS"
-        :key="d.label"
-        :x="LABEL_LEFT - 8"
-        :y="LABEL_TOP + d.row * PITCH + CELL - 2.5"
-        class="axis-label"
-        text-anchor="end"
+    <div class="heatmap-scroll" ref="scrollEl">
+      <svg
+        :viewBox="`0 0 ${width} ${height}`"
+        :width="width"
+        :height="height"
+        :aria-label="t('activity.ariaLabel', { n: totalGames }, totalGames)"
       >
-        {{ d.label }}
-      </text>
-      <rect
-        v-for="c in grid.cells"
-        :key="`${c.x}-${c.y}`"
-        :x="c.x"
-        :y="c.y"
-        :width="CELL"
-        :height="CELL"
-        :fill="c.fill"
-        rx="3"
-        class="cell"
-      >
-        <title>{{ c.title }}</title>
-      </rect>
-    </svg>
+        <text v-for="m in grid.months" :key="m.x" :x="m.x" :y="LABEL_TOP - 7" class="axis-label">
+          {{ m.label }}
+        </text>
+        <text
+          v-for="d in DAY_LABELS"
+          :key="d.label"
+          :x="LABEL_LEFT - 8"
+          :y="LABEL_TOP + d.row * PITCH + CELL - 2.5"
+          class="axis-label"
+          text-anchor="end"
+        >
+          {{ d.label }}
+        </text>
+        <rect
+          v-for="c in grid.cells"
+          :key="`${c.x}-${c.y}`"
+          :x="c.x"
+          :y="c.y"
+          :width="CELL"
+          :height="CELL"
+          :fill="c.fill"
+          rx="3"
+          class="cell"
+        >
+          <title>{{ c.title }}</title>
+        </rect>
+      </svg>
+    </div>
     <div class="legend">
       <span class="muted">{{ t('activity.totalGames', { n: totalGames }, totalGames) }}</span>
       <span class="scale">
@@ -150,10 +166,23 @@ const totalGames = computed(() => props.matches.length)
 </template>
 
 <style scoped>
+.heatmap-scroll {
+  overflow-x: auto;
+}
+
 svg {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* Pod 720px sa mriežka nezmršťuje na nečitateľné bunky — radšej natívna
+   veľkosť + horizontálny scroll, nech ostane vidno aspoň pár posledných týždňov. */
+@media (max-width: 720px) {
+  svg {
+    width: auto;
+    max-width: none;
+  }
 }
 
 .axis-label {

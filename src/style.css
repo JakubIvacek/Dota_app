@@ -70,6 +70,7 @@ h2 { font-size: var(--text-md); }
 }
 
 .container {
+  width: 100%;
   max-width: 1160px;
   margin: 0 auto;
   padding: var(--space-5);
@@ -188,6 +189,13 @@ table.data td {
 
 table.data tr:last-child td {
   border-bottom: none;
+}
+
+/* Tabuľky sú širšie ako mobilný viewport — horizontálny scroll na kontajneri,
+   nikdy na celej stránke. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Číselné stĺpce — zarovnať doprava, nech sa dajú porovnávať očami. */

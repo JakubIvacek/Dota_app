@@ -170,6 +170,7 @@ async function refreshFromOpenDota() {
         :label="t('dashboard.statLastMatch')"
         :value="formatDuration(lastMatchStats.duration)"
         :tone="lastMatchStats.won ? 'win' : 'loss'"
+        show-badge
         :sub="`${lastMatchStats.gold_per_min ?? 0} GPM · ${lastMatchStats.xp_per_min ?? 0} XPM\n${lastMatchStats.kills} K / ${lastMatchStats.deaths} D / ${lastMatchStats.assists} A`"
       />
       <StatCard
@@ -189,22 +190,24 @@ async function refreshFromOpenDota() {
     <section class="chart-grid">
       <div class="card">
         <h2>{{ t('dashboard.topHeroes') }}</h2>
-        <table class="data">
-          <thead>
-            <tr>
-              <th>Hero</th>
-              <th class="num">Games</th>
-              <th class="num">Winrate</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="h in topHeroes" :key="h.hero_id">
-              <td><HeroIcon :hero="h.hero" /></td>
-              <td class="num">{{ h.games }}</td>
-              <td class="num">{{ winratePct(h.win, h.games) }} %</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Hero</th>
+                <th class="num">Games</th>
+                <th class="num">Winrate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="h in topHeroes" :key="h.hero_id">
+                <td><HeroIcon :hero="h.hero" /></td>
+                <td class="num">{{ h.games }}</td>
+                <td class="num">{{ winratePct(h.win, h.games) }} %</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p class="muted more">
           <RouterLink :to="`/player/${route.params.accountId}/heroes`">{{ t('dashboard.allHeroes') }}</RouterLink>
         </p>
@@ -241,22 +244,24 @@ async function refreshFromOpenDota() {
 
     <section class="card">
       <h2>{{ t('dashboard.winrateByMode') }}</h2>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Mode</th>
-            <th class="num">Games</th>
-            <th class="num">Winrate</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="m in modeStats" :key="m.mode">
-            <td>{{ gameModeName(m.mode) }}</td>
-            <td class="num">{{ m.games }}</td>
-            <td><WinrateBar :win="m.win" :games="m.games" /></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th class="num">Games</th>
+              <th class="num">Winrate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="m in modeStats" :key="m.mode">
+              <td>{{ gameModeName(m.mode) }}</td>
+              <td class="num">{{ m.games }}</td>
+              <td><WinrateBar :win="m.win" :games="m.games" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </template>
 </template>
@@ -307,6 +312,10 @@ async function refreshFromOpenDota() {
   .stats {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .stats > :first-child {
+    grid-column: span 1;
+  }
 }
 
 section.card {
@@ -315,7 +324,7 @@ section.card {
 
 .chart-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
 }

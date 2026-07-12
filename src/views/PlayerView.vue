@@ -109,6 +109,13 @@ const { isFavorite, toggle } = useFavorites()
   color: var(--accent);
 }
 
+@media (max-width: 720px) {
+  .tabs {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
 .star {
   background: none;
   border: none;

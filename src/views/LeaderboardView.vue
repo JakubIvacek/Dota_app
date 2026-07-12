@@ -64,28 +64,30 @@ function flag(country?: string): string {
     </p>
 
     <div class="card">
-      <table class="data">
-        <thead>
-          <tr>
-            <th class="num">#</th>
-            <th>{{ t('leaderboard.colPlayer') }}</th>
-            <th>{{ t('leaderboard.colTeam') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in rows" :key="p.rank" class="lb-row">
-            <td class="num rank">{{ p.rank }}</td>
-            <td>
-              <RouterLink class="player" :to="{ name: 'search', query: { q: p.name } }">
-                <span class="flag" :class="{ placeholder: !flag(p.country) }">{{
-                  flag(p.country) || '🌐'
-                }}</span>{{ p.name }}
-              </RouterLink>
-            </td>
-            <td class="muted">{{ p.team_tag ?? '—' }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>{{ t('leaderboard.colPlayer') }}</th>
+              <th>{{ t('leaderboard.colTeam') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in rows" :key="p.rank" class="lb-row">
+              <td class="num rank">{{ p.rank }}</td>
+              <td>
+                <RouterLink class="player" :to="{ name: 'search', query: { q: p.name } }">
+                  <span class="flag" :class="{ placeholder: !flag(p.country) }">{{
+                    flag(p.country) || '🌐'
+                  }}</span>{{ p.name }}
+                </RouterLink>
+              </td>
+              <td class="muted">{{ p.team_tag ?? '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <button v-if="shown < total" class="more" @click="shown += 200">
         {{ t('leaderboard.showMore', { shown, total: total.toLocaleString(intlLocale) }) }}
       </button>
@@ -108,6 +110,7 @@ function flag(country?: string): string {
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
 }
 

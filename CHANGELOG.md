@@ -15,6 +15,40 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-07-12
+
+### Fixed
+
+- Mobile layout: fixed page-level horizontal overflow that occurred across
+  most views on narrow viewports. Root causes: `.container` had no explicit
+  `width: 100%` so it wouldn't reliably stretch to the viewport once a wide
+  table was nested inside it; the header search input had a hardcoded
+  `220px` width that couldn't shrink; the home page's ambient glow decoration
+  bled past the viewport edge; and `.chart-grid`'s `minmax(320px, 1fr)`
+  didn't fit inside a 320px viewport once padding is subtracted.
+- Data tables (Leaderboard, Heroes, Matches, and the two Dashboard tables)
+  now scroll horizontally inside a `.table-scroll` wrapper instead of
+  overflowing the page, matching the pattern already used on the match
+  detail scoreboard.
+- Header now wraps into two rows on narrow screens instead of overflowing:
+  brand + nav on the first row (nav right-aligned), search + language
+  switcher sharing the second row (search fills the row instead of leaving
+  a gap at its old desktop width).
+- Leaderboard region tabs, player-profile tabs, and search-result rows now
+  wrap instead of overflowing on narrow screens.
+- Dashboard stat cards now form an even 2×2 grid on mobile instead of the
+  all-time winrate card staying full-width and leaving "Avg match" stranded
+  alone on its own row.
+- Activity heatmap no longer squishes to illegible cell sizes on mobile —
+  it keeps its native cell size and scrolls horizontally, opening scrolled
+  to the most recent week.
+
+### Added
+
+- `StatCard` optional `show-badge` prop — renders a W/L pill next to the
+  value (used on the "Last match" card) so the result isn't carried by
+  color alone.
+
 ## [0.5.0] — 2026-07-12
 
 ### Added

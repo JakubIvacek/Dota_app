@@ -9,15 +9,22 @@ withDefaults(
     /** lg — jeden „featured“ stat na stránke (napr. all-time winrate), nech
      * hierarchia štyroch čísel v rade nie je štyri rovnaké krabičky. */
     size?: 'md' | 'lg'
+    /** W/L odznak vedľa hodnoty — nech výhra/prehra nie je nesená len farbou. */
+    showBadge?: boolean
   }>(),
-  { tone: 'default', size: 'md' },
+  { tone: 'default', size: 'md', showBadge: false },
 )
 </script>
 
 <template>
   <div class="card stat" :class="size">
     <div class="label">{{ label }}</div>
-    <div class="value" :class="tone">{{ value }}</div>
+    <div class="value-row">
+      <div class="value" :class="tone">{{ value }}</div>
+      <span v-if="showBadge && (tone === 'win' || tone === 'loss')" class="badge" :class="tone">
+        {{ tone === 'win' ? 'W' : 'L' }}
+      </span>
+    </div>
     <div v-if="sub" class="sub">{{ sub }}</div>
   </div>
 </template>
@@ -44,6 +51,12 @@ withDefaults(
   letter-spacing: var(--tracking-eyebrow);
   color: var(--muted);
   font-weight: var(--weight-semibold);
+}
+
+.value-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .value {

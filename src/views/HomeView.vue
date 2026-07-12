@@ -102,6 +102,7 @@ const shownRecents = computed(() =>
   padding-top: 8vh;
   padding-bottom: var(--space-8);
   text-align: center;
+  overflow-x: hidden;
 }
 
 /* Ambient glow anchored behind the hero — gives the landing screen a focal

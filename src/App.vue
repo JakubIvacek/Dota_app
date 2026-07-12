@@ -28,24 +28,26 @@ function onLocaleChange(e: Event) {
         <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`">{{ t('app.nav.profile') }}</RouterLink>
         <RouterLink to="/leaderboard">{{ t('app.nav.leaderboards') }}</RouterLink>
       </nav>
-      <SearchBox class="topbar-search" />
-      <div class="locale-wrap">
-        <svg class="locale-icon" viewBox="0 0 20 20" aria-hidden="true">
-          <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4" />
-          <ellipse cx="10" cy="10" rx="3.4" ry="8" fill="none" stroke="currentColor" stroke-width="1.4" />
-          <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.4" />
-        </svg>
-        <select
-          class="locale-select"
-          :value="locale"
-          :title="SUPPORTED_LOCALES.find((l) => l.code === locale)?.label"
-          aria-label="Language"
-          @change="onLocaleChange"
-        >
-          <option v-for="l in SUPPORTED_LOCALES" :key="l.code" :value="l.code" :title="l.label">
-            {{ l.code.toUpperCase() }}
-          </option>
-        </select>
+      <div class="topbar-actions">
+        <SearchBox class="topbar-search" />
+        <div class="locale-wrap">
+          <svg class="locale-icon" viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4" />
+            <ellipse cx="10" cy="10" rx="3.4" ry="8" fill="none" stroke="currentColor" stroke-width="1.4" />
+            <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.4" />
+          </svg>
+          <select
+            class="locale-select"
+            :value="locale"
+            :title="SUPPORTED_LOCALES.find((l) => l.code === locale)?.label"
+            aria-label="Language"
+            @change="onLocaleChange"
+          >
+            <option v-for="l in SUPPORTED_LOCALES" :key="l.code" :value="l.code" :title="l.label">
+              {{ l.code.toUpperCase() }}
+            </option>
+          </select>
+        </div>
       </div>
     </div>
   </header>
@@ -205,8 +207,43 @@ nav a.router-link-active::after {
   border-color: var(--accent);
 }
 
-.topbar-search {
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .topbar-inner {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+  }
+
+  /* Riadok 1: brand vľavo, nav zarovnaná doprava (nech nesedí nalepená na
+     brand s prázdnym miestom za sebou). Riadok 2: search + locale ako jeden
+     blok, nech locale nevisí sám na vlastnom riadku (flex-wrap po
+     jednotlivých položkách je nespoľahlivý na úzkych šírkach). */
+  nav {
+    margin-left: auto;
+  }
+
+  .topbar-actions {
+    flex-basis: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .topbar-search {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  /* Na svojom vlastnom riadku nech input vyplní celú šírku namiesto toho,
+     aby zostal pri desktopových 220px a nechal za tlačidlom prázdny pás. */
+  .topbar-search :deep(input) {
+    max-width: none;
+  }
 }
 
 .footer {

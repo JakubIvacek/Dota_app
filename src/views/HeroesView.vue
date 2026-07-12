@@ -59,26 +59,28 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
   <div v-else-if="error" class="error-box">{{ t('heroes.errorLoad', { error }) }}</div>
 
   <div v-else class="card">
-    <table class="data">
-      <thead>
-        <tr>
-          <th class="sortable" @click="sortBy('name')">{{ t('heroes.colHero') }}{{ arrow('name') }}</th>
-          <th class="sortable num" @click="sortBy('games')">{{ t('heroes.colGames') }}{{ arrow('games') }}</th>
-          <th class="sortable num" @click="sortBy('win')">{{ t('heroes.colWins') }}{{ arrow('win') }}</th>
-          <th class="sortable" @click="sortBy('winrate')">{{ t('heroes.colWinrate') }}{{ arrow('winrate') }}</th>
-          <th class="sortable" @click="sortBy('last_played')">{{ t('heroes.colLastPlayed') }}{{ arrow('last_played') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="h in rows" :key="h.hero_id" class="hero-row">
-          <td><HeroIcon :hero="h.hero" /></td>
-          <td class="num">{{ h.games }}</td>
-          <td class="num">{{ h.win }}</td>
-          <td><WinrateBar :win="h.win" :games="h.games" /></td>
-          <td class="muted">{{ h.last_played ? timeAgo(h.last_played, intlLocale) : '—' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th class="sortable" @click="sortBy('name')">{{ t('heroes.colHero') }}{{ arrow('name') }}</th>
+            <th class="sortable num" @click="sortBy('games')">{{ t('heroes.colGames') }}{{ arrow('games') }}</th>
+            <th class="sortable num" @click="sortBy('win')">{{ t('heroes.colWins') }}{{ arrow('win') }}</th>
+            <th class="sortable" @click="sortBy('winrate')">{{ t('heroes.colWinrate') }}{{ arrow('winrate') }}</th>
+            <th class="sortable" @click="sortBy('last_played')">{{ t('heroes.colLastPlayed') }}{{ arrow('last_played') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="h in rows" :key="h.hero_id" class="hero-row">
+            <td><HeroIcon :hero="h.hero" /></td>
+            <td class="num">{{ h.games }}</td>
+            <td class="num">{{ h.win }}</td>
+            <td><WinrateBar :win="h.win" :games="h.games" /></td>
+            <td class="muted">{{ h.last_played ? timeAgo(h.last_played, intlLocale) : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 

@@ -48,7 +48,8 @@ const { data: results, loading, error } = useAsync(() =>
 .result {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
   padding: 0.5rem 0.8rem;
   border-radius: var(--radius-md);
   color: var(--ink);
@@ -63,6 +64,7 @@ const { data: results, loading, error } = useAsync(() =>
 .result img {
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   border-radius: var(--radius-md);
 }
 
