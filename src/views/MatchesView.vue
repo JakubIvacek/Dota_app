@@ -195,7 +195,7 @@ async function refreshFromOpenDota() {
   <p v-else-if="!rows.length" class="muted">{{ t('matches.emptyFiltered') }}</p>
 
   <div v-else class="card">
-    <div class="table-scroll">
+    <div class="table-scroll desktop-table">
       <table class="data">
         <thead>
           <tr>
@@ -221,6 +221,29 @@ async function refreshFromOpenDota() {
         </tbody>
       </table>
     </div>
+
+    <ul class="mobile-matches">
+      <li
+        v-for="m in rows"
+        :key="m.match_id"
+        class="match-card"
+        :class="m.won ? 'win' : 'loss'"
+        @click="openMatch(m.match_id)"
+      >
+        <div class="match-card-top">
+          <HeroIcon :hero="m.hero" />
+          <span class="badge" :class="m.won ? 'win' : 'loss'">{{ m.won ? 'W' : 'L' }}</span>
+        </div>
+        <div class="match-card-stats">
+          <span>{{ m.kills }} / {{ m.deaths }} / {{ m.assists }}</span>
+          <span class="dot">·</span>
+          <span>{{ formatDuration(m.duration) }}</span>
+          <span class="dot">·</span>
+          <span>{{ gameModeName(m.game_mode) }}</span>
+        </div>
+        <div class="muted match-card-time">{{ timeAgo(m.start_time, intlLocale) }}</div>
+      </li>
+    </ul>
 
     <div ref="sentinel" class="scroll-footer">
       <span v-if="loadingMore" class="muted">{{ t('matches.loadingMore') }}</span>
@@ -355,5 +378,111 @@ async function refreshFromOpenDota() {
 .load-more:hover {
   border-color: var(--accent);
   color: var(--ink);
+}
+
+/* Mobile card list — hidden by default, swapped in for the table below
+   720px so match data reads top-to-bottom instead of needing a horizontal
+   scroll to see duration/mode/played. */
+.mobile-matches {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-matches {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filters label {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .filters select {
+    flex: 1;
+  }
+
+  .result-toggle {
+    margin-left: 0;
+  }
+}
+
+.match-card {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+
+.match-card.win {
+  border-color: var(--win-soft);
+  border-left-color: var(--radiant-strong);
+  background: var(--radiant-wash);
+}
+
+.match-card.loss {
+  border-color: var(--loss-soft);
+  border-left-color: var(--dire-strong);
+  background: var(--dire-wash);
+}
+
+.match-card:hover,
+.match-card:active {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.match-card.win:hover,
+.match-card.win:active {
+  border-color: var(--win-soft);
+  border-left-color: var(--radiant-strong);
+  background: var(--radiant-wash), var(--surface-2);
+}
+
+.match-card.loss:hover,
+.match-card.loss:active {
+  border-color: var(--loss-soft);
+  border-left-color: var(--dire-strong);
+  background: var(--dire-wash), var(--surface-2);
+}
+
+.match-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.match-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.match-card-stats .dot {
+  color: var(--muted);
+}
+
+.match-card-time {
+  margin-top: 0.2rem;
+  font-size: var(--text-sm);
 }
 </style>

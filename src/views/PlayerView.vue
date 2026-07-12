@@ -113,6 +113,7 @@ const { isFavorite, toggle } = useFavorites()
   .tabs {
     margin-left: 0;
     flex-basis: 100%;
+    justify-content: center;
   }
 }
 

@@ -15,6 +15,34 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-07-12
+
+### Added
+
+- New `/updates` page showing official Dota 2 patch notes pulled from the
+  Steam News API (proxied under `/steamnews` in dev and via a Vercel
+  rewrite), with a "Latest Dota 2 updates" teaser section on the homepage
+  and nav/footer links.
+- Matches table now renders as a stacked card list below 720px instead of
+  scrolling horizontally — hero, result, K/D/A, duration, mode, and
+  time-ago are all visible without scrolling. Cards get a green/red
+  left-border and tint matching the win/loss badge color.
+
+### Changed
+
+- Homepage and header search boxes unified into one compact pill design;
+  the header search box now always renders, including on the homepage, so
+  the header no longer resizes when navigating between pages.
+- Nav links (Leaderboards/Updates) sized up slightly with more spacing
+  between them.
+- News excerpt stripper also strips Steam's `{STEAM_CLAN_*}` image
+  placeholders and bare CDN URLs that were leaking into excerpt text.
+
+### Fixed
+
+- Player profile tabs now center instead of left-aligning when wrapped to
+  their own row on mobile.
+
 ## [0.6.0] — 2026-07-12
 
 ### Added
