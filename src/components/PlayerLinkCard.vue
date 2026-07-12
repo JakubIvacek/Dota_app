@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import RankBadge from './RankBadge.vue'
+
 defineProps<{
   accountId: string
   personaname: string
   avatarfull: string
   sub?: string
+  rankTier?: number | null
 }>()
 </script>
 
@@ -11,7 +14,10 @@ defineProps<{
   <RouterLink :to="`/player/${accountId}`" class="card card--interactive player-link">
     <img :src="avatarfull" alt="" />
     <div>
-      <div class="player-name">{{ personaname }}</div>
+      <div class="player-name">
+        <RankBadge v-if="rankTier" :rank-tier="rankTier" />
+        {{ personaname }}
+      </div>
       <div v-if="sub" class="muted small">{{ sub }}</div>
     </div>
   </RouterLink>

@@ -15,7 +15,7 @@ import {
   wonMatch,
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
-import { formatDate, winratePct } from '../utils/format'
+import { formatDuration, formatShortDate, winratePct } from '../utils/format'
 import { pickWindow, rollingAvg } from '../utils/stats'
 import { cssVar } from '../utils/theme'
 import StatCard from '../components/StatCard.vue'
@@ -55,7 +55,7 @@ function trend(perMatch: number[], preferredWindow: number) {
   const window = pickWindow(perMatch.length, preferredWindow)
   return {
     window,
-    labels: chronological.value.slice(window - 1).map((m) => formatDate(m.start_time, intlLocale.value)),
+    labels: chronological.value.slice(window - 1).map((m) => formatShortDate(m.start_time, intlLocale.value)),
     values: rollingAvg(perMatch, window),
   }
 }
@@ -89,6 +89,31 @@ const modeStats = computed(() =>
 const recentWinrate = computed(() => {
   const matches = data.value?.recentMatches ?? []
   return winratePct(matches.filter(wonMatch).length, matches.length)
+})
+
+const recentWinLoss = computed(() => {
+  const matches = data.value?.recentMatches ?? []
+  const wins = matches.filter(wonMatch).length
+  return { wins, losses: matches.length - wins }
+})
+
+const lastMatchStats = computed(() => {
+  const match = data.value?.recentMatches[0]
+  if (!match) return null
+  return { ...match, won: wonMatch(match) }
+})
+
+const avgMatchStats = computed(() => {
+  const matches = data.value?.recentMatches ?? []
+  if (matches.length === 0) return null
+  const avg = (values: number[]) => values.reduce((sum, v) => sum + v, 0) / matches.length
+  return {
+    duration: avg(matches.map((m) => m.duration)),
+    gpm: Math.round(avg(matches.map((m) => m.gold_per_min ?? 0))),
+    xpm: Math.round(avg(matches.map((m) => m.xp_per_min ?? 0))),
+    kills: avg(matches.map((m) => m.kills)).toFixed(1),
+    deaths: avg(matches.map((m) => m.deaths)).toFixed(1),
+  }
 })
 
 // Nulové wl + žiadne matche = OpenDota tohto hráča ešte nezaindexovala.
@@ -136,17 +161,28 @@ async function refreshFromOpenDota() {
       <StatCard
         :label="t('dashboard.statWinrateAllTime')"
         :value="`${winratePct(data.wl.win, data.wl.win + data.wl.lose)} %`"
-        :sub="`${data.wl.win} W – ${data.wl.lose} L`"
+        :sub="`${data.wl.win + data.wl.lose} ${t('dashboard.gamesSuffix')} · ${data.wl.win} W – ${data.wl.lose} L`"
         :tone="data.wl.win >= data.wl.lose ? 'win' : 'loss'"
         size="lg"
       />
-      <StatCard :label="t('dashboard.statWins')" :value="String(data.wl.win)" tone="win" />
-      <StatCard :label="t('dashboard.statLosses')" :value="String(data.wl.lose)" tone="loss" />
+      <StatCard
+        v-if="lastMatchStats"
+        :label="t('dashboard.statLastMatch')"
+        :value="formatDuration(lastMatchStats.duration)"
+        :tone="lastMatchStats.won ? 'win' : 'loss'"
+        :sub="`${lastMatchStats.gold_per_min ?? 0} GPM · ${lastMatchStats.xp_per_min ?? 0} XPM\n${lastMatchStats.kills} K / ${lastMatchStats.deaths} D / ${lastMatchStats.assists} A`"
+      />
       <StatCard
         :label="t('dashboard.statWinrateRecent')"
         :value="`${recentWinrate} %`"
-        :sub="`${data.recentMatches.length} ${t('dashboard.matchesSuffix')}`"
+        :sub="`${data.recentMatches.length} ${t('dashboard.matchesSuffix')}\n${recentWinLoss.wins} W / ${recentWinLoss.losses} L`"
         :tone="recentWinrate === '—' ? 'default' : Number(recentWinrate) >= 50 ? 'win' : 'loss'"
+      />
+      <StatCard
+        v-if="avgMatchStats"
+        :label="t('dashboard.statAvgMatch')"
+        :value="formatDuration(Math.round(avgMatchStats.duration))"
+        :sub="`${avgMatchStats.gpm} GPM · ${avgMatchStats.xpm} XPM\n${avgMatchStats.kills} K / ${avgMatchStats.deaths} D`"
       />
     </section>
 

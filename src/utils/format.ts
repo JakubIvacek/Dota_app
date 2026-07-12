@@ -14,6 +14,14 @@ export function formatDate(unixSeconds: number, locale: string): string {
   })
 }
 
+/** Bez roka — pre husté X osi (chart ticky), kde celý dátum s rokom koliduje. */
+export function formatShortDate(unixSeconds: number, locale: string): string {
+  return new Date(unixSeconds * 1000).toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'numeric',
+  })
+}
+
 /** Relatívny čas cez Intl.RelativeTimeFormat — gramaticky správne skloňovanie
  * v akomkoľvek locale zadarmo, bez ručného prekladu "pred X minútami" pre
  * každý jazyk zvlášť. */

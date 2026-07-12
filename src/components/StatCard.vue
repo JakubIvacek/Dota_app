@@ -24,6 +24,9 @@ withDefaults(
 
 <style scoped>
 .stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: var(--space-3) var(--space-5);
 }
 
@@ -64,5 +67,6 @@ withDefaults(
 .sub {
   font-size: var(--text-sm);
   color: var(--ink-2);
+  white-space: pre-line;
 }
 </style>

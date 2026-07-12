@@ -15,6 +15,32 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-07-12
+
+### Added
+
+- Rank medal badges (official Valve rank icons + star overlay) next to the
+  player name on the profile page, home "my profile" card, and player link
+  cards.
+- Dashboard "Avg match" stat card (GPM/XPM and K/D average over the last 100
+  matches) and "Last match" stat card (duration, GPM/XPM, KDA, win/loss
+  tone), replacing a wins/losses card that duplicated info already shown in
+  the all-time winrate card's sub-line.
+
+### Changed
+
+- Header: search box moved left (next to nav), language switcher moved right
+  with a globe icon + short language code instead of the full spelled-out
+  name.
+- Footer copyright line now credits "byKeno".
+- All-time winrate stat card's sub-line now includes the total game count;
+  last-100 winrate card now shows a win/loss breakdown line so it doesn't
+  read as empty.
+- KDA and GPM/XPM trend charts use short date labels (no year) so X-axis
+  ticks stop overlapping.
+- `StatCard` content is vertically centered so cards in the same row align
+  regardless of sub-line length.
+
 ## [0.4.0] — 2026-07-12
 
 ### Added

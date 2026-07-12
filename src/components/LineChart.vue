@@ -73,7 +73,7 @@ onMounted(() => {
       scales: {
         x: {
           grid: { display: false },
-          ticks: { color: MUTED, maxTicksLimit: 8, maxRotation: 0 },
+          ticks: { color: MUTED, maxTicksLimit: 6, maxRotation: 0 },
         },
         y: {
           // Nulová os výraznejšia — pri gold/XP advantage oddeľuje Radiant/Dire.
