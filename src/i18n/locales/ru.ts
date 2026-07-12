@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: 'Мой профиль',
       leaderboards: 'Leaderboards',
+      updates: 'Обновления',
     },
     footer: {
       disclaimer: 'Неофициальный фанатский инструмент, не связанный с Valve Corporation. Данные через {link}.',
       github: 'GitHub',
+      updates: 'Обновления',
       terms: 'Условия',
       privacy: 'Конфиденциальность',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: 'Неизвестно',
   },
   searchbox: {
-    placeholder: 'Имя игрока или Dota ID…',
+    placeholder: 'Имя или Dota ID…',
     ariaLabel: 'Поиск игрока',
     submit: 'Найти',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · СТАТИСТИКА ИГРОКОВ',
     heading: 'Найди любого игрока Dota 2',
     tagline: 'Смотри недавние матчи, статистику по героям, винрейт и рост ранга.',
+    viewUpdates: 'Смотри последние обновления Dota 2.',
     favorites: 'Избранное',
     favoritesEmpty: 'Пока нет избранных игроков. Добавь игрока в избранное с его профиля.',
     recentlyViewed: 'Недавно просмотренные',
     recentlyViewedEmpty: 'Игроки, которых ты искал, появятся здесь.',
+    latestUpdates: 'Последние обновления Dota 2',
+    latestUpdatesEmpty: 'Сейчас нет доступных обновлений.',
+    showAllUpdates: 'Показать все',
     features: {
       eyebrow: 'Обзор возможностей',
       title: 'Превью того, что тебя ждёт — в профиле игрока есть ещё больше.',
@@ -145,6 +151,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: 'Показать ещё 200 ({shown} / {total})',
+  },
+  updates: {
+    title: 'Обновления Dota 2',
+    subtitle: 'Официальные патчноуты и новости от Valve прямо из новостной ленты Steam.',
+    errorLoad: 'Не удалось загрузить обновления: {error}',
+    empty: 'Сейчас нет доступных обновлений.',
+    readMore: 'Читать в Steam',
   },
   search: {
     resultsFor: 'Результаты для «{query}»',

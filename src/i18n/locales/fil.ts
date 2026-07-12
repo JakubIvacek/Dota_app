@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: 'Aking Profile',
       leaderboards: 'Leaderboards',
+      updates: 'Mga Update',
     },
     footer: {
       disclaimer: 'Hindi opisyal na fan tool, walang kinalaman sa Valve Corporation. Data mula sa {link}.',
       github: 'GitHub',
+      updates: 'Mga Update',
       terms: 'Mga Tuntunin',
       privacy: 'Privacy',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: 'Hindi Alam',
   },
   searchbox: {
-    placeholder: 'Pangalan ng player o Dota ID…',
+    placeholder: 'Pangalan o Dota ID…',
     ariaLabel: 'Maghanap ng player',
     submit: 'Hanapin',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · PLAYER STATS',
     heading: 'Maghanap ng kahit sinong Dota 2 player',
     tagline: 'Tingnan ang mga huling match, performance ng hero, winrate, at pag-angat ng rank.',
+    viewUpdates: 'Tingnan ang pinakabagong Dota 2 updates.',
     favorites: 'Mga Paborito',
     favoritesEmpty: 'Wala pang paboritong player. Magdagdag ng player sa paborito mula sa profile nila.',
     recentlyViewed: 'Kamakailang Tiningnan',
     recentlyViewedEmpty: 'Lalabas dito ang mga player na hinahanap mo.',
+    latestUpdates: 'Pinakabagong Dota 2 updates',
+    latestUpdatesEmpty: 'Walang available na update sa ngayon.',
+    showAllUpdates: 'Ipakita lahat',
     features: {
       eyebrow: 'Product tour',
       title: 'Isang preview ng nasa loob — mas marami pa sa profile ng bawat player.',
@@ -145,6 +151,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: 'Ipakita ang 200 pa ({shown} / {total})',
+  },
+  updates: {
+    title: 'Mga Dota 2 Update',
+    subtitle: 'Opisyal na patch notes at balita mula kay Valve, direkta mula sa Steam news feed.',
+    errorLoad: 'Nabigong i-load ang mga update: {error}',
+    empty: 'Walang available na update sa ngayon.',
+    readMore: 'Basahin sa Steam',
   },
   search: {
     resultsFor: 'Mga resulta para sa "{query}"',

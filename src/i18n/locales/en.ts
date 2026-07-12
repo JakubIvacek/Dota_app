@@ -3,10 +3,12 @@ const en = {
     nav: {
       profile: 'My profile',
       leaderboards: 'Leaderboards',
+      updates: 'Updates',
     },
     footer: {
       disclaimer: 'Unofficial fan tool, not affiliated with Valve Corporation. Data via {link}.',
       github: 'GitHub',
+      updates: 'Updates',
       terms: 'Terms',
       privacy: 'Privacy',
     },
@@ -17,7 +19,7 @@ const en = {
     unknown: 'Unknown',
   },
   searchbox: {
-    placeholder: 'Player name or Dota ID…',
+    placeholder: 'Name or Dota ID…',
     ariaLabel: 'Search for a player',
     submit: 'Search',
   },
@@ -25,10 +27,14 @@ const en = {
     eyebrow: 'DOTA 2 · PLAYER STATS',
     heading: 'Search any Dota 2 player',
     tagline: 'View recent matches, hero performance, winrate and rank progression.',
+    viewUpdates: 'Check the latest Dota 2 updates',
     favorites: 'Favorites',
     favoritesEmpty: 'No favorite players yet. Add a player to favorites from their profile.',
     recentlyViewed: 'Recently viewed',
     recentlyViewedEmpty: 'Players you search for will appear here.',
+    latestUpdates: 'Latest Dota 2 updates',
+    latestUpdatesEmpty: 'No updates available right now.',
+    showAllUpdates: 'Show all',
     features: {
       eyebrow: 'Product tour',
       title: "A preview of what's inside — there's even more on every player's profile.",
@@ -143,6 +149,13 @@ const en = {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: 'Show 200 more ({shown} / {total})',
+  },
+  updates: {
+    title: 'Dota 2 updates',
+    subtitle: 'Official patch notes and news from Valve, straight from the Steam news feed.',
+    errorLoad: 'Failed to load updates: {error}',
+    empty: 'No updates available right now.',
+    readMore: 'Read on Steam',
   },
   search: {
     resultsFor: 'Results for "{query}"',

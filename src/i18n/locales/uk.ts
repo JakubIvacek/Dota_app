@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: 'Мій профіль',
       leaderboards: 'Leaderboards',
+      updates: 'Оновлення',
     },
     footer: {
       disclaimer: 'Неофіційний фанатський інструмент, не пов\'язаний з Valve Corporation. Дані через {link}.',
       github: 'GitHub',
+      updates: 'Оновлення',
       terms: 'Умови',
       privacy: 'Конфіденційність',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: 'Невідомо',
   },
   searchbox: {
-    placeholder: 'Ім\'я гравця або Dota ID…',
+    placeholder: 'Ім\'я або Dota ID…',
     ariaLabel: 'Пошук гравця',
     submit: 'Знайти',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · СТАТИСТИКА ГРАВЦІВ',
     heading: 'Знайди будь-якого гравця Dota 2',
     tagline: 'Дивись останні матчі, статистику по героях, вінрейт та прогрес рангу.',
+    viewUpdates: 'Дивись останні оновлення Dota 2.',
     favorites: 'Улюблені',
     favoritesEmpty: 'Поки що немає улюблених гравців. Додай гравця до улюблених з його профілю.',
     recentlyViewed: 'Нещодавно переглянуті',
     recentlyViewedEmpty: 'Гравці, яких ти шукаєш, з\'являться тут.',
+    latestUpdates: 'Останні оновлення Dota 2',
+    latestUpdatesEmpty: 'Наразі оновлень немає.',
+    showAllUpdates: 'Показати всі',
     features: {
       eyebrow: 'Огляд можливостей',
       title: 'Перегляд того, що на тебе чекає — у профілі гравця є ще більше.',
@@ -145,6 +151,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: 'Показати ще 200 ({shown} / {total})',
+  },
+  updates: {
+    title: 'Оновлення Dota 2',
+    subtitle: 'Офіційні патчноути та новини від Valve прямо зі стрічки новин Steam.',
+    errorLoad: 'Не вдалося завантажити оновлення: {error}',
+    empty: 'Наразі оновлень немає.',
+    readMore: 'Читати в Steam',
   },
   search: {
     resultsFor: 'Результати для «{query}»',

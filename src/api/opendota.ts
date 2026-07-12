@@ -28,7 +28,7 @@ const CONSTANTS_TTL = 24 * 60 * MINUTE
 // "loadovať" dve minúty.
 const FETCH_TIMEOUT_MS = 12_000
 
-async function fetchJsonFromUrl<T>(
+export async function fetchJsonFromUrl<T>(
   url: string,
   ttl = DEFAULT_TTL,
   label = 'HTTP',

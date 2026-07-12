@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: '我的主页',
       leaderboards: 'Leaderboards',
+      updates: '更新',
     },
     footer: {
       disclaimer: '非官方粉丝制作工具,与 Valve Corporation 无关。数据来自 {link}。',
       github: 'GitHub',
+      updates: '更新',
       terms: '使用条款',
       privacy: '隐私政策',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: '未知',
   },
   searchbox: {
-    placeholder: '玩家名称或 Dota ID…',
+    placeholder: '名称或 Dota ID…',
     ariaLabel: '搜索玩家',
     submit: '搜索',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · 玩家数据',
     heading: '搜索任意 Dota 2 玩家',
     tagline: '查看最近对局、英雄表现、胜率和段位进度。',
+    viewUpdates: '查看最新 Dota 2 更新。',
     favorites: '收藏',
     favoritesEmpty: '还没有收藏的玩家。可以在玩家主页中将其添加到收藏。',
     recentlyViewed: '最近浏览',
     recentlyViewedEmpty: '你搜索过的玩家会显示在这里。',
+    latestUpdates: '最新 Dota 2 更新',
+    latestUpdatesEmpty: '目前没有可用的更新。',
+    showAllUpdates: '查看全部',
     features: {
       eyebrow: '功能预览',
       title: '先睹为快——玩家主页里还有更多内容。',
@@ -142,6 +148,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: '再显示 200 个 ({shown} / {total})',
+  },
+  updates: {
+    title: 'Dota 2 更新',
+    subtitle: '来自 Valve 的官方更新说明和新闻,直接来自 Steam 新闻源。',
+    errorLoad: '加载更新失败:{error}',
+    empty: '目前没有可用的更新。',
+    readMore: '在 Steam 上阅读',
   },
   search: {
     resultsFor: '“{query}” 的搜索结果',

@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: 'Profilim',
       leaderboards: 'Leaderboards',
+      updates: 'Güncellemeler',
     },
     footer: {
       disclaimer: "Resmi olmayan bir hayran aracıdır, Valve Corporation ile bağlantısı yoktur. Veriler {link} üzerinden.",
       github: 'GitHub',
+      updates: 'Güncellemeler',
       terms: 'Kullanım Koşulları',
       privacy: 'Gizlilik',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: 'Bilinmiyor',
   },
   searchbox: {
-    placeholder: 'Oyuncu adı veya Dota ID…',
+    placeholder: 'İsim veya Dota ID…',
     ariaLabel: 'Oyuncu ara',
     submit: 'Ara',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · OYUNCU İSTATİSTİKLERİ',
     heading: 'Herhangi bir Dota 2 oyuncusunu ara',
     tagline: 'Son maçları, hero performansını, winrate ve rank ilerlemesini gör.',
+    viewUpdates: 'En son Dota 2 güncellemelerini incele.',
     favorites: 'Favoriler',
     favoritesEmpty: 'Henüz favori oyuncu yok. Bir oyuncuyu profilinden favorilere ekle.',
     recentlyViewed: 'Son görüntülenenler',
     recentlyViewedEmpty: 'Aradığın oyuncular burada görünecek.',
+    latestUpdates: 'En son Dota 2 güncellemeleri',
+    latestUpdatesEmpty: 'Şu anda kullanılabilir güncelleme yok.',
+    showAllUpdates: 'Tümünü göster',
     features: {
       eyebrow: 'Ürün turu',
       title: 'İçeride seni neler beklediğine dair bir önizleme — her oyuncunun profilinde çok daha fazlası var.',
@@ -145,6 +151,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: '200 tane daha göster ({shown} / {total})',
+  },
+  updates: {
+    title: 'Dota 2 güncellemeleri',
+    subtitle: 'Valve\'ın resmi yama notları ve haberleri, doğrudan Steam haber akışından.',
+    errorLoad: 'Güncellemeler yüklenemedi: {error}',
+    empty: 'Şu anda kullanılabilir güncelleme yok.',
+    readMore: "Steam'de oku",
   },
   search: {
     resultsFor: '"{query}" için sonuçlar',

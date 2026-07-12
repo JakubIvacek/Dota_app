@@ -4,8 +4,6 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { extractAccountId } from '../utils/accountId'
 
-withDefaults(defineProps<{ size?: 'normal' | 'large' }>(), { size: 'normal' })
-
 const { t } = useI18n()
 const router = useRouter()
 const query = ref('')
@@ -33,7 +31,7 @@ async function submit() {
 </script>
 
 <template>
-  <form class="search" :class="size" @submit.prevent="submit">
+  <form class="search" @submit.prevent="submit">
     <svg class="icon" viewBox="0 0 20 20" aria-hidden="true">
       <circle cx="9" cy="9" r="6.25" fill="none" stroke="currentColor" stroke-width="1.6" />
       <line x1="13.6" y1="13.6" x2="18" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -55,11 +53,12 @@ async function submit() {
 .search {
   position: relative;
   display: flex;
-  gap: 0.5rem;
-  background: var(--surface);
+  align-items: center;
+  gap: 0.3rem;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 3px;
+  border-radius: var(--radius-pill);
+  padding: 3px 3px 3px 0.15rem;
   box-shadow: var(--shadow-sm);
   transition: border-color var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
 }
@@ -70,12 +69,10 @@ async function submit() {
 }
 
 .icon {
-  position: absolute;
-  left: 0.65rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin-left: 0.55rem;
   color: var(--muted);
   pointer-events: none;
   transition: color var(--duration-fast) var(--ease-out);
@@ -89,11 +86,15 @@ input {
   background: transparent;
   border: none;
   color: var(--ink);
-  padding: 0.4rem 0.7rem 0.4rem 2rem;
+  padding: 0.4rem 0.5rem;
   font: inherit;
-  max-width: 220px;
+  width: 180px;
   min-width: 0;
   flex: 1;
+}
+
+input::placeholder {
+  color: var(--muted);
 }
 
 input:focus {
@@ -104,13 +105,14 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   background: var(--accent);
   border: none;
-  border-radius: calc(var(--radius-md) - 2px);
+  border-radius: var(--radius-pill);
   color: #fff;
   font: inherit;
   font-weight: var(--weight-semibold);
-  padding: 0.4rem 0.9rem;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
 }
 
@@ -148,28 +150,5 @@ button:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 1.4s; }
-}
-
-.large {
-  padding: 4px;
-  border-radius: var(--radius-lg);
-}
-
-.large .icon {
-  left: 0.9rem;
-  width: 18px;
-  height: 18px;
-}
-
-.large input {
-  width: min(520px, 60vw);
-  padding: 0.6rem 0.9rem 0.6rem 2.5rem;
-  font-size: 1.05rem;
-}
-
-.large button {
-  border-radius: calc(var(--radius-lg) - 3px);
-  padding: 0.6rem 1.2rem;
-  font-size: 1.05rem;
 }
 </style>

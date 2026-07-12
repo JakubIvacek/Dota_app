@@ -2,7 +2,9 @@
 import { useAppLocale } from '../composables/useAppLocale'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
 import { useFavorites } from '../composables/useFavorites'
-import { timeAgo } from '../utils/format'
+import { useSteamNews } from '../composables/useSteamNews'
+import { timeAgo, formatDate } from '../utils/format'
+import { newsExcerpt } from '../utils/steamContent'
 import SearchBox from '../components/SearchBox.vue'
 import PlayerLinkCard from '../components/PlayerLinkCard.vue'
 import ProductTour from '../components/ProductTour.vue'
@@ -11,6 +13,10 @@ const { t, intlLocale } = useAppLocale()
 
 const { recents } = useRecentPlayers()
 const { favorites } = useFavorites()
+const { data: newsItems, loading: newsLoading } = useSteamNews()
+
+/** Homepage only teases the 3 most recent — the full list lives on /updates. */
+const MAX_UPDATES_SHOWN = 3
 
 /** Desktop shows a max of 4 — older visits live in localStorage, not on the landing page. */
 const MAX_RECENTS_SHOWN = 4
@@ -24,7 +30,8 @@ const MAX_RECENTS_SHOWN = 4
     <p class="muted lede">
       {{ t('home.tagline') }}
     </p>
-    <SearchBox size="large" />
+    <p class="muted updates-note">{{ t('home.viewUpdates') }}</p>
+    <SearchBox />
 
     <section class="group">
       <h2>
@@ -63,6 +70,22 @@ const MAX_RECENTS_SHOWN = 4
         />
       </div>
       <p v-else class="muted empty-note">{{ t('home.recentlyViewedEmpty') }}</p>
+    </section>
+
+    <section class="group">
+      <div class="group-header">
+        <h2>{{ t('home.latestUpdates') }}</h2>
+        <RouterLink to="/updates" class="show-all-link">{{ t('home.showAllUpdates') }} →</RouterLink>
+      </div>
+      <ul v-if="newsItems?.length" class="updates-list">
+        <li v-for="item in newsItems.slice(0, MAX_UPDATES_SHOWN)" :key="item.gid" class="card update-entry">
+          <RouterLink to="/updates" class="update-title">{{ item.title }}</RouterLink>
+          <div class="muted update-date">{{ formatDate(item.date, intlLocale) }}</div>
+          <p class="update-excerpt">{{ newsExcerpt(item.contents, 140) }}</p>
+          <a :href="item.url" target="_blank" rel="noopener" class="update-link">{{ t('updates.readMore') }} →</a>
+        </li>
+      </ul>
+      <p v-else-if="!newsLoading" class="muted empty-note">{{ t('home.latestUpdatesEmpty') }}</p>
     </section>
 
     <ProductTour />
@@ -113,6 +136,11 @@ const MAX_RECENTS_SHOWN = 4
   max-width: 34rem;
 }
 
+.updates-note {
+  font-size: var(--text-sm);
+  margin-top: calc(-1 * var(--space-2));
+}
+
 .group {
   margin-top: var(--space-8);
   width: 100%;
@@ -128,6 +156,24 @@ const MAX_RECENTS_SHOWN = 4
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   color: var(--muted);
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.show-all-link {
+  font-size: var(--text-sm);
+  color: var(--accent);
+  white-space: nowrap;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.show-all-link:hover {
+  opacity: 0.8;
 }
 
 .star-icon {
@@ -148,6 +194,51 @@ const MAX_RECENTS_SHOWN = 4
 
 .grid :deep(.player-link) {
   animation: card-in var(--duration-normal) var(--ease-out) both;
+}
+
+.updates-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.update-entry {
+  padding: var(--space-3) var(--space-4);
+}
+
+.update-title {
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.update-title:hover {
+  color: var(--accent);
+}
+
+.update-date {
+  font-size: var(--text-sm);
+  margin-top: 0.15rem;
+}
+
+.update-excerpt {
+  margin-top: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.update-link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--accent);
+}
+
+.update-link:hover {
+  text-decoration: underline;
 }
 
 @keyframes card-in {

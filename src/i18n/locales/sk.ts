@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: 'Môj profil',
       leaderboards: 'Leaderboards',
+      updates: 'Updaty',
     },
     footer: {
       disclaimer: 'Neoficiálny fanúšikovský nástroj, nespojený s Valve Corporation. Dáta cez {link}.',
       github: 'GitHub',
+      updates: 'Updaty',
       terms: 'Podmienky',
       privacy: 'Súkromie',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: 'Neznáme',
   },
   searchbox: {
-    placeholder: 'Meno hráča alebo Dota ID…',
+    placeholder: 'Meno alebo Dota ID…',
     ariaLabel: 'Hľadať hráča',
     submit: 'Hľadať',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · ŠTATISTIKY HRÁČOV',
     heading: 'Vyhľadaj ľubovoľného hráča Dota 2',
     tagline: 'Pozri si nedávne matche, výkon podľa hrdinov, winrate a postup v ranku.',
+    viewUpdates: 'Pozri si najnovšie aktualizácie Dota 2.',
     favorites: 'Obľúbení',
     favoritesEmpty: 'Zatiaľ žiadni obľúbení hráči. Pridaj hráča do obľúbených z jeho profilu.',
     recentlyViewed: 'Nedávno pozreté',
     recentlyViewedEmpty: 'Hráči, ktorých vyhľadáš, sa zobrazia tu.',
+    latestUpdates: 'Najnovšie Dota 2 updaty',
+    latestUpdatesEmpty: 'Momentálne nie sú dostupné žiadne updaty.',
+    showAllUpdates: 'Zobraziť všetko',
     features: {
       eyebrow: 'Prehliadka',
       title: 'Ukážka toho, čo ťa čaká — na profile hráča toho nájdeš ešte viac.',
@@ -145,6 +151,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: 'Zobraziť ďalších 200 ({shown} / {total})',
+  },
+  updates: {
+    title: 'Dota 2 updaty',
+    subtitle: 'Oficiálne patch notes a novinky od Valve, priamo z Steam news feedu.',
+    errorLoad: 'Nepodarilo sa načítať updaty: {error}',
+    empty: 'Momentálne nie sú dostupné žiadne updaty.',
+    readMore: 'Čítať na Steame',
   },
   search: {
     resultsFor: 'Výsledky pre „{query}"',

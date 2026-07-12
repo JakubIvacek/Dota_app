@@ -5,10 +5,12 @@ export default {
     nav: {
       profile: 'Mein Profil',
       leaderboards: 'Leaderboards',
+      updates: 'Updates',
     },
     footer: {
       disclaimer: 'Inoffizielles Fan-Tool, nicht verbunden mit Valve Corporation. Daten über {link}.',
       github: 'GitHub',
+      updates: 'Updates',
       terms: 'Nutzungsbedingungen',
       privacy: 'Datenschutz',
     },
@@ -19,7 +21,7 @@ export default {
     unknown: 'Unbekannt',
   },
   searchbox: {
-    placeholder: 'Spielername oder Dota ID…',
+    placeholder: 'Name oder Dota ID…',
     ariaLabel: 'Spieler suchen',
     submit: 'Suchen',
   },
@@ -27,10 +29,14 @@ export default {
     eyebrow: 'DOTA 2 · SPIELERSTATISTIKEN',
     heading: 'Suche einen beliebigen Dota-2-Spieler',
     tagline: 'Sieh dir letzte Matches, Helden-Performance, Winrate und Rangfortschritt an.',
+    viewUpdates: 'Sieh dir die neuesten Dota-2-Updates an.',
     favorites: 'Favoriten',
     favoritesEmpty: 'Noch keine favorisierten Spieler. Füge einen Spieler über sein Profil zu den Favoriten hinzu.',
     recentlyViewed: 'Kürzlich angesehen',
     recentlyViewedEmpty: 'Gesuchte Spieler erscheinen hier.',
+    latestUpdates: 'Neueste Dota-2-Updates',
+    latestUpdatesEmpty: 'Derzeit keine Updates verfügbar.',
+    showAllUpdates: 'Alle anzeigen',
     features: {
       eyebrow: 'Produktrundgang',
       title: 'Eine Vorschau dessen, was dich erwartet — im Profil eines Spielers findest du noch mehr.',
@@ -145,6 +151,13 @@ export default {
     colPlayer: 'Player',
     colTeam: 'Team',
     showMore: '200 weitere anzeigen ({shown} / {total})',
+  },
+  updates: {
+    title: 'Dota-2-Updates',
+    subtitle: 'Offizielle Patch Notes und News von Valve, direkt aus dem Steam-News-Feed.',
+    errorLoad: 'Updates konnten nicht geladen werden: {error}',
+    empty: 'Derzeit keine Updates verfügbar.',
+    readMore: 'Auf Steam lesen',
   },
   search: {
     resultsFor: 'Ergebnisse für „{query}"',

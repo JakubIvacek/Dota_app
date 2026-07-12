@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
 import { Analytics } from '@vercel/analytics/vue'
 import { ACCOUNT_ID } from './config'
 import { SUPPORTED_LOCALES, persistLocale, type LocaleCode } from './i18n'
@@ -8,7 +7,6 @@ import SearchBox from './components/SearchBox.vue'
 import TopProgressBar from './components/TopProgressBar.vue'
 
 const { t, locale } = useI18n()
-const route = useRoute()
 
 function onLocaleChange(e: Event) {
   const code = (e.target as HTMLSelectElement).value as LocaleCode
@@ -29,11 +27,12 @@ function onLocaleChange(e: Event) {
       <nav>
         <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`">{{ t('app.nav.profile') }}</RouterLink>
         <RouterLink to="/leaderboard">{{ t('app.nav.leaderboards') }}</RouterLink>
+        <RouterLink to="/updates">{{ t('app.nav.updates') }}</RouterLink>
       </nav>
       <div class="topbar-actions">
-        <!-- The homepage already has a large primary search in the hero — showing it
-             again here would just duplicate it. Other pages still get the compact one. -->
-        <SearchBox v-if="route.name !== 'home'" class="topbar-search" />
+        <!-- Always shown, including on the homepage — keeps the header the same
+             width/height across every route instead of it resizing on navigation. -->
+        <SearchBox class="topbar-search" />
         <div class="locale-wrap">
           <svg class="locale-icon" viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4" />
@@ -75,6 +74,7 @@ function onLocaleChange(e: Event) {
 
       <nav class="footer-links">
         <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">{{ t('app.footer.github') }}</a>
+        <RouterLink to="/updates">{{ t('app.footer.updates') }}</RouterLink>
         <RouterLink to="/terms">{{ t('app.footer.terms') }}</RouterLink>
         <RouterLink to="/privacy">{{ t('app.footer.privacy') }}</RouterLink>
       </nav>
@@ -129,14 +129,14 @@ function onLocaleChange(e: Event) {
 
 nav {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 nav a {
   position: relative;
   color: var(--ink-2);
   font-weight: var(--weight-medium);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   padding: 0.4rem 0.15rem;
   transition: color var(--duration-fast) var(--ease-out);
 }
