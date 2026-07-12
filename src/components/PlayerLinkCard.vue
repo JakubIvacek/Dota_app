@@ -34,7 +34,7 @@ defineProps<{
 }
 
 .player-name {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

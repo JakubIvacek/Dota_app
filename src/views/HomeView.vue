@@ -31,6 +31,7 @@ const shownRecents = computed(() =>
 
 <template>
   <div class="landing">
+    <div class="glow" aria-hidden="true" />
     <span class="eyebrow">{{ t('home.eyebrow') }}</span>
     <h1>Dota Stats</h1>
     <p class="muted lede">
@@ -52,11 +53,12 @@ const shownRecents = computed(() =>
       <h2>{{ t('home.favorites') }}</h2>
       <div class="grid">
         <PlayerLinkCard
-          v-for="f in shownFavorites"
+          v-for="(f, i) in shownFavorites"
           :key="f.account_id"
           :account-id="f.account_id"
           :personaname="f.personaname"
           :avatarfull="f.avatarfull"
+          :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
         />
       </div>
     </section>
@@ -65,12 +67,13 @@ const shownRecents = computed(() =>
       <h2>{{ t('home.recentlyViewed') }}</h2>
       <div class="grid">
         <PlayerLinkCard
-          v-for="r in shownRecents"
+          v-for="(r, i) in shownRecents"
           :key="r.account_id"
           :account-id="r.account_id"
           :personaname="r.personaname"
           :avatarfull="r.avatarfull"
           :sub="timeAgo(r.visited_at / 1000, intlLocale)"
+          :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
         />
       </div>
     </section>
@@ -79,6 +82,7 @@ const shownRecents = computed(() =>
 
 <style scoped>
 .landing {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -86,6 +90,21 @@ const shownRecents = computed(() =>
   padding-top: 8vh;
   padding-bottom: var(--space-8);
   text-align: center;
+}
+
+/* Ambient glow anchored behind the hero — gives the landing screen a focal
+   point instead of flat text floating on an empty page. */
+.glow {
+  position: absolute;
+  top: -6vh;
+  left: 50%;
+  width: min(900px, 140vw);
+  height: 420px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(57, 135, 229, 0.16), rgba(57, 135, 229, 0.04) 55%, transparent 75%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .landing h1 {
@@ -160,5 +179,22 @@ const shownRecents = computed(() =>
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-3);
+}
+
+.grid :deep(.player-link) {
+  animation: card-in var(--duration-normal) var(--ease-out) both;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid :deep(.player-link) {
+    animation: none;
+  }
 }
 </style>

@@ -316,11 +316,11 @@ async function refreshFromOpenDota() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--muted);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-wide);
 }
 
 .filters select {
@@ -354,7 +354,7 @@ async function refreshFromOpenDota() {
   border-radius: var(--radius-md);
   color: var(--ink-2);
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   padding: 0.35rem 1rem;
   cursor: pointer;
 }

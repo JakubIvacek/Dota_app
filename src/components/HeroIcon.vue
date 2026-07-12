@@ -33,7 +33,7 @@ const { t } = useI18n()
   width: 42px;
   height: 24px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   display: block;
 }
 </style>

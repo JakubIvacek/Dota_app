@@ -191,7 +191,7 @@ function flag(country?: string): string {
   border-radius: var(--radius-md);
   color: var(--ink-2);
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   padding: 0.5rem;
   cursor: pointer;
 }

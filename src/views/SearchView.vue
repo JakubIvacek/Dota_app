@@ -78,7 +78,7 @@ const { data: results, loading, error } = useAsync(() =>
 }
 
 .name {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .meta {
