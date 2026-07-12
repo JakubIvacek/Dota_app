@@ -18,6 +18,7 @@ import { useAppLocale } from '../composables/useAppLocale'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import TeamGlyph from '../components/TeamGlyph.vue'
+import Skeleton from '../components/Skeleton.vue'
 import type { MatchPlayer } from '../types/opendota'
 
 const route = useRoute()
@@ -139,10 +140,10 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 </script>
 
 <template>
-  <section v-if="loading" class="skeleton-match">
-    <div class="card skeleton" style="height: 84px" />
-    <div class="card skeleton" style="height: 280px" />
-    <div class="card skeleton" style="height: 280px" />
+  <section v-if="loading" class="skeleton-stack lg">
+    <Skeleton variant="block" height="84px" class="card" />
+    <Skeleton variant="block" height="280px" class="card" />
+    <Skeleton variant="block" height="280px" class="card" />
   </section>
   <div v-else-if="error" class="error-box">{{ t('matchDetail.errorLoad', { error }) }}</div>
 
@@ -256,12 +257,6 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 </template>
 
 <style scoped>
-.skeleton-match {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .header {
   margin-bottom: var(--space-4);
   text-align: center;

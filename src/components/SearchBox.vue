@@ -8,16 +8,22 @@ withDefaults(defineProps<{ size?: 'normal' | 'large' }>(), { size: 'normal' })
 const { t } = useI18n()
 const router = useRouter()
 const query = ref('')
+const submitting = ref(false)
 
-function submit() {
+async function submit() {
   const q = query.value.trim()
-  if (!q) return
+  if (!q || submitting.value) return
   query.value = ''
-  // Číselný vstup berieme rovno ako account ID (Friend Code), inak fulltext search.
-  if (/^\d+$/.test(q)) {
-    router.push(`/player/${q}`)
-  } else {
-    router.push({ name: 'search', query: { q } })
+  submitting.value = true
+  try {
+    // Číselný vstup berieme rovno ako account ID (Friend Code), inak fulltext search.
+    if (/^\d+$/.test(q)) {
+      await router.push(`/player/${q}`)
+    } else {
+      await router.push({ name: 'search', query: { q } })
+    }
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -34,7 +40,10 @@ function submit() {
       :placeholder="t('searchbox.placeholder')"
       :aria-label="t('searchbox.ariaLabel')"
     />
-    <button type="submit">{{ t('searchbox.submit') }}</button>
+    <button type="submit" :disabled="submitting" :class="{ pending: submitting }">
+      <span v-if="submitting" class="spinner" aria-hidden="true" />
+      <span :class="{ 'sr-only': submitting }">{{ t('searchbox.submit') }}</span>
+    </button>
   </form>
 </template>
 
@@ -87,6 +96,9 @@ input:focus {
 }
 
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--accent);
   border: none;
   border-radius: calc(var(--radius-md) - 2px);
@@ -99,6 +111,38 @@ button {
 
 button:hover {
   filter: brightness(1.1);
+}
+
+button:disabled {
+  cursor: default;
+  filter: none;
+  opacity: 0.85;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.spinner {
+  width: 0.95em;
+  height: 0.95em;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: search-spin 0.7s linear infinite;
+}
+
+@keyframes search-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 1.4s; }
 }
 
 .large {

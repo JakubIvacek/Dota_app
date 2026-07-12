@@ -13,6 +13,7 @@ import { useAsync } from '../composables/useAsync'
 import { formatDuration, timeAgo } from '../utils/format'
 import { useAppLocale } from '../composables/useAppLocale'
 import HeroIcon from '../components/HeroIcon.vue'
+import Skeleton from '../components/Skeleton.vue'
 import type { PlayerMatch } from '../types/opendota'
 
 const route = useRoute()
@@ -179,8 +180,8 @@ async function refreshFromOpenDota() {
     </div>
   </div>
 
-  <section v-if="loading" class="card skeleton-table">
-    <div v-for="i in 8" :key="i" class="skeleton skeleton-row" />
+  <section v-if="loading" class="card skeleton-stack">
+    <Skeleton v-for="i in 8" :key="i" variant="row" height="40px" />
   </section>
   <div v-else-if="error" class="error-box">{{ t('matches.errorLoad', { error }) }}</div>
 
@@ -273,16 +274,6 @@ async function refreshFromOpenDota() {
 
 .result-btn.win.active { color: var(--win); }
 .result-btn.loss.active { color: var(--loss); }
-
-.skeleton-table {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.skeleton-row {
-  height: 40px;
-}
 
 .empty-state {
   display: flex;

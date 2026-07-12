@@ -15,6 +15,40 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-07-12
+
+### Added
+
+- Consistent loading states across the app: a shared `Skeleton.vue` component
+  (row/line/avatar/block variants) replaces the per-view
+  `.skeleton-table`/`.skeleton-row`/`.skeleton-profile`/`.skeleton-match` CSS
+  that had been duplicated across Dashboard, Leaderboard, Search, Heroes,
+  Matches, Player, and Match Detail views.
+- Home page now shows a skeleton for the "my profile" card while it loads
+  (previously fetched but never surfaced its own loading state).
+- Search box shows a spinner and disables the button while a submit is in
+  flight.
+- A global top-of-page progress bar (`TopProgressBar.vue`), wired to both
+  route navigation and a new `useGlobalLoading()` signal in `useAsync`, so it
+  reflects real OpenDota request latency, not just route/chunk loading.
+  Delay-show/hold-before-hide avoids flicker on fast responses.
+
+### Changed
+
+- Two-pass visual polish: app-wide button press feedback and card hover
+  lift, a rebuilt `SearchBox` with real depth (surface, border, focus glow,
+  search icon), an ambient hero glow and staggered card entrance on the home
+  page, leading glyphs on status/error boxes, and remaining hardcoded
+  spacing/weight values replaced with design tokens.
+
+### Fixed
+
+- `useAsync`'s new pending-request counter had a self-triggering infinite
+  reactive loop (`pendingCount.value++` read-then-wrote a ref inside its own
+  tracked effect scope), which pegged the CPU and broke `npm run dev`. Fixed
+  by keeping a plain counter and only ever assigning the reactive
+  projection, never reading it, from inside the effect.
+
 ## [0.3.0] — 2026-07-12
 
 ### Added

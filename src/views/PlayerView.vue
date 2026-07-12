@@ -6,6 +6,7 @@ import { useAsync } from '../composables/useAsync'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
 import { useFavorites } from '../composables/useFavorites'
 import { useAppLocale } from '../composables/useAppLocale'
+import Skeleton from '../components/Skeleton.vue'
 
 const route = useRoute()
 const { t } = useAppLocale()
@@ -23,8 +24,8 @@ const { isFavorite, toggle } = useFavorites()
 
 <template>
   <section v-if="loading" class="card profile skeleton-profile">
-    <div class="skeleton avatar" />
-    <div class="skeleton skeleton-line" style="width: 220px" />
+    <Skeleton variant="avatar" width="64px" height="64px" />
+    <Skeleton variant="line" width="220px" />
   </section>
   <div v-else-if="error" class="error-box">{{ t('player.errorLoad', { error }) }}</div>
 
@@ -81,11 +82,6 @@ const { isFavorite, toggle } = useFavorites()
 
 .skeleton-profile.profile {
   margin-bottom: var(--space-4);
-}
-
-.skeleton-line {
-  height: 20px;
-  border-radius: var(--radius-sm);
 }
 
 .tabs {

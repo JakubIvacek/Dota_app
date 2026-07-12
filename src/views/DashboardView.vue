@@ -23,6 +23,7 @@ import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 import WinrateBar from '../components/WinrateBar.vue'
+import Skeleton from '../components/Skeleton.vue'
 
 const route = useRoute()
 const { t, intlLocale } = useAppLocale()
@@ -115,10 +116,10 @@ async function refreshFromOpenDota() {
 
 <template>
   <section v-if="loading" class="stats">
-    <div class="card stat lg skeleton" style="height: 108px" />
-    <div class="card skeleton" style="height: 108px" />
-    <div class="card skeleton" style="height: 108px" />
-    <div class="card skeleton" style="height: 108px" />
+    <Skeleton variant="block" height="108px" class="card" />
+    <Skeleton variant="block" height="108px" class="card" />
+    <Skeleton variant="block" height="108px" class="card" />
+    <Skeleton variant="block" height="108px" class="card" />
   </section>
   <div v-else-if="error" class="error-box">{{ t('dashboard.errorLoad', { error }) }}</div>
 

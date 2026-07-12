@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/vue'
 import { ACCOUNT_ID } from './config'
 import { SUPPORTED_LOCALES, persistLocale, type LocaleCode } from './i18n'
 import SearchBox from './components/SearchBox.vue'
+import TopProgressBar from './components/TopProgressBar.vue'
 
 const { t, locale } = useI18n()
 
@@ -15,6 +16,8 @@ function onLocaleChange(e: Event) {
 </script>
 
 <template>
+  <TopProgressBar />
+
   <header class="topbar">
     <div class="container topbar-inner">
       <RouterLink to="/" class="brand">

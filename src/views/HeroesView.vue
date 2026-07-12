@@ -7,6 +7,7 @@ import { timeAgo } from '../utils/format'
 import { useAppLocale } from '../composables/useAppLocale'
 import HeroIcon from '../components/HeroIcon.vue'
 import WinrateBar from '../components/WinrateBar.vue'
+import Skeleton from '../components/Skeleton.vue'
 
 const route = useRoute()
 const { t, intlLocale } = useAppLocale()
@@ -52,8 +53,8 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
 </script>
 
 <template>
-  <section v-if="loading" class="card skeleton-table">
-    <div v-for="i in 10" :key="i" class="skeleton skeleton-row" />
+  <section v-if="loading" class="card skeleton-stack">
+    <Skeleton v-for="i in 10" :key="i" variant="row" height="36px" />
   </section>
   <div v-else-if="error" class="error-box">{{ t('heroes.errorLoad', { error }) }}</div>
 
@@ -100,13 +101,4 @@ th.sortable:hover {
   background: var(--surface-2);
 }
 
-.skeleton-table {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.skeleton-row {
-  height: 36px;
-}
 </style>

@@ -140,6 +140,18 @@ button:not(:disabled):active {
   .skeleton::after { animation: none; }
 }
 
+/* Shared skeleton-list layout — pairs with <Skeleton> to replace the
+   .skeleton-table/.skeleton-row blocks duplicated across views. */
+.skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-stack.lg {
+  gap: var(--space-4);
+}
+
 /* Eyebrow — small uppercase label, used sparingly (group headers, table heads). */
 .eyebrow {
   font-size: var(--text-xs);
