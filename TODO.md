@@ -10,6 +10,21 @@ documented in [CHANGELOG.md](./CHANGELOG.md), not here.
 - **Custom replay parser** — only if the app ever diverges from the OpenDota
   API.
 
+## Known upstream issues
+
+- **OpenDota `/search` is unreliable** (times out with a Cloudflare 524 on
+  their origin, unrelated to CORS/proxy/rate-limits — every other OpenDota
+  endpoint works fine). Reported upstream via a GitHub issue on
+  `odota/core`/`odota/opendota-api`. Mitigated client-side for now: shorter
+  fail-fast timeout for this one endpoint (`SEARCH_TIMEOUT_MS`,
+  `src/api/opendota.ts`), `SearchBox` recognizes a pasted account ID or
+  Steam/Dotabuff/OpenDota/Stratz profile link and navigates straight to the
+  profile (`src/utils/accountId.ts`), and the search error state now shows a
+  hint to try that instead (`search.hint` i18n key). Revisit if this stays
+  broken for a long time — see the chat log for a self-hosted BE-proxy option
+  that was considered and deliberately skipped (doesn't fix the root cause,
+  breaks the "no custom backend" decision for a small gain).
+
 ## 3D hero models (stretch goal)
 
 Instead of 2D icons in the match detail, a rotatable static 3D model of the

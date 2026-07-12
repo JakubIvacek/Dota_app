@@ -120,6 +120,7 @@ export default {
     noResults: 'Игрок не найден.',
     lastMatch: 'last match {time}',
     idLabel: 'ID {id}',
+    hint: 'Поиск OpenDota может работать нестабильно. Попробуй вставить account ID игрока или ссылку на профиль (Steam, Dotabuff, OpenDota).',
   },
   activity: {
     tooltip: '{date} — {n} матч ({wins}W – {losses}L) | {date} — {n} матча ({wins}W – {losses}L) | {date} — {n} матчей ({wins}W – {losses}L)',

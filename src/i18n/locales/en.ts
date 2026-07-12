@@ -118,6 +118,7 @@ const en = {
     noResults: 'No player found.',
     lastMatch: 'last match {time}',
     idLabel: 'ID {id}',
+    hint: "OpenDota's search can be unreliable. Try pasting the player's account ID or a profile link (Steam, Dotabuff, OpenDota) instead.",
   },
   activity: {
     tooltip: '{date} — {n} match ({wins}W – {losses}L) | {date} — {n} matches ({wins}W – {losses}L)',

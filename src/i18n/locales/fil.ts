@@ -120,6 +120,7 @@ export default {
     noResults: 'Walang nahanap na player.',
     lastMatch: 'huling match {time}',
     idLabel: 'ID {id}',
+    hint: 'Maaaring hindi maaasahan ang search ng OpenDota. Subukan na lang i-paste ang account ID ng player o link ng profile (Steam, Dotabuff, OpenDota).',
   },
   activity: {
     tooltip: '{date} — {n} matches ({wins}W – {losses}L)',

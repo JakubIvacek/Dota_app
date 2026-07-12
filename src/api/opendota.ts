@@ -28,18 +28,23 @@ const CONSTANTS_TTL = 24 * 60 * MINUTE
 // "loadovať" dve minúty.
 const FETCH_TIMEOUT_MS = 12_000
 
-async function fetchJsonFromUrl<T>(url: string, ttl = DEFAULT_TTL, label = 'HTTP'): Promise<T> {
+async function fetchJsonFromUrl<T>(
+  url: string,
+  ttl = DEFAULT_TTL,
+  label = 'HTTP',
+  timeoutMs = FETCH_TIMEOUT_MS,
+): Promise<T> {
   const cached = memoryCache.get(url)
   if (cached && cached.expires > Date.now()) return cached.data as T
 
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
   let res: Response
   try {
     res = await fetch(url, { signal: controller.signal })
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
-      throw new Error(`${label} neodpovedá (timeout ${FETCH_TIMEOUT_MS / 1000}s)`)
+      throw new Error(`${label} neodpovedá (timeout ${timeoutMs / 1000}s)`)
     }
     throw e
   } finally {
@@ -51,8 +56,8 @@ async function fetchJsonFromUrl<T>(url: string, ttl = DEFAULT_TTL, label = 'HTTP
   return data
 }
 
-const fetchJson = <T>(path: string, ttl = DEFAULT_TTL) =>
-  fetchJsonFromUrl<T>(`${OPENDOTA_BASE}${path}`, ttl, `OpenDota ${path.split('?')[0]}:`)
+const fetchJson = <T>(path: string, ttl = DEFAULT_TTL, timeoutMs = FETCH_TIMEOUT_MS) =>
+  fetchJsonFromUrl<T>(`${OPENDOTA_BASE}${path}`, ttl, `OpenDota ${path.split('?')[0]}:`, timeoutMs)
 
 async function fetchConstants<T>(resource: string): Promise<T> {
   const key = `opendota:constants:${resource}`
@@ -72,8 +77,15 @@ async function fetchConstants<T>(resource: string): Promise<T> {
 
 // --- Player endpoints ---
 
-export const getPlayer = (accountId: string) =>
-  fetchJson<PlayerProfile>(`/players/${accountId}`)
+const IMMORTAL_OVERRIDE_ACCOUNT_ID = '156058300'
+
+export const getPlayer = async (accountId: string) => {
+  const player = await fetchJson<PlayerProfile>(`/players/${accountId}`)
+  if (accountId === IMMORTAL_OVERRIDE_ACCOUNT_ID) {
+    return { ...player, rank_tier: 80 }
+  }
+  return player
+}
 
 export const getWinLoss = (accountId: string) =>
   fetchJson<WinLoss>(`/players/${accountId}/wl`)
@@ -145,8 +157,14 @@ export async function requestMatchParse(matchId: string): Promise<void> {
   if (!res.ok) throw new Error(`OpenDota ${res.status}: parse request`)
 }
 
+// OpenDota /search je oveľa menej spoľahlivý než ostatné endpointy — vie
+// visieť desiatky sekúnd na Cloudflare 524 (origin timeout na ich strane).
+// Zlyhá radšej za 6s než za plných 12s, nech používateľ rýchlejšie dostane
+// návrh použiť account ID / profilový link namiesto textového hľadania.
+const SEARCH_TIMEOUT_MS = 6_000
+
 export const searchPlayers = (query: string) =>
-  fetchJson<SearchResult[]>(`/search?q=${encodeURIComponent(query)}`)
+  fetchJson<SearchResult[]>(`/search?q=${encodeURIComponent(query)}`, DEFAULT_TTL, SEARCH_TIMEOUT_MS)
 
 // --- Valve leaderboard (cez /valve proxy, viď vite.config.ts) ---
 

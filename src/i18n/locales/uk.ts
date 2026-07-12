@@ -120,6 +120,7 @@ export default {
     noResults: 'Гравця не знайдено.',
     lastMatch: 'last match {time}',
     idLabel: 'ID {id}',
+    hint: 'Пошук OpenDota може працювати нестабільно. Спробуй вставити account ID гравця або посилання на профіль (Steam, Dotabuff, OpenDota).',
   },
   activity: {
     tooltip: '{date} — {n} матч ({wins}W – {losses}L) | {date} — {n} матчі ({wins}W – {losses}L) | {date} — {n} матчів ({wins}W – {losses}L)',
