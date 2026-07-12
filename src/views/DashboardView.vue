@@ -15,7 +15,7 @@ import {
   wonMatch,
 } from '../api/opendota'
 import { useAsync } from '../composables/useAsync'
-import { formatDate, winratePct } from '../utils/format'
+import { formatDuration, formatShortDate, winratePct } from '../utils/format'
 import { pickWindow, rollingAvg } from '../utils/stats'
 import { cssVar } from '../utils/theme'
 import StatCard from '../components/StatCard.vue'
@@ -55,7 +55,7 @@ function trend(perMatch: number[], preferredWindow: number) {
   const window = pickWindow(perMatch.length, preferredWindow)
   return {
     window,
-    labels: chronological.value.slice(window - 1).map((m) => formatDate(m.start_time, intlLocale.value)),
+    labels: chronological.value.slice(window - 1).map((m) => formatShortDate(m.start_time, intlLocale.value)),
     values: rollingAvg(perMatch, window),
   }
 }
@@ -89,6 +89,19 @@ const modeStats = computed(() =>
 const recentWinrate = computed(() => {
   const matches = data.value?.recentMatches ?? []
   return winratePct(matches.filter(wonMatch).length, matches.length)
+})
+
+const avgMatchStats = computed(() => {
+  const matches = data.value?.recentMatches ?? []
+  if (matches.length === 0) return null
+  const avg = (values: number[]) => values.reduce((sum, v) => sum + v, 0) / matches.length
+  return {
+    duration: avg(matches.map((m) => m.duration)),
+    gpm: Math.round(avg(matches.map((m) => m.gold_per_min ?? 0))),
+    xpm: Math.round(avg(matches.map((m) => m.xp_per_min ?? 0))),
+    kills: avg(matches.map((m) => m.kills)).toFixed(1),
+    deaths: avg(matches.map((m) => m.deaths)).toFixed(1),
+  }
 })
 
 // Nulové wl + žiadne matche = OpenDota tohto hráča ešte nezaindexovala.
@@ -140,13 +153,27 @@ async function refreshFromOpenDota() {
         :tone="data.wl.win >= data.wl.lose ? 'win' : 'loss'"
         size="lg"
       />
-      <StatCard :label="t('dashboard.statWins')" :value="String(data.wl.win)" tone="win" />
-      <StatCard :label="t('dashboard.statLosses')" :value="String(data.wl.lose)" tone="loss" />
+      <div class="card stat wl-combo">
+        <div class="wl-row">
+          <div class="label">{{ t('dashboard.statWins') }}</div>
+          <div class="value win">{{ data.wl.win }}</div>
+        </div>
+        <div class="wl-row">
+          <div class="label">{{ t('dashboard.statLosses') }}</div>
+          <div class="value loss">{{ data.wl.lose }}</div>
+        </div>
+      </div>
       <StatCard
         :label="t('dashboard.statWinrateRecent')"
         :value="`${recentWinrate} %`"
         :sub="`${data.recentMatches.length} ${t('dashboard.matchesSuffix')}`"
         :tone="recentWinrate === '—' ? 'default' : Number(recentWinrate) >= 50 ? 'win' : 'loss'"
+      />
+      <StatCard
+        v-if="avgMatchStats"
+        :label="t('dashboard.statAvgMatch')"
+        :value="formatDuration(Math.round(avgMatchStats.duration))"
+        :sub="`${avgMatchStats.gpm} GPM · ${avgMatchStats.xpm} XPM\n${avgMatchStats.kills} K / ${avgMatchStats.deaths} D`"
       />
     </section>
 
@@ -266,6 +293,33 @@ async function refreshFromOpenDota() {
 .stats > :first-child {
   grid-column: span 2;
 }
+
+.wl-combo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.wl-row .label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--muted);
+  font-weight: var(--weight-semibold);
+}
+
+.wl-row .value {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-row .value.win { color: var(--win); }
+.wl-row .value.loss { color: var(--loss); }
 
 @media (max-width: 720px) {
   .stats {

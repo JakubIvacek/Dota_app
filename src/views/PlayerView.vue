@@ -7,6 +7,7 @@ import { useRecentPlayers } from '../composables/useRecentPlayers'
 import { useFavorites } from '../composables/useFavorites'
 import { useAppLocale } from '../composables/useAppLocale'
 import Skeleton from '../components/Skeleton.vue'
+import RankBadge from '../components/RankBadge.vue'
 
 const route = useRoute()
 const { t } = useAppLocale()
@@ -32,6 +33,7 @@ const { isFavorite, toggle } = useFavorites()
   <template v-else-if="player">
     <section class="profile card">
       <img v-if="player.profile" :src="player.profile.avatarfull" alt="" class="avatar" />
+      <RankBadge :rank-tier="player.rank_tier" size="lg" />
       <div>
         <h1>
           {{ player.profile?.personaname ?? t('common.playerFallback', { id: accountId }) }}

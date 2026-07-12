@@ -42,6 +42,7 @@ export default {
     statLosses: 'Losses',
     statWinrateRecent: 'Winrate (last 100)',
     matchesSuffix: 'matches',
+    statAvgMatch: 'Avg match',
     topHeroes: 'Самые популярные герои',
     allHeroes: 'Все герои →',
     kdaTrend: 'KDA — среднее за {window} матчей',

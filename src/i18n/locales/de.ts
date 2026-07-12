@@ -42,6 +42,7 @@ export default {
     statLosses: 'Losses',
     statWinrateRecent: 'Winrate (last 100)',
     matchesSuffix: 'matches',
+    statAvgMatch: 'Avg match',
     topHeroes: 'Meistgespielte Helden',
     allHeroes: 'Alle Helden →',
     kdaTrend: 'KDA — Durchschnitt der letzten {window} Matches',

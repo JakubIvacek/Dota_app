@@ -42,6 +42,7 @@ export default {
     statLosses: 'Losses',
     statWinrateRecent: 'Winrate (last 100)',
     matchesSuffix: 'matches',
+    statAvgMatch: 'Avg match',
     topHeroes: 'Pinaka-madalas na hero',
     allHeroes: 'Lahat ng hero →',
     kdaTrend: 'KDA — average ng huling {window} matches',

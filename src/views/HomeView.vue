@@ -9,6 +9,7 @@ import { useFavorites } from '../composables/useFavorites'
 import { timeAgo } from '../utils/format'
 import SearchBox from '../components/SearchBox.vue'
 import PlayerLinkCard from '../components/PlayerLinkCard.vue'
+import RankBadge from '../components/RankBadge.vue'
 import Skeleton from '../components/Skeleton.vue'
 
 const { t, intlLocale } = useAppLocale()
@@ -52,7 +53,10 @@ const shownRecents = computed(() =>
       <div class="me-info">
         <div class="me-label">{{ t('home.myProfile') }}</div>
         <div class="me-name">{{ me?.profile?.personaname ?? t('common.playerFallback', { id: ACCOUNT_ID }) }}</div>
-        <div class="muted" v-if="me">{{ rankTierName(me.rank_tier) }}</div>
+        <div class="muted rank-line" v-if="me">
+          <RankBadge :rank-tier="me.rank_tier" />
+          {{ rankTierName(me.rank_tier) }}
+        </div>
       </div>
       <span class="arrow">→</span>
     </RouterLink>
@@ -167,6 +171,12 @@ const shownRecents = computed(() =>
   font-family: var(--font-display);
   font-weight: var(--weight-bold);
   font-size: 1.15rem;
+}
+
+.rank-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .arrow {

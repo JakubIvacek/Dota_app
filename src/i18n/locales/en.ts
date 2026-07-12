@@ -40,6 +40,7 @@ const en = {
     statLosses: 'Losses',
     statWinrateRecent: 'Winrate (last 100)',
     matchesSuffix: 'matches',
+    statAvgMatch: 'Avg match',
     topHeroes: 'Most played heroes',
     allHeroes: 'All heroes →',
     kdaTrend: 'KDA — {window}-match average',

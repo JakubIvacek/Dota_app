@@ -42,6 +42,7 @@ export default {
     statLosses: 'Losses',
     statWinrateRecent: 'Winrate (last 100)',
     matchesSuffix: 'matches',
+    statAvgMatch: 'Avg match',
     topHeroes: '最常使用的英雄',
     allHeroes: '全部英雄 →',
     kdaTrend: 'KDA — 最近 {window} 场平均值',

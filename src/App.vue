@@ -28,10 +28,25 @@ function onLocaleChange(e: Event) {
         <RouterLink v-if="ACCOUNT_ID" :to="`/player/${ACCOUNT_ID}`">{{ t('app.nav.profile') }}</RouterLink>
         <RouterLink to="/leaderboard">{{ t('app.nav.leaderboards') }}</RouterLink>
       </nav>
-      <select class="locale-select" :value="locale" aria-label="Language" @change="onLocaleChange">
-        <option v-for="l in SUPPORTED_LOCALES" :key="l.code" :value="l.code">{{ l.label }}</option>
-      </select>
       <SearchBox class="topbar-search" />
+      <div class="locale-wrap">
+        <svg class="locale-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <ellipse cx="10" cy="10" rx="3.4" ry="8" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.4" />
+        </svg>
+        <select
+          class="locale-select"
+          :value="locale"
+          :title="SUPPORTED_LOCALES.find((l) => l.code === locale)?.label"
+          aria-label="Language"
+          @change="onLocaleChange"
+        >
+          <option v-for="l in SUPPORTED_LOCALES" :key="l.code" :value="l.code" :title="l.label">
+            {{ l.code.toUpperCase() }}
+          </option>
+        </select>
+      </div>
     </div>
   </header>
 
@@ -58,7 +73,7 @@ function onLocaleChange(e: Event) {
         <RouterLink to="/privacy">{{ t('app.footer.privacy') }}</RouterLink>
       </nav>
 
-      <span class="footer-copy muted">© {{ new Date().getFullYear() }}</span>
+      <span class="footer-copy muted">© {{ new Date().getFullYear() }} byKeno</span>
     </div>
   </footer>
 
@@ -144,15 +159,39 @@ nav a.router-link-active::after {
   right: 0;
 }
 
+.locale-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.locale-icon {
+  position: absolute;
+  left: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  pointer-events: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.locale-wrap:hover .locale-icon,
+.locale-wrap:focus-within .locale-icon {
+  color: var(--ink-2);
+}
+
 .locale-select {
-  margin-left: auto;
   background: var(--page);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--ink-2);
   font: inherit;
   font-size: var(--text-sm);
-  padding: 0.3rem 0.5rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  padding: 0.3rem 0.5rem 0.3rem 1.7rem;
   cursor: pointer;
   transition: border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
@@ -167,7 +206,7 @@ nav a.router-link-active::after {
 }
 
 .topbar-search {
-  margin-left: 0;
+  margin-left: auto;
 }
 
 .footer {

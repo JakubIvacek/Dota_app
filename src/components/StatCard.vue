@@ -64,5 +64,6 @@ withDefaults(
 .sub {
   font-size: var(--text-sm);
   color: var(--ink-2);
+  white-space: pre-line;
 }
 </style>
