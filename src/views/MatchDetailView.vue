@@ -175,7 +175,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
         {{ team.name }}
         <span v-if="team.won" class="badge win">{{ t('matchDetail.victory') }}</span>
       </h2>
-      <div class="table-scroll">
+      <div class="table-scroll desktop-table">
         <table class="data">
           <thead>
             <tr>
@@ -221,6 +221,56 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
           </tbody>
         </table>
       </div>
+
+      <ul class="mobile-players">
+        <li v-for="p in team.players" :key="p.player_slot" class="player-card" :class="{ me: p.isMe }">
+          <div class="player-card-top">
+            <HeroIcon :hero="p.hero" :show-name="false" />
+            <span class="player-name">
+              <RouterLink v-if="p.account_id != null" :to="`/player/${p.account_id}`">
+                {{ p.personaname ?? t('common.playerFallback', { id: p.account_id }) }}
+              </RouterLink>
+              <span v-else class="muted">{{ t('matchDetail.anonymous') }}</span>
+            </span>
+          </div>
+          <div class="player-card-stats">
+            <div class="stat">
+              <span class="stat-value">{{ p.level }}</span>
+              <span class="stat-label">LVL</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</span>
+              <span class="stat-label">K / D / A</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</span>
+              <span class="stat-label">Net</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ p.gold_per_min }} / {{ p.xp_per_min }}</span>
+              <span class="stat-label">GPM / XPM</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ p.last_hits }} / {{ p.denies }}</span>
+              <span class="stat-label">LH / DN</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ formatK(p.hero_damage) }}</span>
+              <span class="stat-label">DMG</span>
+            </div>
+          </div>
+          <div class="items player-card-items">
+            <img
+              v-for="(item, i) in p.items"
+              :key="i"
+              :src="itemImageUrl(item)"
+              :alt="item?.dname ?? ''"
+              :title="item?.dname"
+              class="item"
+            />
+          </div>
+        </li>
+      </ul>
     </section>
 
     <section class="card">
@@ -313,6 +363,83 @@ tr.me td {
   background: var(--accent-soft);
 }
 
+/* Mobile card list — hidden by default, swapped in for the table below
+   720px so per-player stats read top-to-bottom instead of needing a
+   horizontal scroll to see net/gpm/xpm/lh-dn/dmg/items. */
+.mobile-players {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-players {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.player-card {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.player-card.me {
+  background: var(--accent-soft);
+}
+
+.player-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.player-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-name a {
+  color: var(--ink);
+}
+
+.player-name a:hover {
+  color: var(--accent);
+}
+
+.player-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
 .name {
   max-width: 160px;
   overflow: hidden;
@@ -331,6 +458,12 @@ tr.me td {
 .items {
   display: inline-flex;
   gap: 2px;
+}
+
+.player-card-items {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-3);
 }
 
 .item {
