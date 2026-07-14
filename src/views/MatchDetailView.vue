@@ -27,6 +27,11 @@ const { t, intlLocale } = useAppLocale()
 // Zvýrazni hráča, z ktorého profilu sme prišli (?player=), inak vlastný.
 const highlightId = computed(() => String(route.query.player ?? ACCOUNT_ID))
 
+// Späť na Matches tab hráča, z ktorého profilu sme prišli; bez ?player= a bez
+// nastaveného ACCOUNT_ID (napr. priamo otvorený zdieľaný odkaz) padni na domov,
+// nech odkaz nikdy nesmeruje na /player//matches.
+const backTarget = computed(() => (highlightId.value ? `/player/${highlightId.value}/matches` : '/'))
+
 const { data, loading, error } = useAsync(async () => {
   const matchId = String(route.params.id)
   const [match, heroMap, itemMap] = await Promise.all([
@@ -149,6 +154,9 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 
   <template v-else-if="data">
     <section class="card header">
+      <div class="header-back">
+        <RouterLink :to="backTarget" class="back-link">‹ {{ t('matchDetail.back') }}</RouterLink>
+      </div>
       <div class="score">
         <span class="side radiant" :class="{ loser: !data.match.radiant_win }">
           <TeamGlyph side="radiant" />Radiant {{ data.match.radiant_score }}
@@ -310,6 +318,25 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 .header {
   margin-bottom: var(--space-4);
   text-align: center;
+}
+
+.header-back {
+  text-align: left;
+  margin-bottom: var(--space-3);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.back-link:hover {
+  color: var(--accent);
 }
 
 .score {

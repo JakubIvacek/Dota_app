@@ -15,6 +15,14 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-07-14
+
+### Added
+
+- Match detail page now has a "‹ Back" link in the header, returning to the
+  Matches tab of whichever player's profile it was opened from (falls back
+  to home if opened directly with no player context).
+
 ## [0.8.0] — 2026-07-14
 
 ### Added

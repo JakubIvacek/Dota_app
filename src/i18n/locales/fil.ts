@@ -114,6 +114,7 @@ export default {
   matchDetail: {
     errorLoad: 'Hindi na-load ang match: {error}',
     victory: 'Victory',
+    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',

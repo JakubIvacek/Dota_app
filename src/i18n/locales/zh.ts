@@ -113,6 +113,7 @@ export default {
   matchDetail: {
     errorLoad: '对局加载失败:{error}',
     victory: 'Victory',
+    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',

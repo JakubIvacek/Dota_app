@@ -114,6 +114,7 @@ export default {
   matchDetail: {
     errorLoad: 'No se pudo cargar la partida: {error}',
     victory: 'Victory',
+    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',

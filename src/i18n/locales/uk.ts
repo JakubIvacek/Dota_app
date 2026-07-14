@@ -114,6 +114,7 @@ export default {
   matchDetail: {
     errorLoad: 'Не вдалося завантажити матч: {error}',
     victory: 'Victory',
+    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
