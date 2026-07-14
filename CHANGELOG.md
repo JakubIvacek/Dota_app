@@ -15,6 +15,24 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-07-14
+
+### Added
+
+- Heroes table on the player profile now renders as a stacked card list
+  below 720px instead of scrolling horizontally, with a "Sort by"
+  dropdown + direction toggle since the desktop table's clickable column
+  headers don't carry over to cards.
+- Match detail Radiant/Dire player tables now render as a stacked card
+  list below 720px instead of scrolling horizontally — level, K/D/A, net
+  worth, GPM/XPM, LH/DN, damage, and items are all visible without
+  scrolling.
+
+### Changed
+
+- Match detail score header and team section headings now use the actual
+  Radiant/Dire faction icons instead of plain triangle glyphs.
+
 ## [0.7.0] — 2026-07-12
 
 ### Added
