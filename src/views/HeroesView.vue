@@ -31,6 +31,10 @@ function sortBy(key: SortKey) {
   }
 }
 
+function onSortKeyChange(event: Event) {
+  sortBy((event.target as HTMLSelectElement).value as SortKey)
+}
+
 const rows = computed(() => {
   const joined = (data.value?.playerHeroes ?? [])
     .filter((h) => h.games > 0)
@@ -59,7 +63,7 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
   <div v-else-if="error" class="error-box">{{ t('heroes.errorLoad', { error }) }}</div>
 
   <div v-else class="card">
-    <div class="table-scroll">
+    <div class="table-scroll desktop-table">
       <table class="data">
         <thead>
           <tr>
@@ -81,6 +85,42 @@ const arrow = (key: SortKey) => (sortKey.value === key ? (sortDesc.value ? ' ▾
         </tbody>
       </table>
     </div>
+
+    <div class="mobile-sort">
+      <label>
+        {{ t('heroes.sortLabel') }}
+        <select :value="sortKey" @change="onSortKeyChange">
+          <option value="name">{{ t('heroes.colHero') }}</option>
+          <option value="games">{{ t('heroes.colGames') }}</option>
+          <option value="win">{{ t('heroes.colWins') }}</option>
+          <option value="winrate">{{ t('heroes.colWinrate') }}</option>
+          <option value="last_played">{{ t('heroes.colLastPlayed') }}</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        class="sort-dir-btn"
+        :aria-label="sortDesc ? t('heroes.sortDescending') : t('heroes.sortAscending')"
+        @click="sortBy(sortKey)"
+      >
+        {{ sortDesc ? '▾' : '▴' }}
+      </button>
+    </div>
+
+    <ul class="mobile-heroes">
+      <li v-for="h in rows" :key="h.hero_id" class="hero-card">
+        <div class="hero-card-top">
+          <HeroIcon :hero="h.hero" />
+          <WinrateBar :win="h.win" :games="h.games" />
+        </div>
+        <div class="hero-card-stats">
+          <span>{{ h.win }} {{ t('heroes.colWins') }}</span>
+          <span class="dot">·</span>
+          <span>{{ h.games }} {{ t('heroes.colGames') }}</span>
+        </div>
+        <div class="muted hero-card-time">{{ h.last_played ? timeAgo(h.last_played, intlLocale) : '—' }}</div>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -103,4 +143,119 @@ th.sortable:hover {
   background: var(--surface-2);
 }
 
+/* Mobile card list — hidden by default, swapped in for the table below
+   720px so hero stats read top-to-bottom instead of needing a horizontal
+   scroll to see games/wins/winrate/last played. */
+.mobile-heroes {
+  display: none;
+}
+
+.mobile-sort {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-heroes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .mobile-sort {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+}
+
+.mobile-sort label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.mobile-sort select {
+  flex: 1;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  padding: 0.35rem 0.6rem;
+}
+
+.mobile-sort select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.sort-dir-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink-2);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.sort-dir-btn:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.hero-card {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+
+.hero-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.hero-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.hero-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-card-stats .dot {
+  color: var(--muted);
+}
+
+.hero-card-time {
+  margin-top: 0.2rem;
+  font-size: var(--text-sm);
+}
 </style>

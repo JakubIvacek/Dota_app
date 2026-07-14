@@ -143,6 +143,9 @@ export default {
     colWins: 'Wins',
     colWinrate: 'Winrate',
     colLastPlayed: 'Last played',
+    sortLabel: 'Sort by',
+    sortAscending: 'Ascending',
+    sortDescending: 'Descending',
   },
   leaderboard: {
     title: 'Leaderboards',
