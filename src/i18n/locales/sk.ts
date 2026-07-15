@@ -114,7 +114,6 @@ export default {
   matchDetail: {
     errorLoad: 'Nepodarilo sa načítať match: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -126,6 +125,8 @@ export default {
     parseExpired:
       'Replay tohto matchu už expiroval (Valve ich drží ~2–4 týždne), graf sa nedá doplniť. Pri čerstvých matchoch ho appka vyžiada automaticky — stačí mať zapnuté {tag} v Dota klientovi.',
     parseUnavailable: 'Tento match nemá sparsovaný replay — graf nie je dostupný.',
+    playerTimeline: 'Gold & XP priebeh hráča',
+    viewPlayerTimeline: 'Zobraziť gold & XP priebeh hráča {name}',
   },
   player: {
     errorLoad: 'Nepodarilo sa načítať hráča: {error}',

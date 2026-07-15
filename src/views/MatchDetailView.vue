@@ -15,6 +15,7 @@ import { useAsync } from '../composables/useAsync'
 import { formatDate, formatDuration } from '../utils/format'
 import { cssVar } from '../utils/theme'
 import { useAppLocale } from '../composables/useAppLocale'
+import Breadcrumb from '../components/Breadcrumb.vue'
 import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import TeamGlyph from '../components/TeamGlyph.vue'
@@ -31,6 +32,11 @@ const highlightId = computed(() => String(route.query.player ?? ACCOUNT_ID))
 // nastaveného ACCOUNT_ID (napr. priamo otvorený zdieľaný odkaz) padni na domov,
 // nech odkaz nikdy nesmeruje na /player//matches.
 const backTarget = computed(() => (highlightId.value ? `/player/${highlightId.value}/matches` : '/'))
+
+const breadcrumbItems = computed(() => [
+  { label: t('player.tabMatches'), to: backTarget.value },
+  { label: `Match #${data.value?.match.match_id ?? route.params.id}` },
+])
 
 const { data, loading, error } = useAsync(async () => {
   const matchId = String(route.params.id)
@@ -142,6 +148,26 @@ const advantage = computed(() => {
 })
 
 const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
+
+// Per-player timeline card: vyber hráča klikom na ikonu, default prvý Radiant hráč.
+const selectedSlot = ref<number | null>(null)
+const allPlayers = computed(() => [
+  ...radiant.value.map((p) => ({ ...p, isRadiant: true })),
+  ...dire.value.map((p) => ({ ...p, isRadiant: false })),
+])
+const selectedPlayer = computed(() => {
+  const slot = selectedSlot.value ?? radiant.value[0]?.player_slot
+  return allPlayers.value.find((p) => p.player_slot === slot) ?? null
+})
+const playerTimeline = computed(() => {
+  const p = selectedPlayer.value
+  if (!p?.gold_t?.length) return null
+  return {
+    labels: p.gold_t.map((_, i) => formatDuration(i * 60)),
+    gold: p.gold_t,
+    xp: p.xp_t ?? [],
+  }
+})
 </script>
 
 <template>
@@ -153,15 +179,13 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
   <div v-else-if="error" class="error-box">{{ t('matchDetail.errorLoad', { error }) }}</div>
 
   <template v-else-if="data">
+    <Breadcrumb :items="breadcrumbItems" show-back-arrow class="page-breadcrumb" />
+
     <section class="card header">
-      <div class="header-back">
-        <RouterLink :to="backTarget" class="back-link">‹ {{ t('matchDetail.back') }}</RouterLink>
-      </div>
       <div class="score">
         <span class="side radiant" :class="{ loser: !data.match.radiant_win }">
           <TeamGlyph side="radiant" />Radiant {{ data.match.radiant_score }}
         </span>
-        <span class="muted">:</span>
         <span class="side dire" :class="{ loser: data.match.radiant_win }">
           {{ data.match.dire_score }} Dire<TeamGlyph side="dire" />
         </span>
@@ -281,7 +305,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
       </ul>
     </section>
 
-    <section class="card">
+    <section class="card advantage-card">
       <h2>{{ t('matchDetail.goldXpAdvantage') }}</h2>
       <LineChart
         v-if="advantage"
@@ -319,32 +343,64 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
         </template>
       </div>
     </section>
+
+    <section class="card">
+      <h2>{{ t('matchDetail.playerTimeline') }}</h2>
+      <div class="player-strip">
+        <button
+          v-for="p in allPlayers"
+          :key="p.player_slot"
+          type="button"
+          class="player-icon"
+          :class="[p.isRadiant ? 'radiant' : 'dire', { active: p.player_slot === selectedPlayer?.player_slot }]"
+          :aria-label="t('matchDetail.viewPlayerTimeline', { name: p.personaname ?? t('common.playerFallback', { id: p.account_id }) })"
+          :aria-pressed="p.player_slot === selectedPlayer?.player_slot"
+          @click="selectedSlot = p.player_slot"
+        >
+          <HeroIcon :hero="p.hero" :show-name="false" />
+        </button>
+      </div>
+
+      <LineChart
+        v-if="playerTimeline"
+        :labels="playerTimeline.labels"
+        :datasets="[
+          { label: 'Gold', data: playerTimeline.gold, color: cssVar('--gold') },
+          { label: 'XP', data: playerTimeline.xp, color: cssVar('--accent') },
+        ]"
+        :y-format="formatK"
+        :height="300"
+      />
+      <div v-else class="status-note">
+        <template v-if="parseState === 'polling'">
+          {{ t('matchDetail.parsePolling') }}
+        </template>
+        <template v-else-if="parseState === 'gave_up'">
+          {{ t('matchDetail.parseGaveUp') }}
+          <button class="retry" @click="retryParse">{{ t('matchDetail.parseRetry') }}</button>
+        </template>
+        <template v-else-if="parseState === 'expired'">
+          <i18n-t keypath="matchDetail.parseExpired">
+            <template #tag><em>Expose Public Match Data</em></template>
+          </i18n-t>
+        </template>
+        <template v-else>
+          {{ t('matchDetail.parseUnavailable') }}
+        </template>
+      </div>
+    </section>
   </template>
 </template>
 
 <style scoped>
-.header {
-  margin-bottom: var(--space-4);
-  text-align: center;
-}
-
-.header-back {
-  text-align: left;
+.page-breadcrumb {
+  padding-left: var(--space-5);
   margin-bottom: var(--space-3);
 }
 
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  color: var(--ink-2);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  transition: color var(--duration-fast) var(--ease-out);
-}
-
-.back-link:hover {
-  color: var(--accent);
+.header {
+  margin-bottom: var(--space-4);
+  text-align: center;
 }
 
 .score {
@@ -368,6 +424,10 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 .team {
   margin-bottom: var(--space-4);
   border-top: 2px solid transparent;
+}
+
+.advantage-card {
+  margin-bottom: var(--space-4);
 }
 
 /* Dota konvencia: Radiant zelená, Dire červená — plus jemný farebný wash panelu,
@@ -507,6 +567,41 @@ tr.me td {
   object-fit: cover;
   border-radius: var(--radius-sm);
   display: block;
+}
+
+.player-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.player-icon {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.3rem;
+  line-height: 0;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.player-icon.radiant {
+  border-color: var(--radiant-soft);
+}
+
+.player-icon.dire {
+  border-color: var(--dire-soft);
+}
+
+.player-icon.radiant.active {
+  border-color: var(--radiant);
+  box-shadow: var(--shadow-glow-radiant);
+}
+
+.player-icon.dire.active {
+  border-color: var(--dire);
+  box-shadow: var(--shadow-glow-dire);
 }
 
 .retry {

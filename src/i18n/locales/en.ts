@@ -112,7 +112,6 @@ const en = {
   matchDetail: {
     errorLoad: 'Failed to load match: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -124,6 +123,8 @@ const en = {
     parseExpired:
       "This match's replay has already expired (Valve keeps them for ~2-4 weeks), so the chart can't be filled in. For fresh matches the app requests this automatically — just make sure {tag} is enabled in the Dota client.",
     parseUnavailable: "This match doesn't have a parsed replay — the chart isn't available.",
+    playerTimeline: 'Player Gold & XP timeline',
+    viewPlayerTimeline: "View {name}'s gold & XP timeline",
   },
   player: {
     errorLoad: 'Failed to load player: {error}',

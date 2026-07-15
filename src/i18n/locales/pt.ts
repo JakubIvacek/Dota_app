@@ -114,7 +114,6 @@ export default {
   matchDetail: {
     errorLoad: 'Falha ao carregar partida: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -126,6 +125,8 @@ export default {
     parseExpired:
       'O replay desta partida já expirou (a Valve os mantém por ~2-4 semanas), o gráfico não pode ser preenchido. Para partidas recentes o app solicita isso automaticamente — apenas garanta que {tag} esteja ativado no cliente da Dota.',
     parseUnavailable: 'Esta partida não tem um replay processado — o gráfico não está disponível.',
+    playerTimeline: 'Linha do tempo de Gold & XP do jogador',
+    viewPlayerTimeline: 'Ver a linha do tempo de gold & XP de {name}',
   },
   player: {
     errorLoad: 'Falha ao carregar jogador: {error}',
