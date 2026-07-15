@@ -135,7 +135,7 @@ const advantage = computed(() => {
   const m = data.value?.match
   if (!m?.radiant_gold_adv?.length) return null
   return {
-    labels: m.radiant_gold_adv.map((_, i) => `${i}'`),
+    labels: m.radiant_gold_adv.map((_, i) => formatDuration(i * 60)),
     gold: m.radiant_gold_adv,
     xp: m.radiant_xp_adv ?? [],
   }
@@ -292,6 +292,14 @@ const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
         ]"
         :y-format="formatK"
         :height="300"
+        :team-split="{
+          topLabel: 'Radiant',
+          bottomLabel: 'Dire',
+          topWash: cssVar('--radiant-soft'),
+          bottomWash: cssVar('--dire-soft'),
+          topLabelColor: cssVar('--radiant-strong'),
+          bottomLabelColor: cssVar('--dire-strong'),
+        }"
       />
       <div v-else class="status-note">
         <template v-if="parseState === 'polling'">
