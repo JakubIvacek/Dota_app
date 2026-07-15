@@ -57,6 +57,7 @@
   --text-lg: 1.4rem;    /* page head */
   --text-xl: 1.7rem;    /* stat card value */
   --text-2xl: 2.4rem;   /* hero number / home headline */
+  --text-3xl: 2.8rem;   /* match score — the single largest number on the page */
 
   --weight-body: 400;
   --weight-medium: 550;

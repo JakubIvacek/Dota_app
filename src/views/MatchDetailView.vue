@@ -59,11 +59,24 @@ function playerRow(p: MatchPlayer) {
   }
 }
 
+// MVP = najvyšší hero_damage na víťaznom tíme; nezávislé od "isMe" (identita vs. výkon).
+function withMvp<T extends { hero_damage: number }>(players: T[], isWinner: boolean) {
+  if (!isWinner) return players.map((p) => ({ ...p, isMvp: false }))
+  const best = players.reduce((max, p) => (p.hero_damage > max ? p.hero_damage : max), -1)
+  return players.map((p) => ({ ...p, isMvp: p.hero_damage === best }))
+}
+
 const radiant = computed(() =>
-  (data.value?.match.players ?? []).filter((p) => isRadiantSlot(p.player_slot)).map(playerRow),
+  withMvp(
+    (data.value?.match.players ?? []).filter((p) => isRadiantSlot(p.player_slot)).map(playerRow),
+    data.value?.match.radiant_win ?? false,
+  ),
 )
 const dire = computed(() =>
-  (data.value?.match.players ?? []).filter((p) => !isRadiantSlot(p.player_slot)).map(playerRow),
+  withMvp(
+    (data.value?.match.players ?? []).filter((p) => !isRadiantSlot(p.player_slot)).map(playerRow),
+    data.value?.match.radiant_win === false,
+  ),
 )
 
 /**
@@ -181,16 +194,21 @@ const playerTimeline = computed(() => {
   <template v-else-if="data">
     <Breadcrumb :items="breadcrumbItems" show-back-arrow class="page-breadcrumb" />
 
-    <section class="card header">
+    <section class="card match-hero" :class="data.match.radiant_win ? 'radiant' : 'dire'">
+      <div class="hero-verdict">
+        <TeamGlyph :side="data.match.radiant_win ? 'radiant' : 'dire'" />
+        {{ data.match.radiant_win ? 'Radiant' : 'Dire' }} {{ t('matchDetail.victory') }}
+      </div>
       <div class="score">
         <span class="side radiant" :class="{ loser: !data.match.radiant_win }">
-          <TeamGlyph side="radiant" />Radiant {{ data.match.radiant_score }}
+          {{ data.match.radiant_score }}
         </span>
+        <span class="score-sep">—</span>
         <span class="side dire" :class="{ loser: data.match.radiant_win }">
-          {{ data.match.dire_score }} Dire<TeamGlyph side="dire" />
+          {{ data.match.dire_score }}
         </span>
       </div>
-      <div class="muted">
+      <div class="muted hero-meta">
         {{ gameModeName(data.match.game_mode) }} ·
         {{ formatDuration(data.match.duration) }} ·
         {{ formatDate(data.match.start_time, intlLocale) }} ·
@@ -223,20 +241,27 @@ const playerTimeline = computed(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in team.players" :key="p.player_slot" :class="{ me: p.isMe }">
-              <td><HeroIcon :hero="p.hero" :show-name="false" /></td>
+            <tr
+              v-for="p in team.players"
+              :key="p.player_slot"
+              :class="[team.name.toLowerCase(), { me: p.isMe, mvp: p.isMvp }]"
+            >
+              <td>
+                <HeroIcon :hero="p.hero" :show-name="false" />
+              </td>
               <td class="name">
                 <RouterLink v-if="p.account_id != null" :to="`/player/${p.account_id}`">
                   {{ p.personaname ?? t('common.playerFallback', { id: p.account_id }) }}
                 </RouterLink>
                 <span v-else class="muted">{{ t('matchDetail.anonymous') }}</span>
+                <span v-if="p.isMvp" class="mvp-tag">★ MVP</span>
               </td>
               <td class="num">{{ p.level }}</td>
-              <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
-              <td class="num">{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</td>
-              <td class="num">{{ p.gold_per_min }} / {{ p.xp_per_min }}</td>
-              <td class="num">{{ p.last_hits }} / {{ p.denies }}</td>
-              <td class="num">{{ formatK(p.hero_damage) }}</td>
+              <td class="emphasis">{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
+              <td class="num dim">{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</td>
+              <td class="num emphasis">{{ p.gold_per_min }} / {{ p.xp_per_min }}</td>
+              <td class="num dim">{{ p.last_hits }} / {{ p.denies }}</td>
+              <td class="num emphasis">{{ formatK(p.hero_damage) }}</td>
               <td>
                 <span class="items">
                   <img
@@ -255,7 +280,12 @@ const playerTimeline = computed(() => {
       </div>
 
       <ul class="mobile-players">
-        <li v-for="p in team.players" :key="p.player_slot" class="player-card" :class="{ me: p.isMe }">
+        <li
+          v-for="p in team.players"
+          :key="p.player_slot"
+          class="player-card"
+          :class="[team.name.toLowerCase(), { me: p.isMe, mvp: p.isMvp }]"
+        >
           <div class="player-card-top">
             <HeroIcon :hero="p.hero" :show-name="false" />
             <span class="player-name">
@@ -264,29 +294,30 @@ const playerTimeline = computed(() => {
               </RouterLink>
               <span v-else class="muted">{{ t('matchDetail.anonymous') }}</span>
             </span>
+            <span v-if="p.isMvp" class="mvp-tag">MVP</span>
           </div>
           <div class="player-card-stats">
             <div class="stat">
               <span class="stat-value">{{ p.level }}</span>
               <span class="stat-label">LVL</span>
             </div>
-            <div class="stat">
+            <div class="stat emphasis">
               <span class="stat-value">{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</span>
               <span class="stat-label">K / D / A</span>
             </div>
-            <div class="stat">
+            <div class="stat dim">
               <span class="stat-value">{{ p.net_worth != null ? formatK(p.net_worth) : '—' }}</span>
               <span class="stat-label">Net</span>
             </div>
-            <div class="stat">
+            <div class="stat emphasis">
               <span class="stat-value">{{ p.gold_per_min }} / {{ p.xp_per_min }}</span>
               <span class="stat-label">GPM / XPM</span>
             </div>
-            <div class="stat">
+            <div class="stat dim">
               <span class="stat-value">{{ p.last_hits }} / {{ p.denies }}</span>
               <span class="stat-label">LH / DN</span>
             </div>
-            <div class="stat">
+            <div class="stat emphasis">
               <span class="stat-value">{{ formatK(p.hero_damage) }}</span>
               <span class="stat-label">DMG</span>
             </div>
@@ -307,6 +338,8 @@ const playerTimeline = computed(() => {
 
     <section class="card advantage-card">
       <h2>{{ t('matchDetail.goldXpAdvantage') }}</h2>
+      <!-- TODO: Roshan/team-wipe/high-ground event markers need OpenDota objectives/teamfights
+           data (not in MatchPlayer/types/opendota.ts today) plus LineChart annotation support. -->
       <LineChart
         v-if="advantage"
         :labels="advantage.labels"
@@ -319,8 +352,8 @@ const playerTimeline = computed(() => {
         :team-split="{
           topLabel: 'Radiant',
           bottomLabel: 'Dire',
-          topWash: cssVar('--radiant-soft'),
-          bottomWash: cssVar('--dire-soft'),
+          topWash: 'rgba(38, 176, 76, 0.07)',
+          bottomWash: 'rgba(224, 82, 79, 0.07)',
           topLabelColor: cssVar('--radiant-strong'),
           bottomLabelColor: cssVar('--dire-strong'),
         }"
@@ -398,36 +431,65 @@ const playerTimeline = computed(() => {
   margin-bottom: var(--space-3);
 }
 
-.header {
-  margin-bottom: var(--space-4);
+/* Hero section — the page's primary focal point, given more visual weight
+   (glow shadow, larger padding) than the team/graph cards below it. */
+.match-hero {
+  margin-bottom: var(--space-8);
+  padding: var(--space-6) var(--space-5);
   text-align: center;
 }
 
+.match-hero.radiant { box-shadow: var(--shadow-glow-radiant), var(--shadow-md); }
+.match-hero.dire { box-shadow: var(--shadow-glow-dire), var(--shadow-md); }
+
+.hero-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin-bottom: var(--space-2);
+}
+
+.match-hero.radiant .hero-verdict { color: var(--radiant); }
+.match-hero.dire .hero-verdict { color: var(--dire); }
+
+/* Score is the page's primary focal point — sized up from the old --text-2xl
+   so it reads before the verdict line or any other stat. */
 .score {
-  font-size: var(--text-lg);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
   font-weight: var(--weight-bold);
   display: flex;
   justify-content: center;
+  align-items: baseline;
   gap: 0.75rem;
-}
-
-.score .side {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
+  font-variant-numeric: tabular-nums;
 }
 
 .score .side.radiant { color: var(--radiant); }
-.score .side.dire { color: var(--dire); flex-direction: row-reverse; }
+.score .side.dire { color: var(--dire); }
 .score .side.loser { opacity: 0.5; }
 
+/* Glow only the winning side's digits — the losing side stays flat via .loser opacity. */
+.score .side.radiant:not(.loser) { text-shadow: 0 0 24px rgba(38, 176, 76, 0.45); }
+.score .side.dire:not(.loser) { text-shadow: 0 0 24px rgba(224, 82, 79, 0.45); }
+
+.score-sep { color: var(--muted); }
+
+.hero-meta {
+  margin-top: var(--space-3);
+}
+
 .team {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-6);
   border-top: 2px solid transparent;
 }
 
 .advantage-card {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 /* Dota konvencia: Radiant zelená, Dire červená — plus jemný farebný wash panelu,
@@ -444,6 +506,11 @@ const playerTimeline = computed(() => {
 .team.radiant .team-name { color: var(--radiant); }
 .team.dire .team-name { color: var(--dire); }
 
+/* Stronger presence than the plain global .badge.win — a soft glow reinforces
+   "this team won" as the one thing in this row that should pop. */
+.team.radiant .badge.win { box-shadow: var(--shadow-glow-radiant); }
+.team.dire .badge.win { box-shadow: var(--shadow-glow-dire); }
+
 .team h2 {
   display: flex;
   align-items: center;
@@ -454,8 +521,59 @@ const playerTimeline = computed(() => {
   overflow-x: auto;
 }
 
-tr.me td {
-  background: var(--accent-soft);
+/* Subtle alternating tint + hover instead of hard row borders. */
+tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* MVP = highest hero_damage on the team; independent of "me" identity. */
+tr.mvp td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--radiant);
+}
+
+tr.dire.mvp td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--dire);
+}
+
+/* Subtle gold tint marks the row as elite — wins over .me's accent tint
+   even on your own row, since MVP is the rarer, more notable signal. */
+tr.mvp td {
+  background: var(--gold-soft);
+}
+
+tr.mvp:hover td {
+  background: rgba(201, 133, 0, 0.22);
+}
+
+.mvp-tag {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0.05rem var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  color: #1a1200;
+  background: var(--gold);
+  box-shadow: 0 0 0 1px rgba(201, 133, 0, 0.3), 0 4px 12px -4px rgba(201, 133, 0, 0.5);
+  vertical-align: middle;
+}
+
+.num.dim,
+.stat.dim .stat-value {
+  opacity: 0.6;
+}
+
+/* K/D/A, GPM/XPM, DMG carry the most scan-value — a touch heavier + brighter
+   than the default so the eye lands on them first, without going full bold. */
+td.emphasis,
+.stat.emphasis .stat-value {
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
 }
 
 /* Mobile card list — hidden by default, swapped in for the table below
@@ -486,8 +604,13 @@ tr.me td {
   border-radius: var(--radius-md);
 }
 
-.player-card.me {
-  background: var(--accent-soft);
+.player-card.mvp {
+  border-left: 3px solid var(--radiant);
+  background: var(--gold-soft);
+}
+
+.player-card.dire.mvp {
+  border-left-color: var(--dire);
 }
 
 .player-card-top {
@@ -552,21 +675,29 @@ tr.me td {
 
 .items {
   display: inline-flex;
-  gap: 2px;
+  gap: var(--space-2);
 }
 
 .player-card-items {
   display: flex;
   justify-content: center;
+  gap: var(--space-2);
   margin-top: var(--space-3);
 }
 
 .item {
-  width: 30px;
-  height: 22px;
+  width: 36px;
+  height: 27px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   display: block;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.item:hover {
+  transform: scale(1.15);
+  position: relative;
+  z-index: 1;
 }
 
 .player-strip {

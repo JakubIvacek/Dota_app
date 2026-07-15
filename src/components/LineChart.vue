@@ -3,7 +3,6 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   CategoryScale,
   Chart,
-  Legend,
   LinearScale,
   LineController,
   LineElement,
@@ -13,7 +12,7 @@ import {
 } from 'chart.js'
 import { cssVar } from '../utils/theme'
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend)
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip)
 
 const props = withDefaults(
   defineProps<{
@@ -41,12 +40,15 @@ const canvas = ref<HTMLCanvasElement | null>(null)
 let chart: Chart | null = null
 
 /* Čítať skutočné CSS premenné namiesto duplicitných hexov — jeden zdroj pravdy v tokens.css. */
+const INK = cssVar('--ink')
 const INK_2 = cssVar('--ink-2')
 const MUTED = cssVar('--muted')
 const GRID = cssVar('--grid')
 const BASELINE = cssVar('--baseline')
 const ZERO_LINE_STRONG = cssVar('--ink-2')
 const FONT_BODY = cssVar('--font-body')
+const SURFACE_2 = cssVar('--surface-2')
+const BORDER_STRONG = cssVar('--border-strong')
 
 function buildData() {
   return {
@@ -64,21 +66,26 @@ function buildData() {
   }
 }
 
-/* Zaokrúhli nahor na "pekné" číslo (1/2/5 × mocnina desiatky) — 12345 -> 15000. */
+/* Zaokrúhli nahor na "pekné" číslo — jemnejšie kroky (1/1.5/2/2.5/3/4/5/6/7.5/10 ×
+ * mocnina desiatky) než klasické 1/2/5/10, aby napr. hodnota tesne nad 5×
+ * nepreskočila rovno na 10× a nevyplytvala takmer polovicu osi Y prázdnym
+ * priestorom (12345 -> 15000, nie 20000). */
 function niceCeil(value: number): number {
   if (value <= 0) return 1
   const magnitude = 10 ** Math.floor(Math.log10(value))
   const residual = value / magnitude
-  const niceResidual = residual <= 1 ? 1 : residual <= 2 ? 2 : residual <= 5 ? 5 : 10
+  const steps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 10]
+  const niceResidual = steps.find((s) => residual <= s) ?? 10
   return niceResidual * magnitude
 }
 
 /* Symetrický rozsah osi Y okolo nuly, aby nulová os (hranica Radiant/Dire)
  * padla presne na stred plochy namiesto niekde podľa toho, kam vyjde min/max dát.
- * +10% padding nad najvyššiu hodnotu a zaokrúhlenie na pekné číslo. */
+ * Zaokrúhlenie na pekné číslo bez extra paddingu — niceCeil už dáva dostatočnú
+ * rezervu nad najvyššiu hodnotu, netreba ju ešte navyšovať o 10 %. */
 function symmetricBounds() {
   const maxAbs = Math.max(1, ...props.datasets.flatMap((d) => d.data.map((v) => Math.abs(v))))
-  const bound = niceCeil(maxAbs * 1.1)
+  const bound = niceCeil(maxAbs)
   return { min: -bound, max: bound }
 }
 
@@ -120,7 +127,7 @@ function buildTeamSplitPlugin(config: NonNullable<typeof props.teamSplit>): Plug
         ctx.font = `600 11px ${FONT_BODY}`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.translate(chartArea.left + 12, midY)
+        ctx.translate(chartArea.left + 8, midY)
         ctx.rotate(-Math.PI / 2)
         ctx.fillText(text, 0, 0)
         ctx.restore()
@@ -141,18 +148,27 @@ onMounted(() => {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      layout: props.teamSplit ? { padding: { left: 28 } } : undefined,
+      layout: { padding: { left: props.teamSplit ? 20 : 0 } },
       plugins: {
-        legend: {
-          display: props.datasets.length > 1,
-          labels: { color: INK_2, boxWidth: 12, boxHeight: 12 },
-        },
         tooltip: {
           callbacks: props.yFormat
             ? {
                 label: (ctx) => `${ctx.dataset.label}: ${props.yFormat!(ctx.parsed.y ?? 0)}`,
               }
             : undefined,
+          // Theme the tooltip to match the app surface instead of Chart.js's
+          // default flat-black box — rounded corners, tokenized surface/border.
+          backgroundColor: SURFACE_2,
+          titleColor: INK,
+          bodyColor: INK_2,
+          borderColor: BORDER_STRONG,
+          borderWidth: 1,
+          cornerRadius: 8,
+          padding: 10,
+          boxPadding: 4,
+          usePointStyle: true,
+          titleFont: { family: FONT_BODY, weight: 600 },
+          bodyFont: { family: FONT_BODY },
         },
       },
       scales: {
@@ -195,7 +211,44 @@ onBeforeUnmount(() => chart?.destroy())
 </script>
 
 <template>
-  <div :style="{ height: `${height}px`, position: 'relative' }">
-    <canvas ref="canvas"></canvas>
+  <div>
+    <!-- Real HTML legend instead of Chart.js's canvas-drawn one — its layout math
+         only gives a fixed +10px regardless of padding, so the gap to the plot
+         area below never grows the way you'd expect from labels.padding. -->
+    <ul v-if="datasets.length > 1" class="chart-legend">
+      <li v-for="d in datasets" :key="d.label" class="chart-legend-item">
+        <span class="chart-legend-dot" :style="{ backgroundColor: d.color }"></span>
+        {{ d.label }}
+      </li>
+    </ul>
+    <div :style="{ height: `${height}px`, position: 'relative' }">
+      <canvas ref="canvas"></canvas>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.chart-legend {
+  display: flex;
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
+}
+
+.chart-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+}
+</style>
