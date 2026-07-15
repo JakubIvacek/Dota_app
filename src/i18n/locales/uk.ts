@@ -114,7 +114,6 @@ export default {
   matchDetail: {
     errorLoad: 'Не вдалося завантажити матч: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -126,6 +125,8 @@ export default {
     parseExpired:
       'Реплей цього матчу вже втратив чинність (Valve зберігає їх ~2-4 тижні), графік не можна доповнити. Для свіжих матчів застосунок запитує це автоматично — переконайся, що в клієнті Dota увімкнено {tag}.',
     parseUnavailable: 'Цей матч не має розібраного реплею — графік недоступний.',
+    playerTimeline: 'Графік Gold & XP гравця',
+    viewPlayerTimeline: 'Переглянути графік gold & XP гравця {name}',
   },
   player: {
     errorLoad: 'Не вдалося завантажити гравця: {error}',

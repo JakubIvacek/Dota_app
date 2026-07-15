@@ -114,7 +114,6 @@ export default {
   matchDetail: {
     errorLoad: 'Maç yüklenemedi: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -126,6 +125,8 @@ export default {
     parseExpired:
       "Bu maçın replay'i zaten süresi doldu (Valve bunları ~2-4 hafta saklar), grafik tamamlanamıyor. Yeni maçlar için uygulama bunu otomatik olarak talep eder — Dota istemcisinde {tag} özelliğinin etkin olduğundan emin ol.",
     parseUnavailable: "Bu maçın ayrıştırılmış bir replay'i yok — grafik kullanılamıyor.",
+    playerTimeline: 'Oyuncu Gold & XP zaman çizelgesi',
+    viewPlayerTimeline: "{name} adlı oyuncunun gold & XP zaman çizelgesini görüntüle",
   },
   player: {
     errorLoad: 'Oyuncu yüklenemedi: {error}',

@@ -114,7 +114,6 @@ export default {
   matchDetail: {
     errorLoad: 'Match konnte nicht geladen werden: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -126,6 +125,8 @@ export default {
     parseExpired:
       'Das Replay dieses Matches ist bereits abgelaufen (Valve speichert sie ~2-4 Wochen), das Diagramm kann nicht ergänzt werden. Bei frischen Matches fordert die App dies automatisch an — stelle sicher, dass {tag} im Dota-Client aktiviert ist.',
     parseUnavailable: 'Dieses Match hat kein geparstes Replay — das Diagramm ist nicht verfügbar.',
+    playerTimeline: 'Gold- & XP-Verlauf des Spielers',
+    viewPlayerTimeline: 'Gold- & XP-Verlauf von {name} anzeigen',
   },
   player: {
     errorLoad: 'Spieler konnte nicht geladen werden: {error}',

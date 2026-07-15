@@ -114,7 +114,6 @@ export default {
   matchDetail: {
     errorLoad: 'Hindi na-load ang match: {error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -126,6 +125,8 @@ export default {
     parseExpired:
       'Nag-expire na ang replay ng match na ito (itinatago ito ng Valve ng ~2-4 na linggo), kaya hindi na mapupunan ang chart. Para sa mga bagong match, awtomatikong nire-request ito ng app — siguraduhin lang na naka-enable ang {tag} sa Dota client.',
     parseUnavailable: 'Walang na-parse na replay ang match na ito — hindi available ang chart.',
+    playerTimeline: 'Gold & XP timeline ng manlalaro',
+    viewPlayerTimeline: 'Tingnan ang gold & XP timeline ni {name}',
   },
   player: {
     errorLoad: 'Hindi na-load ang player: {error}',

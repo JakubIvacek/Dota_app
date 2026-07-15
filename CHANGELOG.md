@@ -15,6 +15,29 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-07-15
+
+### Changed
+
+- Match detail visual-hierarchy pass: the score is now the page's primary
+  focal point (larger, with a soft glow on the winning side's digits, verdict
+  line sized down); K/D/A, GPM/XPM, and DMG table columns are emphasized over
+  the muted Net/LH-DN columns for faster scanning; MVP rows get a gold tint,
+  hover glow, and a filled star tag; item icons have more breathing room and
+  a hover scale; section spacing widened; card borders softened app-wide
+  (shadow + gradient carry definition instead of a harder border).
+- Removed the blue "this is you" row highlight from the match detail
+  scoreboard (desktop table and mobile cards) — MVP styling now applies
+  uniformly regardless of whose row it is.
+- `LineChart.vue`: tooltip is now themed to match the app surface (rounded,
+  tokenized colors) instead of Chart.js's unstyled default; the legend is a
+  real HTML element above the canvas instead of Chart.js's canvas-drawn one,
+  since the latter's layout math couldn't produce a reliable gap to the plot
+  area; the "nice" y-axis bound rounds in finer steps and drops the extra 10%
+  padding, so a `teamSplit` chart with a big swing no longer inflates the
+  axis range far beyond the actual data (e.g. ~58k of data no longer forces
+  a 100k-scale axis).
+
 ## [0.10.0] — 2026-07-15
 
 ### Added

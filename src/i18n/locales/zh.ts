@@ -113,7 +113,6 @@ export default {
   matchDetail: {
     errorLoad: '对局加载失败:{error}',
     victory: 'Victory',
-    back: 'Back',
     anonymous: 'Anonymous',
     goldXpAdvantage: 'Gold & XP advantage (Radiant +/−)',
     colPlayer: 'Player',
@@ -124,6 +123,8 @@ export default {
     parseExpired:
       '这场对局的录像已经过期(Valve 只保存约 2-4 周),图表无法补全。对于新对局,应用会自动请求解析——只需确保在 Dota 客户端中启用了 {tag}。',
     parseUnavailable: '这场对局没有解析过的录像——图表不可用。',
+    playerTimeline: '玩家 Gold & XP 曲线',
+    viewPlayerTimeline: '查看 {name} 的 gold & XP 曲线',
   },
   player: {
     errorLoad: '玩家加载失败:{error}',

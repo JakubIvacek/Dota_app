@@ -85,6 +85,9 @@ export interface MatchPlayer {
   item_3: number
   item_4: number
   item_5: number
+  /** Prítomné len pri sparsovanom replayi (Expose Public Match Data). */
+  gold_t?: number[] | null
+  xp_t?: number[] | null
 }
 
 export interface MatchDetail {
