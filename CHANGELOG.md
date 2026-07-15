@@ -15,6 +15,17 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-07-15
+
+### Added
+
+- Match detail Gold & XP advantage chart now visually splits into
+  Radiant/Dire zones around a symmetric, zero-centered y-axis (rounded to a
+  "nice" bound with padding), with edge team labels, a brighter zero line,
+  and `M:SS` x-axis labels — closer to the in-game client's advantage graph.
+  Opt-in via a new `teamSplit` prop on `LineChart.vue`; other charts using
+  the component are unaffected.
+
 ## [0.9.0] — 2026-07-14
 
 ### Added
