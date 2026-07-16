@@ -15,6 +15,13 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.11.1] — 2026-07-16
+
+### Fixed
+
+- Removed the "Updates" link from the footer nav — it duplicated the top nav
+  link and didn't belong there.
+
 ## [0.11.0] — 2026-07-15
 
 ### Changed
