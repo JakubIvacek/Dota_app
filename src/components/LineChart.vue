@@ -64,6 +64,12 @@ const markers = ref<MarkerPosition[]>([])
 const hoveredMarkerKey = ref<string | null>(null)
 const hoveredMarker = computed(() => markers.value.find((m) => m.key === hoveredMarkerKey.value))
 
+/* Canvas je nepozicovaný element, takže bez vlastného z-indexu vždy padne
+ * pod absolútne pozicované .kill-marker overlaye bez ohľadu na poradie v DOM
+ * — Chart.js tooltip sa ale kreslí priamo na canvas, takže by bol trvalo pod
+ * kill ikonami. Zdvihni canvas nad markery len kým je tooltip reálne viditeľný. */
+const tooltipActive = ref(false)
+
 // Rovnaký princíp ako ActivityHeatmap na mobile: graf sa fluidne zmršťuje s
 // kontajnerom až po tento floor (kill markery majú dosť miesta, nekolidujú) —
 // pod ním radšej natívna šírka + horizontálny scroll ako ďalšie zmršťovanie.
@@ -243,6 +249,9 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
       }
       markers.value = newMarkers
     },
+    afterDraw(c) {
+      tooltipActive.value = (c.tooltip?.opacity ?? 0) > 0
+    },
   }
 }
 
@@ -349,7 +358,7 @@ onBeforeUnmount(() => chart?.destroy())
           minWidth: minChartWidth ? `${minChartWidth}px` : undefined,
         }"
       >
-        <canvas ref="canvas"></canvas>
+        <canvas ref="canvas" :style="{ position: 'relative', zIndex: tooltipActive ? markers.length + 1 : 0 }"></canvas>
         <img
           v-for="m in markers"
           :key="m.key"
