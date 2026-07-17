@@ -127,6 +127,8 @@ export default {
     parseUnavailable: 'Tento match nemá sparsovaný replay — graf nie je dostupný.',
     playerTimeline: 'Gold & XP priebeh hráča',
     viewPlayerTimeline: 'Zobraziť gold & XP priebeh hráča {name}',
+    killTooltip: '{hero} zomrel o {time}',
+    chartScrollHint: '← Posuň pre celú časovú os →',
   },
   player: {
     errorLoad: 'Nepodarilo sa načítať hráča: {error}',

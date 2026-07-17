@@ -127,6 +127,8 @@ export default {
     parseUnavailable: "Bu maçın ayrıştırılmış bir replay'i yok — grafik kullanılamıyor.",
     playerTimeline: 'Oyuncu Gold & XP zaman çizelgesi',
     viewPlayerTimeline: "{name} adlı oyuncunun gold & XP zaman çizelgesini görüntüle",
+    killTooltip: '{hero} {time} anında öldü',
+    chartScrollHint: '← Tüm zaman çizelgesini görmek için kaydırın →',
   },
   player: {
     errorLoad: 'Oyuncu yüklenemedi: {error}',

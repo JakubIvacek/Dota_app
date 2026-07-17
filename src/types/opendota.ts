@@ -88,6 +88,8 @@ export interface MatchPlayer {
   /** Prítomné len pri sparsovanom replayi (Expose Public Match Data). */
   gold_t?: number[] | null
   xp_t?: number[] | null
+  /** Tento hráčov kill log — `key` je NPC meno OBETE (napr. npc_dota_hero_axe), nie killera. */
+  kills_log?: { time: number; key: string }[] | null
 }
 
 export interface MatchDetail {

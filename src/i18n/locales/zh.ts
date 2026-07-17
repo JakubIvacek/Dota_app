@@ -125,6 +125,8 @@ export default {
     parseUnavailable: '这场对局没有解析过的录像——图表不可用。',
     playerTimeline: '玩家 Gold & XP 曲线',
     viewPlayerTimeline: '查看 {name} 的 gold & XP 曲线',
+    killTooltip: '{hero} 死于 {time}',
+    chartScrollHint: '← 滑动查看完整时间线 →',
   },
   player: {
     errorLoad: '玩家加载失败:{error}',

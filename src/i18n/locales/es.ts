@@ -127,6 +127,8 @@ export default {
     parseUnavailable: 'Esta partida no tiene un replay procesado — el gráfico no está disponible.',
     playerTimeline: 'Progresión de Gold & XP del jugador',
     viewPlayerTimeline: 'Ver la progresión de gold & XP de {name}',
+    killTooltip: '{hero} murió a los {time}',
+    chartScrollHint: '← Desliza para ver la línea de tiempo completa →',
   },
   player: {
     errorLoad: 'No se pudo cargar el jugador: {error}',
