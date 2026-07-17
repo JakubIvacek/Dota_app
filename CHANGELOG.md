@@ -15,6 +15,24 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-07-17
+
+### Added
+
+- Kill-event markers on the match Gold/XP advantage chart: Radiant/Dire kill
+  icons positioned by time above/below the team-split chart, grouped into
+  per-minute stacks so simultaneous kills don't overlap, with a hover tooltip
+  (hero + team glyph + time) and edge-clamping so first/last-minute kills
+  stay inside the chart bounds.
+
+### Fixed
+
+- Kill-marker icons stayed hoverable instead of losing pointer events when
+  Chart.js's own tooltip was active.
+- Chart tooltip is now pinned to the chart's vertical center via a custom
+  Chart.js tooltip positioner, so it no longer overlaps the kill-marker icon
+  rows at the top/bottom edges.
+
 ## [0.11.1] — 2026-07-16
 
 ### Fixed

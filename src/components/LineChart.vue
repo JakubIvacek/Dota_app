@@ -9,19 +9,29 @@ import {
   type Plugin,
   PointElement,
   Tooltip,
+  type ChartType,
+  type TooltipPositionerFunction,
 } from 'chart.js'
 import { cssVar } from '../utils/theme'
 import TeamGlyph from './TeamGlyph.vue'
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip)
 
+// Chart.js's built-in TooltipPositionerMap only declares "average"/"nearest" —
+// module augmentation is the documented way to add a custom positioner key
+// (https://www.chartjs.org/docs/latest/configuration/tooltip.html#positioners).
+declare module 'chart.js' {
+  interface TooltipPositionerMap {
+    centerY: TooltipPositionerFunction<ChartType>
+  }
+}
+
 /* Kill markery sedia v riadkoch pri hornom/dolnom okraji chartArea — defaultný
  * tooltip positioner ("average") drží tooltip pri kurzore, takže pri hoveri
  * blízko okraja prekrýva ikony. Zafixuj tooltip na vertikálny stred grafu,
  * x nech sleduje dátový bod ako predtým. */
 Tooltip.positioners.centerY = function (items, eventPosition) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pos = (Tooltip.positioners.average as any).call(this, items, eventPosition)
+  const pos = Tooltip.positioners.average.call(this, items, eventPosition)
   if (!pos) return false
   const chartArea = this.chart.chartArea
   return { x: pos.x, y: (chartArea.top + chartArea.bottom) / 2 }
