@@ -127,6 +127,8 @@ export default {
     parseUnavailable: 'Walang na-parse na replay ang match na ito — hindi available ang chart.',
     playerTimeline: 'Gold & XP timeline ng manlalaro',
     viewPlayerTimeline: 'Tingnan ang gold & XP timeline ni {name}',
+    killTooltip: 'Namatay si {hero} sa {time}',
+    chartScrollHint: '← I-scroll para makita ang buong timeline →',
   },
   player: {
     errorLoad: 'Hindi na-load ang player: {error}',

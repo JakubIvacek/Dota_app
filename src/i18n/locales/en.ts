@@ -125,6 +125,8 @@ const en = {
     parseUnavailable: "This match doesn't have a parsed replay — the chart isn't available.",
     playerTimeline: 'Player Gold & XP timeline',
     viewPlayerTimeline: "View {name}'s gold & XP timeline",
+    killTooltip: '{hero} died at {time}',
+    chartScrollHint: '← Scroll to see the full timeline →',
   },
   player: {
     errorLoad: 'Failed to load player: {error}',

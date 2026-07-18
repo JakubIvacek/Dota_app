@@ -74,7 +74,6 @@ function onLocaleChange(e: Event) {
 
       <nav class="footer-links">
         <a href="https://github.com/JakubIvacek/Dota_app" target="_blank" rel="noopener">{{ t('app.footer.github') }}</a>
-        <RouterLink to="/updates">{{ t('app.footer.updates') }}</RouterLink>
         <RouterLink to="/terms">{{ t('app.footer.terms') }}</RouterLink>
         <RouterLink to="/privacy">{{ t('app.footer.privacy') }}</RouterLink>
       </nav>

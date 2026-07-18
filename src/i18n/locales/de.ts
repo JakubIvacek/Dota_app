@@ -127,6 +127,8 @@ export default {
     parseUnavailable: 'Dieses Match hat kein geparstes Replay — das Diagramm ist nicht verfügbar.',
     playerTimeline: 'Gold- & XP-Verlauf des Spielers',
     viewPlayerTimeline: 'Gold- & XP-Verlauf von {name} anzeigen',
+    killTooltip: '{hero} starb bei {time}',
+    chartScrollHint: '← Scrollen, um die ganze Zeitleiste zu sehen →',
   },
   player: {
     errorLoad: 'Spieler konnte nicht geladen werden: {error}',

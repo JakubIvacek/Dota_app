@@ -7,6 +7,7 @@ import {
   getHeroMap,
   getItemMap,
   getMatch,
+  heroIconUrl,
   isRadiantSlot,
   itemImageUrl,
   requestMatchParse,
@@ -161,6 +162,37 @@ const advantage = computed(() => {
 })
 
 const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
+
+// Kill markers pre advantage graf — len ak je match sparsovaný (rovnaká brána ako
+// radiant_gold_adv). `kills_log` je per-hráč log killov, ktoré tento hráč získal;
+// `key` je NPC meno OBETE, treba ho dohľadať v heroMape podľa `.name`. Bez gold-per-kill
+// (nie je v tomto poli) a bez Radiant/Dire summary listu — viď OPENDOTA_API_NOTES.md.
+const killMarkers = computed(() => {
+  const match = data.value?.match
+  if (!match?.radiant_gold_adv?.length) return []
+  const heroByNpcName = new Map(
+    Array.from(data.value!.heroMap.values()).map((h) => [h.name, h]),
+  )
+  return match.players
+    .flatMap((p) =>
+      (p.kills_log ?? []).map((k) => ({
+        time: k.time,
+        isRadiant: isRadiantSlot(p.player_slot),
+        hero: heroByNpcName.get(k.key),
+      })),
+    )
+    .filter((e): e is typeof e & { hero: NonNullable<typeof e.hero> } => e.hero != null)
+    .sort((a, b) => a.time - b.time)
+    .map((e) => ({
+      time: e.time,
+      isRadiant: e.isRadiant,
+      iconUrl: heroIconUrl(e.hero),
+      title: t('matchDetail.killTooltip', {
+        hero: e.hero.localized_name,
+        time: formatDuration(e.time),
+      }),
+    }))
+})
 
 // Per-player timeline card: vyber hráča klikom na ikonu, default prvý Radiant hráč.
 const selectedSlot = ref<number | null>(null)
@@ -348,7 +380,7 @@ const playerTimeline = computed(() => {
           { label: 'XP', data: advantage.xp, color: cssVar('--accent') },
         ]"
         :y-format="formatK"
-        :height="300"
+        :height="360"
         :team-split="{
           topLabel: 'Radiant',
           bottomLabel: 'Dire',
@@ -357,6 +389,8 @@ const playerTimeline = computed(() => {
           topLabelColor: cssVar('--radiant-strong'),
           bottomLabelColor: cssVar('--dire-strong'),
         }"
+        :kill-markers="killMarkers"
+        :scroll-hint="t('matchDetail.chartScrollHint')"
       />
       <div v-else class="status-note">
         <template v-if="parseState === 'polling'">

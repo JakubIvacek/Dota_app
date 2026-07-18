@@ -127,6 +127,8 @@ export default {
     parseUnavailable: 'Цей матч не має розібраного реплею — графік недоступний.',
     playerTimeline: 'Графік Gold & XP гравця',
     viewPlayerTimeline: 'Переглянути графік gold & XP гравця {name}',
+    killTooltip: '{hero} загинув о {time}',
+    chartScrollHint: '← Прокрутіть, щоб побачити весь графік →',
   },
   player: {
     errorLoad: 'Не вдалося завантажити гравця: {error}',
