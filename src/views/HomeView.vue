@@ -3,6 +3,7 @@ import { useAppLocale } from '../composables/useAppLocale'
 import { useRecentPlayers } from '../composables/useRecentPlayers'
 import { useFavorites } from '../composables/useFavorites'
 import { useSteamNews } from '../composables/useSteamNews'
+import { useSuggestedPlayers } from '../composables/useSuggestedPlayers'
 import { timeAgo, formatDate } from '../utils/format'
 import { newsExcerpt } from '../utils/steamContent'
 import SearchBox from '../components/SearchBox.vue'
@@ -14,6 +15,7 @@ const { t, intlLocale } = useAppLocale()
 const { recents } = useRecentPlayers()
 const { favorites } = useFavorites()
 const { data: newsItems, loading: newsLoading } = useSteamNews()
+const { players: suggestedPlayers } = useSuggestedPlayers()
 
 /** Homepage only teases the 3 most recent — the full list lives on /updates. */
 const MAX_UPDATES_SHOWN = 3
@@ -33,7 +35,7 @@ const MAX_RECENTS_SHOWN = 4
     <p class="muted updates-note">{{ t('home.viewUpdates') }}</p>
     <SearchBox />
 
-    <section class="group">
+    <section v-if="favorites.length" class="group">
       <h2>
         <svg class="star-icon" viewBox="0 0 20 20" aria-hidden="true">
           <path
@@ -43,7 +45,7 @@ const MAX_RECENTS_SHOWN = 4
         </svg>
         {{ t('home.favorites') }}
       </h2>
-      <div v-if="favorites.length" class="grid">
+      <div class="grid">
         <PlayerLinkCard
           v-for="(f, i) in favorites"
           :key="f.account_id"
@@ -53,7 +55,6 @@ const MAX_RECENTS_SHOWN = 4
           :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
         />
       </div>
-      <p v-else class="muted empty-note">{{ t('home.favoritesEmpty') }}</p>
     </section>
 
     <section class="group">
@@ -70,6 +71,22 @@ const MAX_RECENTS_SHOWN = 4
         />
       </div>
       <p v-else class="muted empty-note">{{ t('home.recentlyViewedEmpty') }}</p>
+    </section>
+
+    <section v-if="suggestedPlayers.length" class="group">
+      <h2>{{ t('home.suggestedPlayers') }}</h2>
+      <p class="muted suggested-note">{{ t('home.suggestedPlayersDesc') }}</p>
+      <div class="grid">
+        <PlayerLinkCard
+          v-for="(p, i) in suggestedPlayers"
+          :key="p.account_id"
+          :account-id="String(p.account_id)"
+          :personaname="p.name ?? p.personaname"
+          :avatarfull="p.avatarfull"
+          :sub="p.team_name ?? undefined"
+          :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
+        />
+      </div>
     </section>
 
     <section class="group">
@@ -184,6 +201,12 @@ const MAX_RECENTS_SHOWN = 4
 
 .empty-note {
   margin-top: var(--space-2);
+}
+
+.suggested-note {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
 }
 
 .grid {

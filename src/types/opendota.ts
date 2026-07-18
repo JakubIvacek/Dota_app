@@ -16,6 +16,27 @@ export interface SearchResult {
   last_match_time?: string
 }
 
+/** Subset of OpenDota's /proPlayers fields — only what the suggested-players
+ * card on the home page needs. `name` is the curated pro handle (e.g.
+ * "Yatoro"), distinct from `personaname` which is the player's current,
+ * freely-editable Steam display name (often a joke status, not their handle). */
+export interface ProPlayer {
+  account_id: number
+  personaname: string
+  avatarfull: string
+  name: string | null
+  team_id: number | null
+  team_name: string | null
+  last_match_time: string | null
+}
+
+/** Subset of OpenDota's /teams fields — pre-sorted by `rating` descending. */
+export interface Team {
+  team_id: number
+  name: string
+  rating: number
+}
+
 export interface WinLoss {
   win: number
   lose: number
