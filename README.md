@@ -63,6 +63,17 @@ app runs in guest mode via search.
 Other commands: `npm run build` (typecheck via `vue-tsc -b` + Vite build),
 `npm run preview` (local preview of the build).
 
+## Branching model
+
+**Decision from 2026-07-18:** `main` is production (always deployable,
+what's live). `dev` is the integration branch — feature/fix branches open
+PRs into `dev`, not `main`. `dev` gets merged into `main` periodically as a
+release (see `/release`), not on every PR.
+
+```
+feat/xxx, fix/xxx  →  PR into dev  →  (later) dev  →  PR into main = release
+```
+
 ## Tech stack
 
 - **Frontend:** Vue 3 + Vite + TypeScript, Chart.js for charts, vue-router,
