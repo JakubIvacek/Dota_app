@@ -15,6 +15,21 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.12.1] — 2026-07-18
+
+### Fixed
+
+- Kill-marker bucket spacing on the Gold/XP advantage chart now widens the
+  grouping window only as much as the available horizontal space actually
+  needs, instead of a fixed 1-minute window that could visually overlap on
+  long matches or narrow viewports.
+- Clicking or hovering a stacked group of kill markers now shows every kill
+  in that time window at once (hero, team, time), instead of one tooltip per
+  icon.
+- The kill-list tooltip is now clamped to the chart's currently visible
+  (scrolled) viewport instead of the full underlying canvas, so it no longer
+  drifts far from the clicked icon or gets cut off near the chart's edge.
+
 ## [0.12.0] — 2026-07-17
 
 ### Added

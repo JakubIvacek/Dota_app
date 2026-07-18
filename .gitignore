@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Working artifact from /stale, not committed
+.claude-stale-report.md

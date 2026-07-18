@@ -38,6 +38,10 @@ no need to build a custom replay parser.
   dev/preview routes it through a Vite proxy at `/valve` (`vite.config.ts`).
   Valve doesn't expose account IDs, so clicking a player name goes to
   OpenDota search instead
+- **Updates page** — latest Dota 2 patch/news posts via the Steam News API
+  (same CORS-proxy pattern as Leaderboards, `/steamnews` in
+  `vite.config.ts`); a preview shows on the home page, full list at
+  `/updates`
 - **Multi-language support** — `vue-i18n`, 10 languages (English default:
   en, sk, ru, uk, de, pt, es, zh, fil, tr), a switcher in the topbar, and a
   persisted choice (`dotastats:locale`); dates/relative time follow the
@@ -71,18 +75,20 @@ Other commands: `npm run build` (typecheck via `vue-tsc -b` + Vite build),
 ## Structure
 
 - `src/views/` — pages (Dashboard, Matches, MatchDetail, Heroes, Player,
-  Search, Home, Leaderboard, Terms, Privacy)
+  Search, Home, Leaderboard, Updates, Terms, Privacy)
 - `src/components/` — shared components (`WinrateBar`, `TeamGlyph`,
   `LineChart`, `ActivityHeatmap`, `HeroIcon`, `PlayerLinkCard`, `SearchBox`,
-  `StatCard`)
+  `StatCard`, `Breadcrumb`, `ProductTour`, `RankBadge`, `Skeleton`,
+  `TopProgressBar`)
 - `src/composables/` — `useAsync`, `useFavorites`, `useRecentPlayers`,
-  `useAppLocale`
+  `useAppLocale`, `useNavProgress`, `useSteamNews`
 - `src/api/opendota.ts` — all OpenDota API calls
 - `src/i18n/` — `vue-i18n` config and translations (`locales/*.ts`)
 - `src/styles/tokens.css` — design tokens (type scale, spacing, radius,
   elevation)
 - `src/utils/` — formatting (`format.ts`), stats (`stats.ts`), theme
-  (`theme.ts`)
+  (`theme.ts`), account ID/profile-link parsing (`accountId.ts`), Steam
+  content helpers (`steamContent.ts`)
 
 ## Key OpenDota endpoints
 
