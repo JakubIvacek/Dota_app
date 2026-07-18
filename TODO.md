@@ -9,6 +9,12 @@ documented in [CHANGELOG.md](./CHANGELOG.md), not here.
 - **Real-time match tracking** (GSI, websockets) — nice to have.
 - **Custom replay parser** — only if the app ever diverges from the OpenDota
   API.
+- **Roshan/team-wipe/high-ground chart event markers** — extend the Gold/XP
+  advantage chart's kill-event markers (`buildKillMarkerPlugin` in
+  `src/components/LineChart.vue`) with Roshan kills, team wipes, and
+  high-ground pushes; needs OpenDota `objectives`/`teamfights` data (not
+  currently typed in `src/types/opendota.ts`) plus annotation support in
+  `LineChart.vue`.
 
 ## Known upstream issues
 
