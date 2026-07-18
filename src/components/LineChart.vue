@@ -74,6 +74,7 @@ const MARKER_SIZE = 18
 
 interface MarkerPosition {
   key: string
+  groupKey: string
   left: number
   top: number
   zIndex: number
@@ -83,13 +84,56 @@ interface MarkerPosition {
 }
 
 const markers = ref<MarkerPosition[]>([])
-const hoveredMarkerKey = ref<string | null>(null)
-const hoveredMarker = computed(() => markers.value.find((m) => m.key === hoveredMarkerKey.value))
+// Hover ALEBO klik na ktorúkoľvek ikonu v stacku otvorí zoznam VŠETKÝCH killov
+// v tej istej bucket+tím skupine naraz (nie len tú jednu ikonu pod kurzorom) —
+// klik sa správa rovnako ako hover (potrebný na touch, kde mouseenter/leave
+// nenastane), zmizne pri odídení myšou z ikony rovnako v oboch prípadoch.
+const activeGroupKey = ref<string | null>(null)
+const activeGroupMarkers = computed(() =>
+  markers.value.filter((m) => m.groupKey === activeGroupKey.value),
+)
+
+// Musí sedieť s .kill-marker-tooltip max-width v <style> — použité na
+// pixel-clip zoznamu killov nižšie, nech pri stĺpci blízko okraja grafu
+// tooltip nevyletí mimo kartu (tam by sa jeho text orezal).
+const TOOLTIP_WIDTH = 240
+const chartScroll = ref<HTMLDivElement | null>(null)
+// Klampuj na aktuálne VIDITEĽNÉ (scrollnuté) okno .chart-scroll, nie na celý
+// (často oveľa širší, horizontálne scrollovateľný) canvas — inak by sa
+// tooltip pri stĺpci blízko konca dlhého matchu vedel odtiahnuť ďaleko od
+// klikanej ikony smerom k pravému okraju CELÉHO grafu, mimo aktuálny výrez.
+const viewportPixelBounds = ref({ left: 0, right: 0 })
+function updateViewportPixelBounds() {
+  const el = chartScroll.value
+  if (!el) return
+  viewportPixelBounds.value = { left: el.scrollLeft, right: el.scrollLeft + el.clientWidth }
+}
+// Rovnaký pixel-clip princíp ako pri samotných markeroch (left v
+// buildKillMarkerPlugin) — vycentruj na markeri, ale nedovoľ, aby ktorýkoľvek
+// okraj tooltipu presiahol viditeľné okno.
+const activeGroupTooltipLeft = computed(() => {
+  const anchor = activeGroupMarkers.value[0]
+  if (!anchor) return 0
+  const idealCenter = anchor.left + MARKER_SIZE / 2
+  const half = TOOLTIP_WIDTH / 2
+  const { left, right } = viewportPixelBounds.value
+  if (right <= left) return idealCenter
+  return Math.min(Math.max(idealCenter, left + half), right - half)
+})
+
+// Minimálna šírka na 1 minútu, kým sa bucket-y v buildKillMarkerPlugin
+// nezačnú zlučovať do širších časových okien — mierny prekryv ikon pri
+// hustých teamfightoch je OK, uprednostni krátke časové okno pred úplným
+// rozostupom. Drž v sync s buildKillMarkerPlugin, ktorý ju používa priamo.
+const MIN_MINUTE_PX = MARKER_SIZE + 6
+const totalMinutes = computed(() => Math.max(0, props.labels.length - 1))
 
 // Rovnaký princíp ako ActivityHeatmap na mobile: graf sa fluidne zmršťuje s
 // kontajnerom až po tento floor (kill markery majú dosť miesta, nekolidujú) —
 // pod ním radšej natívna šírka + horizontálny scroll ako ďalšie zmršťovanie.
-// Viď .chart-scroll nižšie.
+// Pevná hodnota (nerastie s dĺžkou matchu) — na dlhých matchoch namiesto
+// naťahovania grafu do šírky radšej bucket-merging v buildKillMarkerPlugin
+// zlúči kills do širších časových okien. Viď .chart-scroll nižšie.
 const MIN_CHART_WIDTH = 900
 const minChartWidth = computed(() => (props.killMarkers?.length ? MIN_CHART_WIDTH : 0))
 
@@ -204,32 +248,42 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
     afterLayout(c) {
       const events = props.killMarkers
       const { chartArea } = c
-      const totalMinutes = props.labels.length - 1
-      if (!events?.length || !chartArea || totalMinutes <= 0) {
+      updateViewportPixelBounds()
+      if (!events?.length || !chartArea || totalMinutes.value <= 0) {
         if (markers.value.length) markers.value = []
         return
       }
-      const pxPerMinute = (chartArea.right - chartArea.left) / totalMinutes
+      const pxPerMinute = (chartArea.right - chartArea.left) / totalMinutes.value
 
-      // Kills v rovnakej minúte (rovnaká teamfight) zdieľajú x — namiesto
-      // rozťahovania do šírky (ktoré by zasahovalo do susedných minút) sa
+      // Kills v rovnakom bucket-e (rovnaká teamfight) zdieľajú x — namiesto
+      // rozťahovania do šírky (ktoré by zasahovalo do susedných bucketov) sa
       // vrství vertikálne na sebe, mierne posunuté, ako balíček kariet —
       // každá ikona ostáva čiastočne viditeľná, ale stĺpec sa nikdy nerozlieva
-      // do susedného minútového bucketu.
-      const STACK_OFFSET = 21
+      // do susedného bucketu.
+      const STACK_OFFSET = MARKER_SIZE + 4
       const MARKER_INSET = 4
 
-      // Klip na [0, totalMinutes] rieši len presný overflow (kill tesne po
-      // poslednej celej minúte by inak zaokrúhlil mimo rozsah dát). Kills
+      // Bucket širka (v minútach) je 1 minúta, kým na to stačí pxPerMinute —
+      // na dlhých matchoch/úzkych viewportoch by sa pri pevnej 1-minútovej
+      // šírke susedné stĺpce prekrývali cez seba úplne, tak sa okno rozšíri
+      // na 2, 3, ... minút, kým medzi bucketmi nezostane aspoň MIN_MINUTE_PX
+      // voľného miesta. Zámerne bez ďalšej rezervy navyše — mierny prekryv
+      // ikon (napr. pri edge-clipe krajného bucketu nižšie) je akceptovateľný,
+      // priorita je čo najkratšie časové okno na stĺpec, nie nulový prekryv.
+      const minutesPerBucket = Math.max(1, Math.ceil(MIN_MINUTE_PX / pxPerMinute))
+      const bucketCount = Math.ceil(totalMinutes.value / minutesPerBucket)
+
+      // Klip na [0, bucketCount] rieši len presný overflow (kill tesne po
+      // poslednom celom bucket-e by inak zaokrúhlil mimo rozsah dát). Kills
       // v posledných/prvých EDGE_MERGE_SECONDS sekundách matchu naviac
       // schválne stiahni na krajný bucket — inak by boli tak blízko canvas
       // hranice, že by po pixel-clipe (nižšie) kolidovali so susedným bucketom.
       const EDGE_MERGE_SECONDS = 90
-      const matchEndSeconds = totalMinutes * 60
+      const matchEndSeconds = totalMinutes.value * 60
       function resolveBucket(time: number): number {
         if (time <= EDGE_MERGE_SECONDS) return 0
-        if (matchEndSeconds - time <= EDGE_MERGE_SECONDS) return totalMinutes
-        return Math.min(totalMinutes, Math.max(0, Math.round(time / 60)))
+        if (matchEndSeconds - time <= EDGE_MERGE_SECONDS) return bucketCount
+        return Math.min(bucketCount, Math.max(0, Math.round(time / 60 / minutesPerBucket)))
       }
 
       const buckets = new Map<string, typeof events>()
@@ -241,17 +295,18 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
       }
 
       const newMarkers: MarkerPosition[] = []
-      for (const group of buckets.values()) {
+      for (const [groupKey, group] of buckets) {
         const bucket = resolveBucket(group[0].time)
         const isRadiant = group[0].isRadiant
         // Bezpečnostný pixel-clip navyše — istota, že ikona nikdy nepresiahne
         // canvas hranicu, nech vyjde pxPerMinute/padding akokoľvek.
-        const idealLeft = chartArea.left + bucket * pxPerMinute - MARKER_SIZE / 2
+        const idealLeft = chartArea.left + bucket * minutesPerBucket * pxPerMinute - MARKER_SIZE / 2
         const left = Math.min(Math.max(idealLeft, chartArea.left), chartArea.right - MARKER_SIZE)
         const sorted = [...group].sort((a, b) => a.time - b.time)
         sorted.forEach((e, i) => {
           newMarkers.push({
-            key: `${bucket}-${isRadiant}-${i}`,
+            key: `${groupKey}-${i}`,
+            groupKey,
             left,
             top: isRadiant
               ? chartArea.top + MARKER_INSET + i * STACK_OFFSET
@@ -264,6 +319,11 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
         })
       }
       markers.value = newMarkers
+      // Skupina, na ktorú bol otvorený tooltip, mohla po resize/update zaniknúť
+      // (iný bucketing) — zavri ho, nech nezostane "duch" tooltip bez markerov.
+      if (activeGroupKey.value && !newMarkers.some((m) => m.groupKey === activeGroupKey.value)) {
+        activeGroupKey.value = null
+      }
     },
   }
 }
@@ -349,7 +409,17 @@ watch(
   { deep: true },
 )
 
-onBeforeUnmount(() => chart?.destroy())
+// Fallback pre touch: mouseleave tam spoľahlivo nenastane, takže po ťuknutí
+// na ikonu (activeGroupKey nastavené cez @click) zavri skupinu aspoň klikom
+// mimo markerov/tooltipu (tie majú @click.stop, takže sem neprebublá).
+function handleOutsideClick() {
+  activeGroupKey.value = null
+}
+onMounted(() => document.addEventListener('click', handleOutsideClick))
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+  chart?.destroy()
+})
 </script>
 
 <template>
@@ -364,7 +434,7 @@ onBeforeUnmount(() => chart?.destroy())
       </li>
     </ul>
     <p v-if="scrollHint && minChartWidth" class="chart-scroll-hint">{{ scrollHint }}</p>
-    <div class="chart-scroll">
+    <div ref="chartScroll" class="chart-scroll" @scroll="updateViewportPixelBounds">
       <div
         :style="{
           height: `${height}px`,
@@ -384,22 +454,28 @@ onBeforeUnmount(() => chart?.destroy())
             top: `${m.top}px`,
             width: `${MARKER_SIZE}px`,
             height: `${MARKER_SIZE}px`,
-            zIndex: m.key === hoveredMarkerKey ? markers.length : m.zIndex,
+            zIndex: m.groupKey === activeGroupKey ? markers.length : m.zIndex,
           }"
-          @mouseenter="hoveredMarkerKey = m.key"
-          @mouseleave="hoveredMarkerKey = null"
+          @mouseenter="activeGroupKey = m.groupKey"
+          @mouseleave="activeGroupKey = null"
+          @click.stop="activeGroupKey = m.groupKey"
         />
         <div
-          v-if="hoveredMarker"
+          v-if="activeGroupMarkers.length"
           class="kill-marker-tooltip"
-          :class="hoveredMarker.isRadiant ? 'below' : 'above'"
+          :class="activeGroupMarkers[0].isRadiant ? 'below' : 'above'"
           :style="{
-            left: `${hoveredMarker.left + MARKER_SIZE / 2}px`,
-            top: `${hoveredMarker.isRadiant ? hoveredMarker.top + MARKER_SIZE + 6 : hoveredMarker.top - 6}px`,
+            left: `${activeGroupTooltipLeft}px`,
+            top: activeGroupMarkers[0].isRadiant
+              ? `${Math.max(...activeGroupMarkers.map((m) => m.top)) + MARKER_SIZE + 6}px`
+              : `${Math.min(...activeGroupMarkers.map((m) => m.top)) - 6}px`,
           }"
+          @click.stop
         >
-          <TeamGlyph :side="hoveredMarker.isRadiant ? 'radiant' : 'dire'" class="tooltip-glyph" />
-          {{ hoveredMarker.title }}
+          <div v-for="m in activeGroupMarkers" :key="m.key" class="kill-marker-tooltip-row">
+            <TeamGlyph :side="m.isRadiant ? 'radiant' : 'dire'" class="tooltip-glyph" />
+            {{ m.title }}
+          </div>
         </div>
       </div>
     </div>
@@ -473,20 +549,36 @@ onBeforeUnmount(() => chart?.destroy())
 .kill-marker-tooltip {
   position: absolute;
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  /* max-width musí sedieť s TOOLTIP_WIDTH v script setup — ten sa používa na
+     pixel-clip pozície (nedovolí tooltipu presiahnuť okraj grafu), takže
+     skutočná šírka sa s ním nesmie rozísť. */
+  max-width: 240px;
+  max-height: 9rem;
+  overflow-y: auto;
   transform: translateX(-50%);
   background: var(--surface-2);
   color: var(--ink);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  padding: 0.25rem 0.55rem;
+  padding: 0.35rem 0.55rem;
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
   white-space: nowrap;
-  pointer-events: none;
+  /* Klikací zoznam killov (nie len hover-info ako predtým) — potrebuje
+     pointer-events, aby @click.stop stihol zastaviť handleOutsideClick skôr,
+     než klik "prepadne" na document a tooltip sa hneď zavrie. Scrollovateľné
+     pre husté teamfighty s veľa killmi v jednom bucket-e. */
+  pointer-events: auto;
   z-index: 10;
   box-shadow: var(--shadow-sm);
+}
+
+.kill-marker-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .kill-marker-tooltip.above {
