@@ -8,7 +8,9 @@ import type {
   PlayerHero,
   PlayerMatch,
   PlayerProfile,
+  ProPlayer,
   SearchResult,
+  Team,
   WinLoss,
 } from '../types/opendota'
 
@@ -165,6 +167,19 @@ const SEARCH_TIMEOUT_MS = 6_000
 
 export const searchPlayers = (query: string) =>
   fetchJson<SearchResult[]>(`/search?q=${encodeURIComponent(query)}`, DEFAULT_TTL, SEARCH_TIMEOUT_MS)
+
+// Real, OpenDota-curated list of pro players (account_id/name/avatar verified
+// by them, not us) — used for the home page's first-visit suggested-players
+// section instead of hand-picked account IDs, which would be unverifiable
+// (Steam personanames are freely editable, so we can't otherwise confirm an
+// ID actually belongs to who we think it does).
+export const getProPlayers = () => fetchJson<ProPlayer[]>('/proPlayers', CONSTANTS_TTL)
+
+// /teams comes back pre-sorted by `rating` descending — used to narrow the
+// full pro-player pool (thousands of entries, many obscure/inactive) down to
+// a smaller "actually recognizable" scouting pool for suggestions, see
+// useSuggestedPlayers.ts.
+export const getTeams = () => fetchJson<Team[]>('/teams', CONSTANTS_TTL)
 
 // --- Valve leaderboard (cez /valve proxy, viď vite.config.ts) ---
 
