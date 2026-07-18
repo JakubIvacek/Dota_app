@@ -1,5 +1,7 @@
 import { OPENDOTA_BASE, STEAM_CDN } from '../config'
 import type {
+  AbilityAttrib,
+  AbilityConstant,
   HeroConstant,
   ItemConstant,
   LeaderboardResponse,
@@ -197,6 +199,70 @@ export async function getItemMap(): Promise<Map<number, ItemConstant>> {
   return new Map(Object.values(items).map((i) => [i.id, i]))
 }
 
+/** Talenty (level 10/15/20/25 voľba) nemajú `img` v `constants/abilities` — len text (`dname`). */
+const TALENT_PREFIX = 'special_bonus_'
+
+// Univerzálna "Attribute Bonus" voľba (alternatíva k skillovaniu na takmer
+// každom leveli, nie viazaná na talent-tiery) zdieľa `special_bonus_` prefix
+// s reálnymi talentmi, ale nie je jeden z nich — `special_bonus_attributes`
+// je aktuálne používané meno (potvrdené v živých matchoch, kde sa vie
+// opakovať aj 7x v jednom `ability_upgrades_arr`), `attribute_bonus` je
+// staršie/alternatívne meno tej istej mechaniky.
+const ATTRIBUTE_BONUS_NAMES = new Set(['special_bonus_attributes', 'attribute_bonus'])
+
+/** Raw shape of an entry in OpenDota's `constants/abilities` response. */
+interface RawAbilityInfo {
+  dname?: string
+  img?: string
+  behavior?: string | string[]
+  dmg_type?: string
+  bkbpierce?: string
+  dispellable?: string
+  desc?: string
+  lore?: string
+  mc?: string | string[]
+  cd?: string | string[]
+  attrib?: AbilityAttrib[]
+}
+
+// mc/cd sú niekedy jedna hodnota (napr. pasívky s fixným cooldownom "0.3"),
+// niekedy pole per-level hodnôt — normalizuj na pole, nech je typ konzistentný.
+const toArray = (v: string | string[] | undefined): string[] | undefined =>
+  v === undefined ? undefined : Array.isArray(v) ? v : [v]
+
+/**
+ * `constants/ability_ids` (numeric ID → interné meno) + `constants/abilities`
+ * (interné meno → dname/img/behavior/desc/…) skombinované do jednej mapy pre
+ * skill-build view a jeho hover kartu.
+ */
+export async function getAbilityMap(): Promise<Map<number, AbilityConstant>> {
+  const [ids, abilities] = await Promise.all([
+    fetchConstants<Record<string, string>>('ability_ids'),
+    fetchConstants<Record<string, RawAbilityInfo>>('abilities'),
+  ])
+  const map = new Map<number, AbilityConstant>()
+  for (const [idStr, name] of Object.entries(ids)) {
+    const info = abilities[name]
+    map.set(Number(idStr), {
+      name,
+      dname: info?.dname || name,
+      img: info?.img,
+      isTalent: name.startsWith(TALENT_PREFIX) && !ATTRIBUTE_BONUS_NAMES.has(name),
+      isAttributeBonus: ATTRIBUTE_BONUS_NAMES.has(name),
+      behavior: info?.behavior,
+      dmgType: info?.dmg_type,
+      bkbPierce: info?.bkbpierce,
+      dispellable: info?.dispellable,
+      desc: info?.desc,
+      lore: info?.lore,
+      manaCost: toArray(info?.mc),
+      cooldown: toArray(info?.cd),
+      attrib: info?.attrib,
+    })
+  }
+  return map
+}
+
 // --- Helpers ---
 
 export const heroImageUrl = (hero: HeroConstant | undefined) =>
@@ -207,6 +273,9 @@ export const heroIconUrl = (hero: HeroConstant | undefined) =>
 
 export const itemImageUrl = (item: ItemConstant | undefined) =>
   item ? `${STEAM_CDN}${item.img}` : ''
+
+export const abilityIconUrl = (ability: AbilityConstant | undefined) =>
+  ability?.img ? `${STEAM_CDN}${ability.img}` : ''
 
 export const isRadiantSlot = (playerSlot: number) => playerSlot < 128
 

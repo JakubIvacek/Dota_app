@@ -9,6 +9,34 @@ documented in [CHANGELOG.md](./CHANGELOG.md), not here.
 - **Real-time match tracking** (GSI, websockets) — nice to have.
 - **Custom replay parser** — only if the app ever diverges from the OpenDota
   API.
+- **Show numeric MMR on `PlayerView`/`LeaderboardView`** — `PlayerProfile`
+  (`src/types/opendota.ts`) only carries `rank_tier` and `leaderboard_rank`
+  today (rendered via `RankBadge.vue`); there's no raw MMR number anywhere.
+  OpenDota's `/players/{id}` also exposes `solo_competitive_rank` and
+  `competitive_rank`, but Valve stopped populating those for most accounts
+  years ago (`null` unless the player opted into the old public MMR API), so
+  this is only reliably possible for the Immortal bracket via the existing
+  `leaderboard_rank` (already shown). Investigate whether `solo_competitive_rank`
+  /`competitive_rank` are non-null for the current test account
+  (`scarecr0w`, ID 156058300) or any others before committing to UI work —
+  if they're consistently null, this isn't buildable without a different
+  data source.
+
+- **Skill-build grid shows pick order, not real hero level** —
+  `skillBuild()` (`src/views/MatchDetailView.vue`) labels each ability pip
+  with its index in `ability_upgrades_arr` (1st pick, 2nd pick, …), not the
+  hero's actual level at that pick, because OpenDota's array only records
+  points the player actually spent and silently omits any level where a
+  point was banked for later (legal in Dota, common once a build's core
+  spells are maxed) — confirmed a level-22 hero with only 18 entries. Tried
+  anchoring talents to their real levels (10/15/20/25, the one thing the data
+  does guarantee) and interpolating the picks between them, but the
+  interpolated levels between two talents are still an unverifiable guess and
+  looked more confusing than useful (isolated icons with empty gaps before
+  them), so it was reverted — see `OPENDOTA_API_NOTES.md` "Skill (ability)
+  order" for the full writeup. Revisit if OpenDota ever exposes real
+  per-pick level/timestamp data (nothing in the current `/matches/{id}`
+  player payload has it — checked every field).
 
 ## Known upstream issues
 

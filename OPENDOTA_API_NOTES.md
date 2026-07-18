@@ -108,8 +108,18 @@ numeric string (rune type enum — needs a lookup table, e.g. `"5"` = haste,
 
 ## Skill (ability) order
 
-`players[].ability_upgrades_arr`: flat array of **ability IDs in level-up
-order** (index 0 = level 1 skill point, etc.) — not names, not timestamps.
+`players[].ability_upgrades_arr`: flat array of **ability IDs in pick
+order** — not names, not timestamps, and **not reliably `index 0 = level 1`
+either**: it only records skill points the player actually *spent*. Points
+can be banked (spent later, or never) — perfectly legal in Dota — and any
+banked level is silently omitted from the array, so `arrayIndex + 1` only
+equals the real hero level if the player never banked a single point.
+Confirmed against live matches: a level-22 hero can have as few as 18
+entries. The only levels guaranteed by the data are talents (always taken at
+10/15/20/25) — we tried anchoring the array to those and interpolating the
+rest, but the interpolated levels are still a guess for anything between two
+talents, and looked more confusing than useful. `src/views/MatchDetailView.vue`
+now just shows pick order (1st, 2nd, 3rd… pick), not level.
 
 ```json
 [5008, 5009, 5009, 5007, 5009, 5010, 5009, 5008]

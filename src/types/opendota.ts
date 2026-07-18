@@ -90,6 +90,8 @@ export interface MatchPlayer {
   xp_t?: number[] | null
   /** Tento hráčov kill log — `key` je NPC meno OBETE (napr. npc_dota_hero_axe), nie killera. */
   kills_log?: { time: number; key: string }[] | null
+  /** Poradie skillovania (ability ID za level-up) — prítomné len pri sparsovanom replayi. */
+  ability_upgrades_arr?: number[] | null
 }
 
 export interface MatchDetail {
@@ -139,4 +141,36 @@ export interface ItemConstant {
   img: string
   dname?: string
   cost?: number | null
+}
+
+/** Kombinácia `constants/ability_ids` (ID → interné meno) a `constants/abilities`
+ *  (interné meno → dname/img) do jednej mapy — viď getAbilityMap() v api/opendota.ts. */
+export interface AbilityAttrib {
+  key: string
+  header?: string
+  value: string | string[]
+  generated?: boolean
+}
+
+export interface AbilityConstant {
+  name: string
+  dname: string
+  img?: string
+  /** Talent (level 10/15/20/25 voľba, max 4/hru), nie Q/W/E/R skill — meno začína `special_bonus_`. */
+  isTalent: boolean
+  /** Univerzálny "Attribute Bonus" pick (`special_bonus_attributes`/`attribute_bonus`) —
+   *  alternatíva k skillovaniu dostupná na takmer každom leveli, nie viazaná na tiery
+   *  10/15/20/25 ako talenty, môže sa v `ability_upgrades_arr` objaviť opakovane. */
+  isAttributeBonus: boolean
+  /** Niektoré schopnosti majú viacero behavior flagov naraz (napr. ["No Target", "Instant Cast"]). */
+  behavior?: string | string[]
+  dmgType?: string
+  bkbPierce?: string
+  dispellable?: string
+  desc?: string
+  lore?: string
+  /** Normalizované na pole aj pri jednohodnotových passívkach (napr. `cd: "0.3"`). */
+  manaCost?: string[]
+  cooldown?: string[]
+  attrib?: AbilityAttrib[]
 }

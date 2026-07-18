@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ACCOUNT_ID } from '../config'
 import {
+  abilityIconUrl,
   gameModeName,
+  getAbilityMap,
   getHeroMap,
   getItemMap,
   getMatch,
@@ -21,7 +23,7 @@ import HeroIcon from '../components/HeroIcon.vue'
 import LineChart from '../components/LineChart.vue'
 import TeamGlyph from '../components/TeamGlyph.vue'
 import Skeleton from '../components/Skeleton.vue'
-import type { MatchPlayer } from '../types/opendota'
+import type { AbilityConstant, MatchPlayer } from '../types/opendota'
 
 const route = useRoute()
 const { t, intlLocale } = useAppLocale()
@@ -41,15 +43,33 @@ const breadcrumbItems = computed(() => [
 
 const { data, loading, error } = useAsync(async () => {
   const matchId = String(route.params.id)
-  const [match, heroMap, itemMap] = await Promise.all([
+  const [match, heroMap, itemMap, abilityMap] = await Promise.all([
     getMatch(matchId),
     getHeroMap(),
     getItemMap(),
+    getAbilityMap(),
   ])
-  return { match, heroMap, itemMap }
+  return { match, heroMap, itemMap, abilityMap }
 })
 
 const ITEM_SLOTS = ['item_0', 'item_1', 'item_2', 'item_3', 'item_4', 'item_5'] as const
+
+// Poradie skillovania — len ordering (viď OPENDOTA_API_NOTES.md), žiadny
+// timestamp ani skutočný level: `ability_upgrades_arr` obsahuje len abilities,
+// ktoré hráč reálne minul, v poradí, a mlčky vynecháva levely, kde si hráč
+// bod na skill nechal na neskôr (v Dote úplne legálne). Skúšali sme talenty
+// (viazané na skutočné levely 10/15/20/25) použiť ako kotvy a dopočítať
+// zvyšok — výsledok bol technicky presnejší pre talenty, ale prázdne
+// medzery/"osamotené" ikony pôsobili zavádzajúco, keďže level medzi kotvami
+// aj tak len hádame. Radšej ukázať presne to, čo dáta hovoria: poradie
+// pickov, nie level.
+function skillBuild(p: MatchPlayer) {
+  if (!p.ability_upgrades_arr?.length) return []
+  return p.ability_upgrades_arr.map((abilityId, i) => ({
+    level: i + 1,
+    ability: data.value?.abilityMap.get(abilityId),
+  }))
+}
 
 function playerRow(p: MatchPlayer) {
   return {
@@ -57,6 +77,7 @@ function playerRow(p: MatchPlayer) {
     hero: data.value?.heroMap.get(p.hero_id),
     items: ITEM_SLOTS.map((slot) => data.value?.itemMap.get(p[slot])).filter(Boolean),
     isMe: p.account_id != null && String(p.account_id) === highlightId.value,
+    skillBuild: skillBuild(p),
   }
 }
 
@@ -79,6 +100,122 @@ const dire = computed(() =>
     data.value?.match.radiant_win === false,
   ),
 )
+
+const anySkillBuild = computed(() =>
+  (data.value?.match.players ?? []).some((p) => p.ability_upgrades_arr?.length),
+)
+
+// Dotabuff-style hover card pre skill-build ikony — rovnaký vzor ako
+// hoveredMarkerKey v LineChart.vue (jeden zdieľaný element, key-based lookup).
+// Na rozdiel od kill-marker tooltipu (child divu vnútri chart-scroll) je táto
+// karta Teleport-nutá do <body> a polohovaná cez position: fixed — skill-grid
+// sedí v .table-scroll s overflow-x: auto, čo si vynucuje aj overflow-y: auto
+// (CSS spec: "visible" na jednej osi sa zmení na "auto", keď druhá nie je
+// "visible"), takže child-element by sa orezával o výšku/šírku toho tímového
+// tabu namiesto prekrytia celej stránky.
+const hoveredSkillKey = ref<string | null>(null)
+const skillCardPos = ref({ left: 0, top: 0, above: false, mobile: false })
+const skillPipKey = (playerSlot: number, level: number) => `${playerSlot}-${level}`
+
+// Card výška je premenlivá (desc/attrib/lore), preto flip rozhoduje reálny
+// priestor pod pipom vo viewporte namiesto statickej heuristiky.
+const SKILL_CARD_EST_HEIGHT = 320
+const SKILL_CARD_WIDTH = 260
+const VIEWPORT_MARGIN = 8
+
+// Pod týmto viewport width je pip-anchored karta nepoužiteľná — na malej
+// obrazovke sa oveľa ľahšie otvorí bližšie k spodku/kraju než je jej výška/
+// šírka, takže by sa vždy odrezala. Namiesto dolaďovania anchor-offsetov ju
+// na mobile radšej vycentrujeme na celú obrazovku (position: fixed, vlastný
+// scroll), nech je vždy celá viditeľná bez ohľadu na to, ktorý pip sa ťukol.
+const MOBILE_BREAKPOINT = 640
+
+const hoveredAbility = computed<AbilityConstant | undefined>(() => {
+  if (!hoveredSkillKey.value) return undefined
+  for (const p of [...radiant.value, ...dire.value]) {
+    const entry = p.skillBuild.find((e) => e && skillPipKey(p.player_slot, e.level) === hoveredSkillKey.value)
+    if (entry?.ability && !entry.ability.isTalent && !entry.ability.isAttributeBonus) return entry.ability
+  }
+  return undefined
+})
+
+function onSkillPipEnter(playerSlot: number, level: number, event: MouseEvent) {
+  hoveredSkillKey.value = skillPipKey(playerSlot, level)
+
+  if (window.innerWidth <= MOBILE_BREAKPOINT) {
+    skillCardPos.value = { left: 0, top: 0, above: false, mobile: true }
+    return
+  }
+
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const above = window.innerHeight - rect.bottom < SKILL_CARD_EST_HEIGHT
+  const centerLeft = rect.left + rect.width / 2
+  const halfWidth = SKILL_CARD_WIDTH / 2
+  skillCardPos.value = {
+    left: Math.min(
+      Math.max(centerLeft, halfWidth + VIEWPORT_MARGIN),
+      window.innerWidth - halfWidth - VIEWPORT_MARGIN,
+    ),
+    top: above ? rect.top - 8 : rect.bottom + 8,
+    above,
+    mobile: false,
+  }
+}
+
+function onSkillPipLeave() {
+  hoveredSkillKey.value = null
+}
+
+// Touch devices don't fire mouseenter/mouseleave, so hover alone leaves the
+// card unreachable on mobile — tap the pip to toggle it open/closed, and tap
+// anywhere else to dismiss it (see onDocumentClick below).
+function onSkillPipClick(playerSlot: number, level: number, event: MouseEvent) {
+  const key = skillPipKey(playerSlot, level)
+  if (hoveredSkillKey.value === key) {
+    hoveredSkillKey.value = null
+    return
+  }
+  onSkillPipEnter(playerSlot, level, event)
+}
+
+function onDocumentClick(event: MouseEvent) {
+  // The mobile card has pointer-events: auto (so it's touch-scrollable), so
+  // taps landing on the card itself must not count as "outside" — otherwise
+  // scrolling/tapping the open card would immediately dismiss it.
+  const target = event.target as HTMLElement
+  if (!target.closest('.skill-pip') && !target.closest('.skill-card')) {
+    hoveredSkillKey.value = null
+  }
+}
+
+// The pip-anchored (desktop) card's position is captured once
+// (getBoundingClientRect at hover time) and painted with position: fixed —
+// it doesn't track the pip during scroll, so dismiss it rather than leaving
+// it drifted away from its icon. The mobile card is centered on the
+// viewport regardless of page scroll, so it doesn't need this.
+function onWindowScroll() {
+  if (!skillCardPos.value.mobile) hoveredSkillKey.value = null
+}
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick)
+  window.addEventListener('scroll', onWindowScroll, { passive: true, capture: true })
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
+  window.removeEventListener('scroll', onWindowScroll, { capture: true })
+})
+
+// `generated: true` atribúty (cast range/point, odvodené hodnoty) sú na
+// Dotabuffe zväčša skryté — menej užitočné pre hráča než ručne autorované
+// hodnoty ako damage/radius. Bez viditeľného `header` niet čo zobraziť.
+function visibleAttribs(ability: AbilityConstant | undefined) {
+  return (ability?.attrib ?? []).filter((a) => a.header && !a.generated)
+}
+
+function formatAttribValue(value: string | string[]) {
+  return Array.isArray(value) ? value.join(' / ') : value
+}
 
 /**
  * Auto-parse: nesparsovaný match → pošli OpenDote parse request a každú
@@ -368,6 +505,144 @@ const playerTimeline = computed(() => {
       </ul>
     </section>
 
+    <section v-if="anySkillBuild" class="card skill-build-card">
+      <div
+        v-for="team in [
+          { name: 'Radiant', players: radiant },
+          { name: 'Dire', players: dire },
+        ]"
+        :key="team.name"
+        class="skill-build-team"
+      >
+        <h3 class="skill-team-name" :class="team.name.toLowerCase()">
+          <TeamGlyph :side="team.name.toLowerCase() as 'radiant' | 'dire'" />
+          {{ team.name === 'Radiant' ? t('matchDetail.radiantBuilds') : t('matchDetail.direBuilds') }}
+        </h3>
+        <p v-if="!team.players.some((p) => p.skillBuild.length)" class="muted skill-build-empty">
+          {{ t('matchDetail.skillBuildUnavailable') }}
+        </p>
+        <div v-else class="table-scroll">
+          <table class="skill-grid" :class="team.name.toLowerCase()">
+            <thead>
+              <tr>
+                <th class="skill-hero-col">{{ t('matchDetail.colPlayer') }}</th>
+                <th v-for="lvl in 25" :key="lvl" class="num" :title="t('matchDetail.skillOrderHint')">#{{ lvl }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in team.players" :key="p.player_slot">
+                <td class="skill-hero-col">
+                  <span
+                    :title="`${p.personaname ?? t('matchDetail.anonymous')} — ${p.hero?.localized_name ?? t('common.unknown')}`"
+                  >
+                    <HeroIcon :hero="p.hero" :show-name="false" />
+                  </span>
+                </td>
+                <td v-for="lvl in 25" :key="lvl" class="skill-cell">
+                  <span
+                    v-if="p.skillBuild[lvl - 1]"
+                    class="skill-pip"
+                    :class="{
+                      talent: p.skillBuild[lvl - 1].ability?.isTalent,
+                      'attr-bonus': p.skillBuild[lvl - 1].ability?.isAttributeBonus,
+                    }"
+                    :title="
+                      p.skillBuild[lvl - 1].ability?.isTalent
+                        ? t('matchDetail.skillTooltip', { name: p.skillBuild[lvl - 1].ability?.dname ?? '?', level: lvl })
+                        : p.skillBuild[lvl - 1].ability?.isAttributeBonus
+                          ? t('matchDetail.skillTooltip', { name: t('matchDetail.attributeBonus'), level: lvl })
+                          : undefined
+                    "
+                    @mouseenter="
+                      !p.skillBuild[lvl - 1].ability?.isTalent &&
+                      !p.skillBuild[lvl - 1].ability?.isAttributeBonus &&
+                      onSkillPipEnter(p.player_slot, lvl, $event)
+                    "
+                    @mouseleave="onSkillPipLeave"
+                    @click="
+                      !p.skillBuild[lvl - 1].ability?.isTalent &&
+                      !p.skillBuild[lvl - 1].ability?.isAttributeBonus &&
+                      onSkillPipClick(p.player_slot, lvl, $event)
+                    "
+                  >
+                    <img
+                      v-if="
+                        p.skillBuild[lvl - 1].ability &&
+                        !p.skillBuild[lvl - 1].ability?.isTalent &&
+                        !p.skillBuild[lvl - 1].ability?.isAttributeBonus
+                      "
+                      :src="abilityIconUrl(p.skillBuild[lvl - 1].ability)"
+                      :alt="p.skillBuild[lvl - 1].ability?.dname ?? ''"
+                      class="skill-icon"
+                    />
+                    <span v-else-if="p.skillBuild[lvl - 1].ability?.isAttributeBonus" class="skill-icon skill-icon-attr-bonus"
+                      >+2</span
+                    >
+                    <span v-else class="skill-icon skill-icon-talent">🍃</span>
+                  </span>
+                  <span v-else class="skill-cell-empty">—</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teleported to <body> (position: fixed) so the card can never be clipped
+         by the skill-grid's own overflow-x:auto scroll container — a single
+         shared element for all ~250 pips, keyed by hoveredSkillKey. -->
+    <Teleport to="body">
+      <div
+        v-if="hoveredAbility"
+        class="skill-card"
+        :class="skillCardPos.mobile ? 'mobile' : skillCardPos.above ? 'above' : 'below'"
+        :style="skillCardPos.mobile ? {} : { left: `${skillCardPos.left}px`, top: `${skillCardPos.top}px` }"
+      >
+        <div class="skill-card-header">
+          <img :src="abilityIconUrl(hoveredAbility)" :alt="hoveredAbility.dname" class="skill-card-icon" />
+          <span class="skill-card-name">{{ hoveredAbility.dname }}</span>
+        </div>
+
+        <p v-if="hoveredAbility.desc" class="skill-card-desc">{{ hoveredAbility.desc }}</p>
+
+        <dl class="skill-card-meta">
+          <template v-if="hoveredAbility.behavior">
+            <dt>{{ t('matchDetail.skillCardAbility') }}</dt>
+            <dd>{{ formatAttribValue(hoveredAbility.behavior) }}</dd>
+          </template>
+          <template v-if="hoveredAbility.dmgType">
+            <dt>{{ t('matchDetail.skillCardDamageType') }}</dt>
+            <dd>{{ hoveredAbility.dmgType }}</dd>
+          </template>
+          <template v-if="hoveredAbility.bkbPierce">
+            <dt>{{ t('matchDetail.skillCardPierces') }}</dt>
+            <dd>{{ hoveredAbility.bkbPierce }}</dd>
+          </template>
+          <template v-if="hoveredAbility.dispellable">
+            <dt>{{ t('matchDetail.skillCardDispellable') }}</dt>
+            <dd>{{ hoveredAbility.dispellable }}</dd>
+          </template>
+        </dl>
+
+        <ul v-if="visibleAttribs(hoveredAbility).length" class="skill-card-attrib">
+          <li v-for="a in visibleAttribs(hoveredAbility)" :key="a.key">
+            <span class="skill-card-attrib-header">{{ a.header }}</span>
+            <span>{{ formatAttribValue(a.value) }}</span>
+          </li>
+        </ul>
+
+        <p v-if="hoveredAbility.manaCost" class="skill-card-cost">
+          {{ t('matchDetail.skillCardMana') }}: {{ hoveredAbility.manaCost.join('/') }}
+        </p>
+        <p v-if="hoveredAbility.cooldown" class="skill-card-cost">
+          {{ t('matchDetail.skillCardCooldown') }}: {{ hoveredAbility.cooldown.join('/') }}s
+        </p>
+
+        <p v-if="hoveredAbility.lore" class="skill-card-lore">{{ hoveredAbility.lore }}</p>
+      </div>
+    </Teleport>
+
     <section class="card advantage-card">
       <h2>{{ t('matchDetail.goldXpAdvantage') }}</h2>
       <!-- TODO: Roshan/team-wipe/high-ground event markers need OpenDota objectives/teamfights
@@ -422,6 +697,7 @@ const playerTimeline = computed(() => {
           :class="[p.isRadiant ? 'radiant' : 'dire', { active: p.player_slot === selectedPlayer?.player_slot }]"
           :aria-label="t('matchDetail.viewPlayerTimeline', { name: p.personaname ?? t('common.playerFallback', { id: p.account_id }) })"
           :aria-pressed="p.player_slot === selectedPlayer?.player_slot"
+          :title="`${p.personaname ?? t('matchDetail.anonymous')} — ${p.hero?.localized_name ?? t('common.unknown')}`"
           @click="selectedSlot = p.player_slot"
         >
           <HeroIcon :hero="p.hero" :show-name="false" />
@@ -732,6 +1008,269 @@ td.emphasis,
   transform: scale(1.15);
   position: relative;
   z-index: 1;
+}
+
+/* Skill build (poradie skillovania) — dedikovaná sekcia inšpirovaná Dotabuff
+   skill-build mriežkou (hero riadky × level 1-25 stĺpce), ale odľahčená pod
+   naše existujúce farby/radius/tabuľkové konvencie namiesto 1:1 kópie. */
+.skill-build-card {
+  margin-bottom: var(--space-6);
+}
+
+.skill-build-team + .skill-build-team {
+  margin-top: var(--space-4);
+}
+
+.skill-team-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin-bottom: var(--space-2);
+}
+
+.skill-team-name.radiant { color: var(--radiant); }
+.skill-team-name.dire { color: var(--dire); }
+
+.skill-build-empty {
+  font-size: var(--text-sm);
+}
+
+table.skill-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+table.skill-grid th {
+  text-align: center;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  font-weight: var(--weight-semibold);
+  padding: var(--space-2) 0.15rem;
+  border-bottom: 1px solid var(--baseline);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stĺpce levelov farebne ladené s tímom — rovnaká konvencia ako .team-name
+   (Radiant zelená, Dire červená), nech je hneď jasné, ktorá mriežka patrí kam. */
+table.skill-grid.radiant th { color: var(--radiant); }
+table.skill-grid.dire th { color: var(--dire); }
+
+table.skill-grid th.skill-hero-col,
+table.skill-grid td.skill-hero-col {
+  text-align: left;
+  padding-left: var(--space-2);
+}
+
+table.skill-grid td {
+  padding: 2px;
+  border-bottom: 1px solid var(--grid);
+  text-align: center;
+  vertical-align: middle;
+}
+
+table.skill-grid tr:last-child td {
+  border-bottom: none;
+}
+
+table.skill-grid tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.skill-cell-empty {
+  color: var(--muted);
+  opacity: 0.35;
+}
+
+.skill-pip {
+  position: relative;
+  display: inline-flex;
+}
+
+.skill-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  display: block;
+  border: 1px solid var(--border);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+/* Talenty nemajú ikonu v OpenDota constants (len text dname) — leaf glyph ich
+   vizuálne odlíši od Q/W/E/R skillov, podobne ako leaf ikony na Dotabuffe. */
+.skill-icon-talent {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gold);
+  background: var(--gold-soft);
+}
+
+/* Attribute Bonus (+2 all stats) is a different mechanic than a talent — it's
+   not tier-locked and can repeat many times per game, so it needs its own
+   look (not the gold talent leaf) to avoid reading as "this hero took N
+   talents". Distinct accent color, same size/shape as the other pips. */
+.skill-icon-attr-bonus {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.skill-pip:hover .skill-icon {
+  transform: scale(1.25);
+  position: relative;
+  z-index: 1;
+}
+
+/* Dotabuff-style hover card — Teleport-ed to <body> and positioned with
+   position: fixed (left/top set inline from getBoundingClientRect() in
+   onSkillPipEnter), so it always paints above the whole page instead of
+   being clipped/scrolled by the skill-grid's .table-scroll overflow-x:auto
+   container (which forces overflow-y: auto too — see script comment) or
+   fighting the Radiant/Dire section's own stacking height.
+   pointer-events: none so it can't itself trigger mouseleave. */
+.skill-card {
+  position: fixed;
+  width: 260px;
+  z-index: 1000;
+  pointer-events: none;
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-md);
+  text-align: left;
+  white-space: normal;
+  font-variant-numeric: normal;
+}
+
+.skill-card.below {
+  transform: translateX(-50%);
+}
+
+.skill-card.above {
+  transform: translate(-50%, -100%);
+}
+
+/* Mobile: not anchored to the tapped pip at all — centered on the viewport
+   with its own internal scroll, so it's always fully visible regardless of
+   where on the page it was opened (see MOBILE_BREAKPOINT comment in script).
+   Opened by tap (not hover), so — unlike the desktop card — nothing relies
+   on pointer-events: none here; re-enable it so the content is touch-
+   scrollable when it's taller than max-height. */
+.skill-card.mobile {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100vw - 2 * var(--space-4));
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  pointer-events: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.skill-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.skill-card-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.skill-card-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.skill-card-desc {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.skill-card-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.skill-card-meta dt {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  white-space: nowrap;
+}
+
+.skill-card-meta dd {
+  margin: 0;
+  text-align: right;
+  color: var(--ink-2);
+}
+
+.skill-card-attrib {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-xs);
+}
+
+.skill-card-attrib li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.skill-card-attrib-header {
+  color: var(--muted);
+}
+
+.skill-card-cost {
+  margin: 0 0 2px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.skill-card-lore {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--grid);
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--muted);
 }
 
 .player-strip {
