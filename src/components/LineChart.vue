@@ -37,6 +37,13 @@ Tooltip.positioners.centerY = function (items, eventPosition) {
   return { x: pos.x, y: (chartArea.top + chartArea.bottom) / 2 }
 }
 
+interface KillMarkerEvent {
+  time: number
+  isRadiant: boolean
+  iconUrl: string
+  title: string
+}
+
 const props = withDefaults(
   defineProps<{
     labels: (string | number)[]
@@ -58,7 +65,7 @@ const props = withDefaults(
     /** Voliteľné ikonové značky na časovej osi (napr. kill eventy) — kreslené
      * ako DOM overlay nad canvasom, nie priamo na canvas, kvôli natívnemu
      * hoveru/title bez boja s Chart.js tooltip systémom pre obrázkové body. */
-    killMarkers?: { time: number; isRadiant: boolean; iconUrl: string; title: string }[]
+    killMarkers?: KillMarkerEvent[]
     /** Zobrazí sa nad grafom, len keď je pod MIN_CHART_WIDTH breakpointom
      * (viď .chart-scroll-hint media query) — na mobile inak nie je zjavné,
      * že graf s kill markermi je horizontálne scrollovateľný. */
@@ -81,17 +88,53 @@ interface MarkerPosition {
   isRadiant: boolean
   iconUrl: string
   title: string
+  /** True pre "+N" overflow placeholder namiesto skutočnej kill ikony — viď
+   * VISIBLE_STACK_LIMIT v buildKillMarkerPlugin. */
+  isOverflow?: boolean
+  overflowCount?: number
 }
 
 const markers = ref<MarkerPosition[]>([])
-// Hover ALEBO klik na ktorúkoľvek ikonu v stacku otvorí zoznam VŠETKÝCH killov
-// v tej istej bucket+tím skupine naraz (nie len tú jednu ikonu pod kurzorom) —
-// klik sa správa rovnako ako hover (potrebný na touch, kde mouseenter/leave
-// nenastane), zmizne pri odídení myšou z ikony rovnako v oboch prípadoch.
+// Plný zoznam killov na skupinu (bucket+tím), nezávisle od toho, koľko sa ich
+// reálne vykreslí ako ikony — tooltip musí vedieť vypísať VŠETKY kills aj keď
+// je väčšina z nich schovaná za "+N" overflow placeholderom.
+const groupEvents = ref<Map<string, KillMarkerEvent[]>>(new Map())
+// Hover ALEBO klik na ktorúkoľvek ikonu v stacku (vrátane "+N" placeholderu)
+// otvorí zoznam VŠETKÝCH killov v tej istej bucket+tím skupine naraz — klik
+// sa správa rovnako ako hover (potrebný na touch, kde mouseenter/leave
+// nenastane). Zavretie pri odídení myšou je oneskorené (viď scheduleClose
+// nižšie), nech sa dá prejsť z markera do samotného tooltipu.
 const activeGroupKey = ref<string | null>(null)
 const activeGroupMarkers = computed(() =>
   markers.value.filter((m) => m.groupKey === activeGroupKey.value),
 )
+const activeGroupEvents = computed(() => groupEvents.value.get(activeGroupKey.value ?? '') ?? [])
+
+// Medzi markerom a tooltipom je medzera (MARKER_SIZE + 6px, viď top nižšie) —
+// okamžité zavretie na mouseleave z markera by tooltip zrušilo skôr, než tam
+// kurzor pri prechode cez túto medzeru vôbec stihne dorazit (Vue stihne
+// odmountovať element skôr, než ho myš "chytí"), takže pri viacerých killoch
+// sa k scrollovateľnému zoznamu nedalo myšou vôbec dostať. Zavretie sa preto
+// mierne oneskorí a zruší, ak medzitým príde mouseenter na marker ALEBO na
+// samotný tooltip — hover tak prežije prechod cez medzeru aj scrollovanie.
+let closeTimeout: ReturnType<typeof setTimeout> | null = null
+function cancelClose() {
+  if (closeTimeout) {
+    clearTimeout(closeTimeout)
+    closeTimeout = null
+  }
+}
+function openGroup(groupKey: string) {
+  cancelClose()
+  activeGroupKey.value = groupKey
+}
+function scheduleClose() {
+  cancelClose()
+  closeTimeout = setTimeout(() => {
+    activeGroupKey.value = null
+    closeTimeout = null
+  }, 150)
+}
 
 // Musí sedieť s .kill-marker-tooltip max-width v <style> — použité na
 // pixel-clip zoznamu killov nižšie, nech pri stĺpci blízko okraja grafu
@@ -262,6 +305,12 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
       // do susedného bucketu.
       const STACK_OFFSET = MARKER_SIZE + 4
       const MARKER_INSET = 4
+      // Pri veľkom teamfighte (6+ killov v jednom bucket-e) by neobmedzený
+      // vertikálny stack vytrčal cez okraj chartArea — zobraz najviac
+      // VISIBLE_STACK_LIMIT slotov a zvyšok skry za "+N" placeholder v
+      // poslednom slote (skutočné kill dáta ostávajú v groupEvents pre
+      // tooltip, viď nižšie).
+      const VISIBLE_STACK_LIMIT = 5
 
       // Bucket širka (v minútach) je 1 minúta, kým na to stačí pxPerMinute —
       // na dlhých matchoch/úzkych viewportoch by sa pri pevnej 1-minútovej
@@ -295,6 +344,7 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
       }
 
       const newMarkers: MarkerPosition[] = []
+      const newGroupEvents = new Map<string, KillMarkerEvent[]>()
       for (const [groupKey, group] of buckets) {
         const bucket = resolveBucket(group[0].time)
         const isRadiant = group[0].isRadiant
@@ -303,7 +353,16 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
         const idealLeft = chartArea.left + bucket * minutesPerBucket * pxPerMinute - MARKER_SIZE / 2
         const left = Math.min(Math.max(idealLeft, chartArea.left), chartArea.right - MARKER_SIZE)
         const sorted = [...group].sort((a, b) => a.time - b.time)
-        sorted.forEach((e, i) => {
+        newGroupEvents.set(groupKey, sorted)
+
+        // Nad VISIBLE_STACK_LIMIT killov sa posledný slot zmení na "+N"
+        // placeholder namiesto (VISIBLE_STACK_LIMIT)-tej reálnej ikony —
+        // zvyšné kills ostávajú dostupné len cez tooltip (groupEvents).
+        const overflowCount = Math.max(0, sorted.length - VISIBLE_STACK_LIMIT)
+        const visibleCount = overflowCount > 0 ? VISIBLE_STACK_LIMIT - 1 : sorted.length
+        const visible = sorted.slice(0, visibleCount)
+
+        visible.forEach((e, i) => {
           newMarkers.push({
             key: `${groupKey}-${i}`,
             groupKey,
@@ -317,8 +376,27 @@ function buildKillMarkerPlugin(): Plugin<'line'> {
             title: e.title,
           })
         })
+
+        if (overflowCount > 0) {
+          const i = visible.length
+          newMarkers.push({
+            key: `${groupKey}-overflow`,
+            groupKey,
+            left,
+            top: isRadiant
+              ? chartArea.top + MARKER_INSET + i * STACK_OFFSET
+              : chartArea.bottom - MARKER_INSET - MARKER_SIZE - i * STACK_OFFSET,
+            zIndex: i,
+            isRadiant,
+            iconUrl: '',
+            title: `+${overflowCount} more`,
+            isOverflow: true,
+            overflowCount,
+          })
+        }
       }
       markers.value = newMarkers
+      groupEvents.value = newGroupEvents
       // Skupina, na ktorú bol otvorený tooltip, mohla po resize/update zaniknúť
       // (iný bucketing) — zavri ho, nech nezostane "duch" tooltip bez markerov.
       if (activeGroupKey.value && !newMarkers.some((m) => m.groupKey === activeGroupKey.value)) {
@@ -413,11 +491,13 @@ watch(
 // na ikonu (activeGroupKey nastavené cez @click) zavri skupinu aspoň klikom
 // mimo markerov/tooltipu (tie majú @click.stop, takže sem neprebublá).
 function handleOutsideClick() {
+  cancelClose()
   activeGroupKey.value = null
 }
 onMounted(() => document.addEventListener('click', handleOutsideClick))
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleOutsideClick)
+  cancelClose()
   chart?.destroy()
 })
 </script>
@@ -443,23 +523,40 @@ onBeforeUnmount(() => {
         }"
       >
         <canvas ref="canvas"></canvas>
-        <img
-          v-for="m in markers"
-          :key="m.key"
-          :src="m.iconUrl"
-          :alt="m.title"
-          class="kill-marker"
-          :style="{
-            left: `${m.left}px`,
-            top: `${m.top}px`,
-            width: `${MARKER_SIZE}px`,
-            height: `${MARKER_SIZE}px`,
-            zIndex: m.groupKey === activeGroupKey ? markers.length : m.zIndex,
-          }"
-          @mouseenter="activeGroupKey = m.groupKey"
-          @mouseleave="activeGroupKey = null"
-          @click.stop="activeGroupKey = m.groupKey"
-        />
+        <template v-for="m in markers" :key="m.key">
+          <div
+            v-if="m.isOverflow"
+            class="kill-marker kill-marker-overflow"
+            :style="{
+              left: `${m.left}px`,
+              top: `${m.top}px`,
+              width: `${MARKER_SIZE}px`,
+              height: `${MARKER_SIZE}px`,
+              zIndex: m.groupKey === activeGroupKey ? markers.length : m.zIndex,
+            }"
+            @mouseenter="openGroup(m.groupKey)"
+            @mouseleave="scheduleClose"
+            @click.stop="openGroup(m.groupKey)"
+          >
+            +{{ m.overflowCount }}
+          </div>
+          <img
+            v-else
+            :src="m.iconUrl"
+            :alt="m.title"
+            class="kill-marker"
+            :style="{
+              left: `${m.left}px`,
+              top: `${m.top}px`,
+              width: `${MARKER_SIZE}px`,
+              height: `${MARKER_SIZE}px`,
+              zIndex: m.groupKey === activeGroupKey ? markers.length : m.zIndex,
+            }"
+            @mouseenter="openGroup(m.groupKey)"
+            @mouseleave="scheduleClose"
+            @click.stop="openGroup(m.groupKey)"
+          />
+        </template>
         <div
           v-if="activeGroupMarkers.length"
           class="kill-marker-tooltip"
@@ -470,11 +567,17 @@ onBeforeUnmount(() => {
               ? `${Math.max(...activeGroupMarkers.map((m) => m.top)) + MARKER_SIZE + 6}px`
               : `${Math.min(...activeGroupMarkers.map((m) => m.top)) - 6}px`,
           }"
+          @mouseenter="cancelClose"
+          @mouseleave="scheduleClose"
           @click.stop
         >
-          <div v-for="m in activeGroupMarkers" :key="m.key" class="kill-marker-tooltip-row">
-            <TeamGlyph :side="m.isRadiant ? 'radiant' : 'dire'" class="tooltip-glyph" />
-            {{ m.title }}
+          <div
+            v-for="(evt, i) in activeGroupEvents"
+            :key="`${evt.time}-${i}`"
+            class="kill-marker-tooltip-row"
+          >
+            <TeamGlyph :side="evt.isRadiant ? 'radiant' : 'dire'" class="tooltip-glyph" />
+            {{ evt.title }}
           </div>
         </div>
       </div>
@@ -544,6 +647,19 @@ onBeforeUnmount(() => {
 
 .kill-marker:hover {
   transform: scale(1.4);
+}
+
+.kill-marker-overflow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-3, var(--surface-2));
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
 }
 
 .kill-marker-tooltip {
