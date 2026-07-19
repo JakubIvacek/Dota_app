@@ -129,6 +129,8 @@ export default {
     playerTimeline: 'Gold & XP priebeh hráča',
     viewPlayerTimeline: 'Zobraziť gold & XP priebeh hráča {name}',
     killTooltip: '{hero} zomrel o {time}',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← Posuň pre celú časovú os →',
   },
   player: {

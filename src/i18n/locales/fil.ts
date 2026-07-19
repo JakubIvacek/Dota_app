@@ -129,6 +129,8 @@ export default {
     playerTimeline: 'Gold & XP timeline ng manlalaro',
     viewPlayerTimeline: 'Tingnan ang gold & XP timeline ni {name}',
     killTooltip: 'Namatay si {hero} sa {time}',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← I-scroll para makita ang buong timeline →',
   },
   player: {

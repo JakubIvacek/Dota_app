@@ -127,6 +127,8 @@ export default {
     playerTimeline: '玩家 Gold & XP 曲线',
     viewPlayerTimeline: '查看 {name} 的 gold & XP 曲线',
     killTooltip: '{hero} 死于 {time}',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← 滑动查看完整时间线 →',
   },
   player: {

@@ -13,7 +13,6 @@ import {
   type TooltipPositionerFunction,
 } from 'chart.js'
 import { cssVar } from '../utils/theme'
-import TeamGlyph from './TeamGlyph.vue'
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip)
 
@@ -576,7 +575,7 @@ onBeforeUnmount(() => {
             :key="`${evt.time}-${i}`"
             class="kill-marker-tooltip-row"
           >
-            <TeamGlyph :side="evt.isRadiant ? 'radiant' : 'dire'" class="tooltip-glyph" />
+            <img :src="evt.iconUrl" alt="" class="tooltip-glyph" />
             {{ evt.title }}
           </div>
         </div>
@@ -702,10 +701,11 @@ onBeforeUnmount(() => {
 }
 
 .tooltip-glyph {
-  width: 1em;
-  height: 1em;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
   display: block;
-  align-self: center;
-  margin-top: 2px;
+  flex-shrink: 0;
 }
 </style>

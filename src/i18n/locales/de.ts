@@ -129,6 +129,8 @@ export default {
     playerTimeline: 'Gold- & XP-Verlauf des Spielers',
     viewPlayerTimeline: 'Gold- & XP-Verlauf von {name} anzeigen',
     killTooltip: '{hero} starb bei {time}',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← Scrollen, um die ganze Zeitleiste zu sehen →',
   },
   player: {
