@@ -163,11 +163,12 @@ const advantage = computed(() => {
 
 const formatK = (v: number) => `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
 
-// Kill markers pre advantage graf — len ak je match sparsovaný (rovnaká brána ako
-// radiant_gold_adv). `kills_log` je per-hráč log killov, ktoré tento hráč získal;
-// `key` je NPC meno OBETE, treba ho dohľadať v heroMape podľa `.name`. Bez gold-per-kill
-// (nie je v tomto poli) a bez Radiant/Dire summary listu — viď OPENDOTA_API_NOTES.md.
-const killMarkers = computed(() => {
+// Hero kill markers pre advantage graf — len ak je match sparsovaný (rovnaká
+// brána ako radiant_gold_adv). `kills_log` je per-hráč log killov, ktoré tento
+// hráč získal; `key` je NPC meno OBETE, treba ho dohľadať v heroMape podľa
+// `.name`. Bez gold-per-kill (nie je v tomto poli) a bez Radiant/Dire summary
+// listu — viď OPENDOTA_API_NOTES.md.
+const heroKillMarkers = computed(() => {
   const match = data.value?.match
   if (!match?.radiant_gold_adv?.length) return []
   const heroByNpcName = new Map(
@@ -193,6 +194,115 @@ const killMarkers = computed(() => {
       }),
     }))
 })
+
+// Roshan/veža/rax nemajú v projekte overenú Steam CDN ikonu (žiadna z
+// vyskúšaných ciest neexistovala) — namiesto hádania ďalších URL sú to malé
+// vlastné SVG zapečené do data-URI, nech ostane rovnaký <img>-based marker
+// rendering v LineChart.vue bez akejkoľvek zmeny tam. Farebná "badge" plocha
+// pod glyfom drží čitateľnosť pri 18px veľkosti markera v oboch témach.
+function svgIconUrl(inner: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${inner}</svg>`
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
+// Roshanov obrys je skutočná ikona z open-source odota/web (MIT licencia,
+// src/components/Icons/Roshan.tsx) — rovnaký glyf, aký OpenDota sama používa
+// pre Roshan kill eventy, len prefarbený a zmenšený do 24×24 badge.
+const ROSHAN_PATHS = `<path d="M149.9,237.2c11.5,0,8.3,21.6,16.6,21.6s29.8-68.3,9.1-70.7c-20.8-2.4-12.1,24-25.7,24V237.2z"/><path d="M149.9,103.2c2.2,0,8,11.5,22.1,18.2c10,4.7,24.9,8.1,33.6,13.7c21,13.5-0.9,50-4.5,49.1c-3.6-0.9-20-26.1-27.5-26.1c-12.2-1.2-13.1,13.8-23.7,13.8V103.2z"/><path d="M149.9,63.6c41,0,22.1,55.1,51.2,55.1c7.9,0,29.1-20,29.1-55.5c0-13.3-8.4-21.7-14.4-30.4C205.8,18.1,198.6,7.7,189,7.7c-18.3,0-21.7,19.8-39.1,19.8V63.6z"/><path d="M243.9,292.3c2.6,0,56.1-49.1,56.1-77.6S268.5,91,251.3,91s-28.1,28.8-28.1,42.8s45.3,64.1,45.3,97.1S241.3,292.3,243.9,292.3z"/><path d="M150.1,237.2c-11.5,0-8.3,21.6-16.6,21.6s-29.8-68.3-9.1-70.7c20.8-2.4,12.1,24,25.7,24V237.2z"/><path d="M150.1,103.2c-2.2,0-8,11.5-22.1,18.2c-10,4.7-24.9,8.1-33.6,13.7c-21,13.5,0.9,50,4.5,49.1c3.6-0.9,20-26.1,27.5-26.1c12.2-1.2,13.1,13.8,23.7,13.8V103.2z"/><path d="M150.1,63.6c-41,0-22.1,55.1-51.2,55.1c-7.9,0-29.1-20-29.1-55.5c0-13.3,8.4-21.7,14.4-30.4C94.2,18.1,101.4,7.7,111,7.7c18.3,0,21.7,19.8,39.1,19.8V63.6z"/><path d="M56.1,292.3c-2.6,0-56.1-49.1-56.1-77.6C0,186.2,31.5,91,48.7,91s28.1,28.8,28.1,42.8s-45.3,64.1-45.3,97.1S58.7,292.3,56.1,292.3z"/>`
+
+const ROSHAN_ICON = svgIconUrl(
+  `<rect width="24" height="24" rx="4" fill="#4a3728"/>` +
+    `<g fill="#e0b973" transform="translate(2.4,2.4) scale(0.064)">${ROSHAN_PATHS}</g>`,
+)
+// Vlastné jednoduché piktogramy — cimburie/rook siluet pre vežu (čitateľné
+// ako "tower/fort" aj pri 18px, na rozdiel od trojuholníkovej strechy, ktorá
+// pri tejto veľkosti splývala do šípky), nízka široká strieška+telo pre rax
+// (odlíšené na prvý pohľad, jemné detaily typu okná pri 18px nemajú zmysel).
+const TOWER_ICON = svgIconUrl(
+  `<rect width="24" height="24" rx="4" fill="#37474f"/>` +
+    `<rect x="7" y="11" width="10" height="9" fill="#fff"/>` +
+    `<rect x="7" y="7" width="2.6" height="4" fill="#fff"/>` +
+    `<rect x="10.7" y="7" width="2.6" height="4" fill="#fff"/>` +
+    `<rect x="14.4" y="7" width="2.6" height="4" fill="#fff"/>`,
+)
+const BARRACKS_ICON = svgIconUrl(
+  `<rect width="24" height="24" rx="4" fill="#4a2f5e"/>` +
+    `<path d="M2 13 L12 6 L22 13 Z" fill="#fff"/><rect x="4" y="13" width="16" height="7" fill="#fff"/>`,
+)
+
+// Roshan kill markers — `team` v CHAT_MESSAGE_ROSHAN_KILL je Dota tímové
+// číslo (2 = Radiant, 3 = Dire, overené na reálnom matchi), nie player_slot.
+const roshanMarkers = computed(() => {
+  const match = data.value?.match
+  if (!match?.radiant_gold_adv?.length) return []
+  return (match.objectives ?? [])
+    .filter((o) => o.type === 'CHAT_MESSAGE_ROSHAN_KILL' && o.team != null)
+    .map((o) => ({
+      time: o.time,
+      isRadiant: o.team === 2,
+      iconUrl: ROSHAN_ICON,
+      title: t('matchDetail.roshanTooltip', { time: formatDuration(o.time) }),
+    }))
+})
+
+// NPC meno zničenej budovy má tvar
+// npc_dota_<goodguys|badguys>_<tower<tier>|melee_rax|range_rax>[_<top|mid|bot>]
+// (overené na reálnom matchi) — goodguys = padla Radiant stavba, badguys =
+// padla Dire stavba, útočiaci tím je teda opačný. `fort` (Ancient) zámerne
+// vynechaný, padá presne na konci matchu, kde je marker navyše zbytočný.
+const BUILDING_KEY_RE =
+  /^npc_dota_(goodguys|badguys)_(tower\d|melee_rax|range_rax)(?:_(top|mid|bot))?$/
+
+function parseBuildingKey(
+  key: string,
+): { isRadiantAttacker: boolean; icon: string; label: string } | null {
+  const match = BUILDING_KEY_RE.exec(key)
+  if (!match) return null
+  const [, side, type, lane] = match
+  const isRadiantAttacker = side === 'badguys'
+  const laneLabel = lane ? ` ${lane[0]!.toUpperCase()}${lane.slice(1)}` : ''
+  // Skrátené labely (T3/Rax namiesto Tier 3/Barracks) — dlhší text v
+  // .kill-marker-tooltip-row (nowrap, žiadny wrap) tlačil riadok mimo
+  // 240px tooltip a spôsoboval vodorovné pretečenie/scroll.
+  if (type.startsWith('tower')) {
+    return { isRadiantAttacker, icon: TOWER_ICON, label: `T${type.slice(5)}${laneLabel} Tower` }
+  }
+  return {
+    isRadiantAttacker,
+    icon: BARRACKS_ICON,
+    label: `${type === 'melee_rax' ? 'Melee' : 'Ranged'} Rax${laneLabel}`,
+  }
+}
+
+const objectiveMarkers = computed(() => {
+  const match = data.value?.match
+  if (!match?.radiant_gold_adv?.length) return []
+  return (match.objectives ?? [])
+    .filter((o) => o.type === 'building_kill' && o.key)
+    .map((o) => {
+      const parsed = parseBuildingKey(o.key!)
+      if (!parsed) return null
+      return {
+        time: o.time,
+        isRadiant: parsed.isRadiantAttacker,
+        iconUrl: parsed.icon,
+        title: t('matchDetail.objectiveTooltip', {
+          building: parsed.label,
+          time: formatDuration(o.time),
+        }),
+      }
+    })
+    .filter((e): e is NonNullable<typeof e> => e != null)
+})
+
+// Kombinovaný zoznam pre LineChart — hero kills + Roshan + veže/rax v jednom,
+// zoradené podľa času (LineChart si markery aj tak zoskupí do minútových
+// bucketov, ale zoradenie na vstupe je konzistentné s pôvodným správaním).
+const killMarkers = computed(() =>
+  [...heroKillMarkers.value, ...roshanMarkers.value, ...objectiveMarkers.value].sort(
+    (a, b) => a.time - b.time,
+  ),
+)
 
 // Per-player timeline card: vyber hráča klikom na ikonu, default prvý Radiant hráč.
 const selectedSlot = ref<number | null>(null)
@@ -370,8 +480,6 @@ const playerTimeline = computed(() => {
 
     <section class="card advantage-card">
       <h2>{{ t('matchDetail.goldXpAdvantage') }}</h2>
-      <!-- TODO: Roshan/team-wipe/high-ground event markers need OpenDota objectives/teamfights
-           data (not in MatchPlayer/types/opendota.ts today) plus LineChart annotation support. -->
       <LineChart
         v-if="advantage"
         :labels="advantage.labels"

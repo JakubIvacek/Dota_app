@@ -113,6 +113,24 @@ export interface MatchPlayer {
   kills_log?: { time: number; key: string }[] | null
 }
 
+/** Jeden event z /matches/{id}.objectives (chat-log eventy — Roshan, veže,
+ * rax, first blood...). Nie je zdokumentované OpenDotou, štruktúra overená
+ * priamo na reálnom sparsovanom matchi. Polia sa líšia podľa `type`:
+ * - `CHAT_MESSAGE_ROSHAN_KILL`: len `team` (2 = Radiant, 3 = Dire).
+ * - `building_kill`: `key` je NPC meno ZNIČENEJ budovy (npc_dota_goodguys_*
+ *   = padla Radiant stavba, npc_dota_badguys_* = padla Dire stavba — útočiaci
+ *   tím je teda opačný). `unit`/`slot`/`player_slot` (killer) chýbajú, keď
+ *   budovu dorazil creep, nie hráč. */
+export interface MatchObjective {
+  time: number
+  type: string
+  team?: number
+  key?: string
+  unit?: string
+  slot?: number
+  player_slot?: number
+}
+
 export interface MatchDetail {
   match_id: number
   start_time: number
@@ -124,6 +142,7 @@ export interface MatchDetail {
   /** Prítomné len pri sparsovanom replayi (Expose Public Match Data). */
   radiant_gold_adv?: number[] | null
   radiant_xp_adv?: number[] | null
+  objectives?: MatchObjective[] | null
   players: MatchPlayer[]
 }
 

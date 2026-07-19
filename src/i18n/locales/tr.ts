@@ -129,6 +129,8 @@ export default {
     playerTimeline: 'Oyuncu Gold & XP zaman çizelgesi',
     viewPlayerTimeline: "{name} adlı oyuncunun gold & XP zaman çizelgesini görüntüle",
     killTooltip: '{hero} {time} anında öldü',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← Tüm zaman çizelgesini görmek için kaydırın →',
   },
   player: {

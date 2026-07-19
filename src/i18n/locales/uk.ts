@@ -129,6 +129,8 @@ export default {
     playerTimeline: 'Графік Gold & XP гравця',
     viewPlayerTimeline: 'Переглянути графік gold & XP гравця {name}',
     killTooltip: '{hero} загинув о {time}',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← Прокрутіть, щоб побачити весь графік →',
   },
   player: {

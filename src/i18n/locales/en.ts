@@ -127,6 +127,8 @@ const en = {
     playerTimeline: 'Player Gold & XP timeline',
     viewPlayerTimeline: "View {name}'s gold & XP timeline",
     killTooltip: '{hero} died at {time}',
+    roshanTooltip: 'Roshan · {time}',
+    objectiveTooltip: '{building} · {time}',
     chartScrollHint: '← Scroll to see the full timeline →',
   },
   player: {
