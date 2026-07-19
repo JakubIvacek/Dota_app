@@ -15,6 +15,49 @@ a dated version section when released.
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-07-19
+
+### Added
+
+- "Players to explore" section on the home page: scouts a pool of ~50 active
+  pro players from the top 30 teams by rating (OpenDota `/teams` +
+  `/proPlayers`) and shows a random sample of 8 — real, live profiles instead
+  of hardcoded account IDs, since Steam personanames can't be trusted to
+  identify who an ID actually belongs to. Section order is now Favorites (if
+  any) → Recently viewed → Players to explore → Updates, and the
+  Favorites/suggested sections hide entirely instead of showing an
+  empty-state message.
+- Roshan and tower/barracks event markers on the match Gold/XP advantage
+  chart, alongside the existing hero-kill markers — sourced from OpenDota's
+  `objectives` data (now typed as `MatchObjective`). Roshan uses the actual
+  creature silhouette from OpenDota's own MIT-licensed icon set; tower/rax
+  use small hand-drawn pictograms, since no verified Steam CDN asset exists
+  for these.
+- Item-purchase icon markers on the per-player Gold/XP timeline chart,
+  reusing the same marker mechanism. Consumables (wards, tp scrolls, smoke,
+  tangoes) are filtered out to avoid flooding the timeline; build-defining
+  component items like Blink Dagger are kept.
+
+### Fixed
+
+- Kill-marker stacks in a single time bucket are now capped at 5 visible
+  icons, with a "+N" badge for the rest, instead of growing an unbounded
+  vertical column that could run off the chart edge.
+- The kill-marker tooltip could disappear before the pointer reached it (a
+  gap between marker and tooltip raced against the tooltip's own unmount),
+  making a long, scrollable kill list impossible to actually scroll through.
+  Closing is now debounced and cancelled on re-entry to either the marker or
+  the tooltip itself.
+- Tooltip rows now show each event's own icon (hero/Roshan/tower/rax/item)
+  instead of a repeated Radiant/Dire glyph that carried no information once
+  grouped by team.
+- Roshan/objective/item-purchase tooltip text shortened (e.g. "Tier 3 Mid
+  Tower · 12:34" instead of "Tier 3 Mid Tower destroyed at 12:34") after
+  longer real-world labels overflowed the tooltip's fixed width.
+- `LineChart.vue`'s minimum inter-bucket spacing increased — the first,
+  edge-clamped bucket could end up only ~2px from its neighbor on longer
+  matches with dense marker data, visually overlapping.
+
 ## [0.12.1] — 2026-07-18
 
 ### Fixed
