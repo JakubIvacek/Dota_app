@@ -6,6 +6,7 @@ import {
   gameModeName,
   getHeroMap,
   getItemMap,
+  getItemMapByName,
   getMatch,
   heroIconUrl,
   isRadiantSlot,
@@ -41,12 +42,13 @@ const breadcrumbItems = computed(() => [
 
 const { data, loading, error } = useAsync(async () => {
   const matchId = String(route.params.id)
-  const [match, heroMap, itemMap] = await Promise.all([
+  const [match, heroMap, itemMap, itemMapByName] = await Promise.all([
     getMatch(matchId),
     getHeroMap(),
     getItemMap(),
+    getItemMapByName(),
   ])
-  return { match, heroMap, itemMap }
+  return { match, heroMap, itemMap, itemMapByName }
 })
 
 const ITEM_SLOTS = ['item_0', 'item_1', 'item_2', 'item_3', 'item_4', 'item_5'] as const
@@ -323,6 +325,37 @@ const playerTimeline = computed(() => {
     xp: p.xp_t ?? [],
   }
 })
+
+// Item purchase markers pre per-hráčov graf — `purchase_log[].key` je item
+// name (nie id), treba ho dohľadať v itemMapByName. Vynecháva len
+// "consumable"/"consumable;laning" qual (wardy, tp scrolly, tangá, dymovky,
+// vetvičky...) — tie sa kupujú desiatky-krát za match a zaplavili by graf
+// oveľa viac než kill markery. Zámerne NEVYNECHÁVA "component" qual, hoci sú
+// to technicky nedokončené itemy — Blink Dagger má qual "component" (dá sa
+// z neho craftiť Overwhelming/Swift/Arcane Blink), pritom je to jeden z
+// najdôležitejších nákupov v hre, ktorý by tu chcel vidieť každý.
+// Graf nemá Radiant/Dire split (je to jeden hráč) — isRadiant preto natvrdo
+// true, nech markery sedia v jednom riadku nad grafom rovnako pre kohokoľvek.
+const NOISY_ITEM_QUAL_RE = /^consumable/
+const itemPurchaseMarkers = computed(() => {
+  const p = selectedPlayer.value
+  if (!p?.gold_t?.length) return []
+  return (p.purchase_log ?? [])
+    .map((entry) => ({ entry, item: data.value?.itemMapByName.get(entry.key) }))
+    .filter(
+      (e): e is typeof e & { item: NonNullable<typeof e.item> } =>
+        e.item != null && !NOISY_ITEM_QUAL_RE.test(e.item.qual ?? ''),
+    )
+    .map(({ entry, item }) => ({
+      time: entry.time,
+      isRadiant: true,
+      iconUrl: itemImageUrl(item),
+      title: t('matchDetail.itemPurchaseTooltip', {
+        item: item.dname ?? item.name,
+        time: formatDuration(entry.time),
+      }),
+    }))
+})
 </script>
 
 <template>
@@ -545,6 +578,8 @@ const playerTimeline = computed(() => {
         ]"
         :y-format="formatK"
         :height="300"
+        :kill-markers="itemPurchaseMarkers"
+        :scroll-hint="t('matchDetail.chartScrollHint')"
       />
       <div v-else class="status-note">
         <template v-if="parseState === 'polling'">

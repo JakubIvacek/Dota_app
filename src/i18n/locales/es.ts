@@ -131,6 +131,7 @@ export default {
     killTooltip: '{hero} murió a los {time}',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: '{item} · {time}',
     chartScrollHint: '← Desliza para ver la línea de tiempo completa →',
   },
   player: {

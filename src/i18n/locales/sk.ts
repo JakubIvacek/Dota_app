@@ -131,6 +131,7 @@ export default {
     killTooltip: '{hero} zomrel o {time}',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: '{item} · {time}',
     chartScrollHint: '← Posuň pre celú časovú os →',
   },
   player: {

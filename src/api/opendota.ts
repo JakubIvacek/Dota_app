@@ -207,9 +207,25 @@ export async function getHeroMap(): Promise<Map<number, HeroConstant>> {
   return new Map(Object.values(heroes).map((h) => [h.id, h]))
 }
 
-export async function getItemMap(): Promise<Map<number, ItemConstant>> {
+// `name` (napr. "black_king_bar") je v OpenDota odpovedi kľúč objektu, nie
+// pole na iteme — doplní sa tu z Object.entries, aby ho vedeli použiť oba
+// lookupy nižšie (podľa id aj podľa name).
+async function fetchNamedItems(): Promise<[string, ItemConstant][]> {
   const items = await fetchConstants<Record<string, ItemConstant>>('items')
-  return new Map(Object.values(items).map((i) => [i.id, i]))
+  return Object.entries(items).map(([name, item]) => [name, { ...item, name }])
+}
+
+export async function getItemMap(): Promise<Map<number, ItemConstant>> {
+  const items = await fetchNamedItems()
+  return new Map(items.map(([, item]) => [item.id, item]))
+}
+
+// Pre purchase_log[].key, ktorý je item name string, nie číselné id —
+// fetchConstants('items') má vlastný cache (24h), takže toto nepridáva
+// druhý network request oproti getItemMap().
+export async function getItemMapByName(): Promise<Map<string, ItemConstant>> {
+  const items = await fetchNamedItems()
+  return new Map(items)
 }
 
 // --- Helpers ---

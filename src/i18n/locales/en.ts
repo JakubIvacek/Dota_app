@@ -129,6 +129,7 @@ const en = {
     killTooltip: '{hero} died at {time}',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: '{item} · {time}',
     chartScrollHint: '← Scroll to see the full timeline →',
   },
   player: {

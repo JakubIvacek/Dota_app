@@ -167,7 +167,12 @@ const activeGroupTooltipLeft = computed(() => {
 // nezačnú zlučovať do širších časových okien — mierny prekryv ikon pri
 // hustých teamfightoch je OK, uprednostni krátke časové okno pred úplným
 // rozostupom. Drž v sync s buildKillMarkerPlugin, ktorý ju používa priamo.
-const MIN_MINUTE_PX = MARKER_SIZE + 6
+// +6 dávalo len 6px garantovanú medzeru medzi susednými bucketmi — pri prvom
+// bucket-e (pripnutom na ľavý okraj cez EDGE_MERGE_SECONDS clip) sa vďaka
+// clampingu efektívne stratilo ešte ~9px z tejto rezervy, takže sused
+// (napr. item kúpený tesne po štarte) mu vizuálne "liezol na kožu". +14 drží
+// bezpečnú medzeru aj v tomto okrajovom prípade.
+const MIN_MINUTE_PX = MARKER_SIZE + 14
 const totalMinutes = computed(() => Math.max(0, props.labels.length - 1))
 
 // Rovnaký princíp ako ActivityHeatmap na mobile: graf sa fluidne zmršťuje s
