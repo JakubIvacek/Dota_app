@@ -111,6 +111,9 @@ export interface MatchPlayer {
   xp_t?: number[] | null
   /** Tento hráčov kill log — `key` je NPC meno OBETE (napr. npc_dota_hero_axe), nie killera. */
   kills_log?: { time: number; key: string }[] | null
+  /** Tento hráčov nákupný log — `key` je interný item name (napr. "black_king_bar"),
+   * teda kľúč z /constants/items, NIE číselné `id` používané v item_0..item_5. */
+  purchase_log?: { time: number; key: string }[] | null
 }
 
 /** Jeden event z /matches/{id}.objectives (chat-log eventy — Roshan, veže,
@@ -176,7 +179,16 @@ export interface HeroConstant {
 
 export interface ItemConstant {
   id: number
+  /** Kľúč z /constants/items (napr. "black_king_bar") — nie je vo Valve dátach
+   * priamo ako pole, je to kľúč rodičovského objektu; doplnené v getItemMap()/
+   * getItemMapByName(). Zhoduje sa s `purchase_log[].key`. */
+  name: string
   img: string
   dname?: string
   cost?: number | null
+  /** "consumable"/"consumable;laning" = wardy, tp scrolly, tangá, dymovky...
+   * "component"/"secret_shop"/"common"/"rare"/"epic"/"artifact" = skutočné
+   * itemy (aj rozpracované, napr. Blink Dagger je "component"). Chýba pri
+   * receptoch, tie sa ale v purchase_log nevyskytujú ako vlastný záznam. */
+  qual?: string
 }

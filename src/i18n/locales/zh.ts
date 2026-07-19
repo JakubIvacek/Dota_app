@@ -129,6 +129,7 @@ export default {
     killTooltip: '{hero} 死于 {time}',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: '{item} 于 {time} 购买',
     chartScrollHint: '← 滑动查看完整时间线 →',
   },
   player: {

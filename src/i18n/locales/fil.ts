@@ -131,6 +131,7 @@ export default {
     killTooltip: 'Namatay si {hero} sa {time}',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: 'Nabili ang {item} sa {time}',
     chartScrollHint: '← I-scroll para makita ang buong timeline →',
   },
   player: {

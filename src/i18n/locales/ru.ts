@@ -131,6 +131,7 @@ export default {
     killTooltip: '{hero} погиб в {time}',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: '{item} куплен в {time}',
     chartScrollHint: '← Прокрутите, чтобы увидеть весь график →',
   },
   player: {

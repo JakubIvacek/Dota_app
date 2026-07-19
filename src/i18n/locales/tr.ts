@@ -131,6 +131,7 @@ export default {
     killTooltip: '{hero} {time} anında öldü',
     roshanTooltip: 'Roshan · {time}',
     objectiveTooltip: '{building} · {time}',
+    itemPurchaseTooltip: '{item} {time} anında satın alındı',
     chartScrollHint: '← Tüm zaman çizelgesini görmek için kaydırın →',
   },
   player: {
